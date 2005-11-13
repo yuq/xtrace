@@ -1,0 +1,95 @@
+.TH XTRACE 1 "13 November, 2005" "xtrace" XTRACE
+.SH NAME
+xtrace \- trace communication between X11 client and server
+.SH SYNOPSIS
+.B xtrace \fR[\fP \foptions\fP \fR]\fP -s
+
+.B xtrace \fR[\fP \foptions\fP \fR]\fP -k
+.SH DESCRIPTION
+Xtrace fakes an X server and forwards all connections to
+an real X server, printing out the communication in between
+in (well, thoretically) human readable form.
+
+.SH OPTIONS
+.TP
+.B \-d \fIname\fP \fR|\fP \-\-display \fIname\fP
+Forward connections to the X server specified by \fIname\fP
+instead of the one specified by the environment variable
+\fBDISPLAY\fP.
+.TP
+.B \-D \fIname\fP \fR|\fP \-\-fakedisplay \fIname\fP
+Fake display \fIname\fP instead of \fB$FAKEDISPLAY\fP
+or \fB:9\fP respectively.
+.TP
+.B \-f \fIfilename\fP \fR|\fP \-\-authfile \fIfilename\fP
+Add an \fB-f\fP \fIfilename\fP to the arguments for all
+calls to xauth to get the authentication tokens of the
+X server to connect to.
+.TP
+.B \-F \fIfilename\fP \fR|\fP \-\-newauthfile \fIfilename\fP
+Add an \fB-f\fP \fIfilename\fP to the arguments for all
+calls to xauth to save the authentication tokens to
+connect to the faked X server.
+.TP
+.B \-c \fR|\fP \-\-copyauthentication \fR(default)\fP
+Copy the authentication tokens for the X server to connect
+to so that clients connecting to our fake server will use
+them. 
+
+The commands run are roughly equivalent to:
+\fBxauth add $FAKEDISPLAY . `xauth list $DISPLAY | awk '$2=="MIT-MAGIC-COOKIE-1" {print $3}'`\fP
+
+Not that only \fBMIT-MAGIC-COOKIE-1\fP tokens are copied as xtrace does not yet
+support to change the authentication tokens so that \fBXDM-AUTHORIZATION-1\fP
+would be possible.
+.TP
+.B \-n \fR|\fP \-\-nocopyauthentication
+Do not call \fBxauth\fP and do fiddle with authentication tokens but
+leave that to the user to handle. 
+.TP
+.B \-s \fR|\fP \-\-stopwhendone \fR(default in xtrace 0.1)\fP
+Terminate when all forwarded clients have disconnected.
+.TP
+.B \-k \fR|\fP \-\-keeprunning
+If all clients disconnected, wait for new ones to connect.
+.TP
+.B \-e \fR|\fP \-\-denyextensions
+Modify all server replies to say there are no extensions available.
+(As xtrace does support none yet anyway and call all extended
+ requests "unknown" and all replies to such requests "unexpected").
+.TP
+.B \-w \fR|\fP \-\-readwritedebug
+Print how many bytes are read and/or written when.
+.TP
+.B \-m \fIcount\fP \fR|\fP \-\-maxklistlength \fIcount\fP 
+Print only the first \fIcount\fP many elements of all lists.
+
+.SH "ENVIRONMENT VARIABLES"
+.TP 
+.B DISPLAY
+Without \fB\-\-display\fP the content of this variable is used to
+determine the server to connect to. (And without \fB\-n\fP given
+to \fBxauth\fP to get the authentication tokens for this display.)
+.TP 
+.B FAKEDISPLAY
+Without \fB\-\-fakedisplay\fP the content of this variable is used to
+determine how to listen for clients. (And without \fB\-n\fP given
+to \fBxauth\fP to set the authentication tokens for this display.)
+If neighter is given, \fBxtrace\fP will try \fB:9\fP
+.TP 
+.B XAUTHORITY
+Without \fB-n\fP and without \fB-f\fP or \fB-F\fP your \fBxauth\fP
+program will most likely look into this variable for the file
+to get/save the authentication tokens from/into. If this is not
+set it will most likely use \fI$HOME\fP\fB/.Xauthority\fP.
+
+.SH "REPORTING BUGS"
+Report bugs to <brlink@debian.org> or the Debian BTS.
+.SH "SEE ALSO"
+.BR xauth (1),
+.BR x (7x),
+.SH COPYRIGHT
+Copyright \(co 2005 Bernhard R. Link
+.br 
+This is free software; see the source for copying conditions. There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

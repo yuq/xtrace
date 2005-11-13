@@ -1,0 +1,31 @@
+		XTRACE 0.1
+		----------
+
+What strace is for system calls, xtrace is for X11 connections:
+you hook it between one or more X11 clients and an X server and
+it prints the requests going from client to server and the replies,
+events and errors going the other way.
+
+Short howto:
+Run xtrace, which defaults to listening at :9 and forwarding to
+your current $DISPLAY.
+
+Then simply start other clients after setting DISPLAY=:9 or
+giving them -display :9 and see all the data flowing in a far
+to verbose form.
+
+Things still to do (any volunteers?):
+	- test, test, test
+	  (currently only what I needed is tested, and as I calculated
+	   offsets by hand and copy&pasted a lot, there might still be
+	   some errors).
+	- implement the common extensions.
+	   (currently only the base protocol and the BIG-REQUESTS
+	    extension are implemented (and the last was never tested)).
+	- make it less verbose or even better allow to control
+	  verbosity.
+	- implement some filtering
+	- implement life modification. (Currently only supported
+	  by changing the source, look for requestButtonGrab in
+	  parse.c for an example. Being able to do this via
+	  command line would be nice.)
