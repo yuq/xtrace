@@ -87,7 +87,8 @@ static int mainqueue(int listener) {
 		FD_ZERO(&exceptfds);
 		FD_SET(listener,&readfds);
 
-		for( c = connections ; c != NULL ; c = c->next ) {
+		c = connections ; 
+		while( c != NULL ) {
 			if( c->client_fd != -1 && c->server_fd == -1 && c->servercount == 0 ) {
 				close(c->client_fd);
 				c->client_fd = -1;
@@ -123,10 +124,13 @@ static int mainqueue(int listener) {
 					free(c->from);
 					connections = c->next;
 					free(c);
+					c = connections;
 					if( connections == NULL && stopwhennone )
 						return EXIT_SUCCESS;
+					continue;
 				}
 			}
+			c = c->next;
 		}
 
 		r = select(n,&readfds,&writefds,&exceptfds,NULL);

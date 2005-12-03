@@ -25,6 +25,7 @@ extern struct connection {
 	enum server_state { s_start=0, s_normal, s_amlost} serverstate;
 	struct expectedreply *expectedreplies;
 	u_int64_t seq;
+	struct usedextension *usedextensions;
 } *connections;
 void parse_server(struct connection *c);
 void parse_client(struct connection *c);

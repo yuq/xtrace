@@ -42,10 +42,10 @@ static inline unsigned int padded(unsigned int s) {
 #define serverCARD32(ofs) CARD32(c->bigendian,c->serverbuffer,ofs)
 #define serverCARD16(ofs) CARD16(c->bigendian,c->serverbuffer,ofs)
 #define serverCARD8(ofs) c->serverbuffer[ofs]
-#define getCARD32(ofs) CARD32(bigendian,buffer,ofs)
-#define getCARD16(ofs) CARD16(bigendian,buffer,ofs)
+#define getCARD32(ofs) CARD32(c->bigendian,buffer,ofs)
+#define getCARD16(ofs) CARD16(c->bigendian,buffer,ofs)
 #define getCARD8(ofs) buffer[ofs]
-#define getCARD32(ofs) CARD32(bigendian,buffer,ofs)
+#define getCARD32(ofs) CARD32(c->bigendian,buffer,ofs)
 
 #define getBE32(ofs) (((buffer[ofs]*256+buffer[ofs+1])*256+buffer[ofs+2])*256+buffer[ofs+4])
 
@@ -89,7 +89,7 @@ struct usedextension {
 	unsigned char major_opcode;
 	unsigned char first_event;
 	unsigned char first_error;
-} *usedextensions = NULL;
+};
 
 struct expectedreply {
 	struct expectedreply *next;
@@ -250,7 +250,7 @@ static size_t printLISTofCARD8(u8 *buffer,size_t buflen,const struct parameter *
 	return ofs;
 }
 
-static size_t printLISTofCARD16(bool bigendian,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofCARD16(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -283,7 +283,7 @@ static size_t printLISTofCARD16(bool bigendian,u8 *buffer,size_t buflen,const st
 	return ofs;
 }
 
-static size_t printLISTofCARD32(bool bigendian,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofCARD32(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -325,7 +325,7 @@ struct value {
 	const struct constant *constants;
 };
 
-static size_t printLISTofVALUE(bool bigendian,u8 *buffer,size_t buflen,const struct parameter *param,unsigned long valuemask, size_t ofs){
+static size_t printLISTofVALUE(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *param,unsigned long valuemask, size_t ofs){
 
 	const struct value *v = (const struct value*)param->constants;
 	bool notfirst = false;
@@ -425,9 +425,9 @@ static size_t printLISTofVALUE(bool bigendian,u8 *buffer,size_t buflen,const str
 	return ofs;
 }
 
-static size_t print_parameters(bool bigendian,const unsigned char *buffer,unsigned int len, const struct parameter *parameters, bool bigrequest);
+static size_t print_parameters(struct connection *c,const unsigned char *buffer,unsigned int len, const struct parameter *parameters, bool bigrequest);
 
-static size_t printLISTofStruct(bool bigendian,u8 *buffer,size_t buflen,const struct parameter *p,size_t count, size_t ofs){
+static size_t printLISTofStruct(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t count, size_t ofs){
 	bool notfirst = false;
 //	size_t ofs = (p->offset<0)?lastofs:p->offset;
 	/* This is a gross hack: the constants for ft_LISTofStruct are
@@ -455,7 +455,7 @@ static size_t printLISTofStruct(bool bigendian,u8 *buffer,size_t buflen,const st
 			notfirst = true;
 			putchar('{');
 
-			print_parameters(bigendian,buffer+ofs,len,substruct,false);
+			print_parameters(c,buffer+ofs,len,substruct,false);
 
 			putchar('}');
 		}
@@ -464,7 +464,7 @@ static size_t printLISTofStruct(bool bigendian,u8 *buffer,size_t buflen,const st
 	putchar(';');
 	return ofs;
 }
-static size_t printLISTofVarStruct(bool bigendian,u8 *buffer,size_t buflen,const struct parameter *p,size_t count, size_t ofs){
+static size_t printLISTofVarStruct(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t count, size_t ofs){
 	bool notfirst = false;
 //	size_t ofs = (p->offset<0)?lastofs:p->offset;
 	const struct parameter *substruct = (const void*)p->constants;
@@ -491,7 +491,7 @@ static size_t printLISTofVarStruct(bool bigendian,u8 *buffer,size_t buflen,const
 		notfirst = true;
 		putchar('{');
 
-		lentoadd = print_parameters(bigendian,buffer+ofs,len,substruct,false);
+		lentoadd = print_parameters(c,buffer+ofs,len,substruct,false);
 
 		putchar('}');
 		ofs += lentoadd; count--; nr++;
@@ -501,9 +501,9 @@ static size_t printLISTofVarStruct(bool bigendian,u8 *buffer,size_t buflen,const
 }
 
 /* buffer must have at least 32 valid bytes */
-static void print_event(bool bigendian,const unsigned char *buffer);
+static void print_event(struct connection *c,const unsigned char *buffer);
 
-static size_t print_parameters(bool bigendian,const unsigned char *buffer,unsigned int len, const struct parameter *parameters,bool bigrequest) {
+static size_t print_parameters(struct connection *c,const unsigned char *buffer,unsigned int len, const struct parameter *parameters,bool bigrequest) {
 	const struct parameter *p;
 	unsigned long stored = INT_MAX;
 	unsigned char format = 0;
@@ -557,10 +557,10 @@ static size_t print_parameters(bool bigendian,const unsigned char *buffer,unsign
 			lastofs = printLISTofCARD8(buffer,len,p,stored,ofs);
 			continue;
 		 case ft_LISTofCARD16:
-			lastofs = printLISTofCARD16(bigendian,buffer,len,p,stored,ofs);
+			lastofs = printLISTofCARD16(c,buffer,len,p,stored,ofs);
 			continue;
 		 case ft_LISTofCARD32:
-			lastofs = printLISTofCARD32(bigendian,buffer,len,p,stored,ofs);
+			lastofs = printLISTofCARD32(c,buffer,len,p,stored,ofs);
 			continue;
 		 case ft_LISTofFormat:
 			switch( format ) {
@@ -568,10 +568,10 @@ static size_t print_parameters(bool bigendian,const unsigned char *buffer,unsign
 				lastofs = printLISTofCARD8(buffer,len,p,stored,ofs);
 				break;
 			 case 16:
-				lastofs = printLISTofCARD16(bigendian,buffer,len,p,stored,ofs);
+				lastofs = printLISTofCARD16(c,buffer,len,p,stored,ofs);
 				break;
 			 case 32:
-				lastofs = printLISTofCARD32(bigendian,buffer,len,p,stored,ofs);
+				lastofs = printLISTofCARD32(c,buffer,len,p,stored,ofs);
 				break;
 			 default:
 				lastofs = ofs;
@@ -579,20 +579,20 @@ static size_t print_parameters(bool bigendian,const unsigned char *buffer,unsign
 			}
 			continue;
 		 case ft_Struct:
-			printLISTofStruct(bigendian,buffer,len,p,1,ofs);
+			printLISTofStruct(c,buffer,len,p,1,ofs);
 			continue;
 		 case ft_LISTofStruct:
-			lastofs = printLISTofStruct(bigendian,buffer,len,p,stored,ofs);
+			lastofs = printLISTofStruct(c,buffer,len,p,stored,ofs);
 			continue;
 		 case ft_LISTofVarStruct:
-			lastofs = printLISTofVarStruct(bigendian,buffer,len,p,stored,ofs);
+			lastofs = printLISTofVarStruct(c,buffer,len,p,stored,ofs);
 			continue;
 		 case ft_LISTofVALUE:
-			lastofs = printLISTofVALUE(bigendian,buffer,len,p,stored,ofs);
+			lastofs = printLISTofVALUE(c,buffer,len,p,stored,ofs);
 			continue;
 		 case ft_EVENT:
 			if( len >= ofs + 32 )
-				print_event(bigendian,buffer+ofs);
+				print_event(c,buffer+ofs);
 			continue;
 		 case ft_BE32:
 			if( ofs + 4 > len )
@@ -749,12 +749,12 @@ static void replyQueryExtension(struct connection *c,bool *ignore UNUSED,bool *d
 		u = malloc(sizeof(struct usedextension));
 		if( u == NULL )
 			abort();
-		u->next = usedextensions;
+		u->next = c->usedextensions;
 		u->extension = data;
 		u->major_opcode = serverCARD8(9);
 		u->first_event = serverCARD8(10);
 		u->first_error = serverCARD8(11);
-		usedextensions = u;
+		c->usedextensions = u;
 	}
 	if( denyallextensions ) {
 		/* disable all extensions */
@@ -781,7 +781,7 @@ static inline const struct request *find_extension_request(struct connection *c,
 	struct usedextension *u;
 	unsigned char subreq = clientCARD8(1);
 
-	for( u = usedextensions; u != NULL ; u = u->next ) {
+	for( u = c->usedextensions; u != NULL ; u = u->next ) {
 		if( req != u->major_opcode )
 			continue;
 		*extension = u->extension->name;
@@ -822,7 +822,7 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 				extensionname,req,
 				r->name
 		      );
-		print_parameters(c->bigendian,c->clientbuffer,len,r->parameters, bigrequest);
+		print_parameters(c,c->clientbuffer,len,r->parameters, bigrequest);
 		if( r->request_func != NULL )
 			(void)r->request_func(c,false,bigrequest,NULL);
 		putchar('\n');
@@ -844,7 +844,7 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 static inline void print_server_event(struct connection *c) {
 
 	printf("%03d:>:%04llx: Event ",c->id,(unsigned long long)c->seq);
-	print_event(c->bigendian,c->serverbuffer);
+	print_event(c,c->serverbuffer);
 	putchar('\n');
 }
 
@@ -871,7 +871,7 @@ static inline void print_server_reply(struct connection *c) {
 
 			if( !ignore ) {
 				printf("%03d:>:0x%04x:%u: Reply to %s: ", c->id, seq, (unsigned int)c->serverignore,replyto->from->name);
-				print_parameters(c->bigendian,
+				print_parameters(c,
 					c->serverbuffer,len,replyto->from->answers,false);
 				putchar('\n');
 			}
@@ -1042,7 +1042,7 @@ void parse_server(struct connection *c) {
 
 #include "events.inc"
 
-static void print_event(bool bigendian,const unsigned char *buffer) {
+static void print_event(struct connection *c,const unsigned char *buffer) {
 	const struct event *event;
 	u_int8_t code = getCARD8(0);
 
@@ -1050,7 +1050,7 @@ static void print_event(bool bigendian,const unsigned char *buffer) {
 		fputs("(generated) ",stdout);
 	code &= 0x7F;
 	if( code <= 1 || code > NUM(events) ) {
-		struct usedextension *u = usedextensions;
+		struct usedextension *u = c->usedextensions;
 		while( u != NULL ) {
 			if( code >= u->first_event && 
 			    code-u->first_event < u->extension->numevents) {
@@ -1067,7 +1067,7 @@ static void print_event(bool bigendian,const unsigned char *buffer) {
 	} else
 		event = &events[code];
 	printf("%s(%hhu) ",event->name,code);
-	print_parameters(bigendian,buffer,32,event->parameters,false);
+	print_parameters(c,buffer,32,event->parameters,false);
 }
 
 #include "shape.inc"
