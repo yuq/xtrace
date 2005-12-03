@@ -51,10 +51,54 @@ static inline unsigned int padded(unsigned int s) {
 
 #define NUM(array) (sizeof(array)/sizeof(array[0]))
 
+typedef const unsigned char u8;
+
 struct constant {
 	unsigned long value;
 	const char *name;
 };
+
+typedef bool request_func(struct connection*,bool,bool,struct expectedreply *);
+typedef void reply_func(struct connection*,bool*,bool*,void*);
+
+struct request { 
+	const char *name;
+	const struct parameter *parameters;
+	const struct parameter *answers;
+
+	request_func *request_func;
+	reply_func *reply_func;
+};
+struct event {
+	const char *name;
+	const struct parameter *parameters;
+};
+
+struct extension {
+	const char *name;
+	size_t namelen;
+	const struct request *subrequests;
+	unsigned char numsubrequests;
+	const struct event *events;
+	unsigned char numevents;
+};
+
+struct usedextension {
+	struct usedextension *next;
+	const struct extension *extension;
+	unsigned char major_opcode;
+	unsigned char first_event;
+	unsigned char first_error;
+} *usedextensions = NULL;
+
+struct expectedreply {
+	struct expectedreply *next;
+	u_int64_t seq;
+	const struct request *from;
+	void *data;
+};
+
+struct extension *find_extension(u8 *name,size_t len);
 
 static void print_bitfield(const char *name,const struct constant *constants, unsigned long l){
 	const struct constant *c;
@@ -148,9 +192,7 @@ struct parameter {
 	const struct constant *constants;
 };
 
-typedef const unsigned char u8;
-
-static size_t printSTRING8(bool bigendian,u8 *buffer,size_t buflen,const struct parameter *p,size_t len,size_t ofs){
+static size_t printSTRING8(u8 *buffer,size_t buflen,const struct parameter *p,size_t len,size_t ofs){
 	size_t nr = 0;
 
 	if( buflen < ofs )
@@ -175,7 +217,7 @@ static size_t printSTRING8(bool bigendian,u8 *buffer,size_t buflen,const struct 
 	return ofs;
 }
 
-static size_t printLISTofCARD8(bool bigendian,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofCARD8(u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -509,10 +551,10 @@ static size_t print_parameters(bool bigendian,const unsigned char *buffer,unsign
 				 format = getCARD8(ofs);
 			 continue;
 		 case ft_STRING8:
-			lastofs = printSTRING8(bigendian,buffer,len,p,stored,ofs);
+			lastofs = printSTRING8(buffer,len,p,stored,ofs);
 			continue;
 		 case ft_LISTofCARD8:
-			lastofs = printLISTofCARD8(bigendian,buffer,len,p,stored,ofs);
+			lastofs = printLISTofCARD8(buffer,len,p,stored,ofs);
 			continue;
 		 case ft_LISTofCARD16:
 			lastofs = printLISTofCARD16(bigendian,buffer,len,p,stored,ofs);
@@ -523,7 +565,7 @@ static size_t print_parameters(bool bigendian,const unsigned char *buffer,unsign
 		 case ft_LISTofFormat:
 			switch( format ) {
 			 case 8:
-				lastofs = printLISTofCARD8(bigendian,buffer,len,p,stored,ofs);
+				lastofs = printLISTofCARD8(buffer,len,p,stored,ofs);
 				break;
 			 case 16:
 				lastofs = printLISTofCARD16(bigendian,buffer,len,p,stored,ofs);
@@ -662,14 +704,12 @@ static size_t print_parameters(bool bigendian,const unsigned char *buffer,unsign
 	return lastofs;
 }
 
-typedef bool request_func(struct connection*,bool,bool);
-
 /* replace ra(GrabButton) in requests.inc by ra2(GrabButton)
  * and add this function and all
  * GrabButton requests will have an AnyModifier set before
  * being forwarded to the server... >:-] 
  *
-static bool requestGrabButton(struct connection *c, bool pre, bool bigrequest) {
+static bool requestGrabButton(struct connection *c, bool pre, bool bigrequest,struct expectedreply *reply) {
 	if( !pre )
 		return false;
 	if( c->bigendian )
@@ -681,11 +721,20 @@ static bool requestGrabButton(struct connection *c, bool pre, bool bigrequest) {
 
 */
 
+static bool requestQueryExtension(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply) {
+	if( pre )
+		return false;
+	if( reply == NULL)
+		return false;
+	if( c->clientignore <= 8 )
+		return false;
+	reply->data = find_extension(c->clientbuffer+8,c->clientignore-8);
+	return false;
+}
+
 /* Reactions to some replies */
 
-typedef void reply_func(struct connection*,bool*,bool*);
-
-static void replyListFontsWithInfo(struct connection *c,bool *ignore,bool *dontremove) {
+static void replyListFontsWithInfo(struct connection *c,bool *ignore,bool *dontremove,void *data UNUSED) {
 	unsigned int seq = serverCARD16(2);
 	if( serverCARD8(1) == 0 ) {
 
@@ -694,32 +743,30 @@ static void replyListFontsWithInfo(struct connection *c,bool *ignore,bool *dontr
 	} else
 		*dontremove = true;
 }
-static void replyQueryExtension(struct connection *c,bool *ignore,bool *dontremove) {
+static void replyQueryExtension(struct connection *c,bool *ignore UNUSED,bool *dontremove UNUSED,void *data) {
+	if( data != NULL && serverCARD8(8) != 0) {
+		struct usedextension *u;
+		u = malloc(sizeof(struct usedextension));
+		if( u == NULL )
+			abort();
+		u->next = usedextensions;
+		u->extension = data;
+		u->major_opcode = serverCARD8(9);
+		u->first_event = serverCARD8(10);
+		u->first_error = serverCARD8(11);
+		usedextensions = u;
+	}
 	if( denyallextensions ) {
 		/* disable all extensions */
 		c->serverbuffer[8] = 0;
 	}
 }
 
-struct request { 
-	const char *name;
-	const struct parameter *parameters;
-	const struct parameter *answers;
-
-	request_func *request_func;
-	reply_func *reply_func;
-};
 
 #define ft_COUNT8 ft_STORE8
 #define ft_COUNT16 ft_STORE16
 #define ft_COUNT32 ft_STORE32
 #include "requests.inc"
-
-struct expectedreply {
-	struct expectedreply *next;
-	u_int64_t seq;
-	const struct request *from;
-};
 
 static inline void free_expectedreplylist(struct expectedreply *r) {
 
@@ -730,9 +777,27 @@ static inline void free_expectedreplylist(struct expectedreply *r) {
 	}
 }
 
+static inline const struct request *find_extension_request(struct connection *c,unsigned char req, const char **extension) {
+	struct usedextension *u;
+	unsigned char subreq = clientCARD8(1);
+
+	for( u = usedextensions; u != NULL ; u = u->next ) {
+		if( req != u->major_opcode )
+			continue;
+		*extension = u->extension->name;
+		if( subreq < u->extension->numsubrequests )
+			return u->extension->subrequests + subreq;
+		else
+			return NULL;
+	}
+
+	return NULL;
+}
+
 static inline void print_client_request(struct connection *c,bool bigrequest) {
 	unsigned char req = clientCARD8(0);
 	const struct request *r;
+	const char *extensionname = "";
 	size_t len;
 	bool ignore;
 
@@ -740,22 +805,26 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 	if( len > c->clientcount )
 		len = c->clientcount;
 
-	if( req < NUM(requests) )
-		r = &requests[req];
-	else r = &requests[0];
+	r = find_extension_request(c,req,&extensionname);
+	if( r == NULL ) {
+		if( req < NUM(requests) )
+			r = &requests[req];
+		else r = &requests[0];
+	}
 	c->seq++;
 	if( r->request_func == NULL )
 		ignore = false;
 	else
-		ignore = r->request_func(c,true,bigrequest);
+		ignore = r->request_func(c,true,bigrequest,NULL);
 	if( !ignore ) {
-		printf("%03d:<:%04x:%3u: Request(%hhu): %s ",
-				c->id,(unsigned int)(c->seq),c->clientignore,req,
+		printf("%03d:<:%04x:%3u: %sRequest(%hhu): %s ",
+				c->id,(unsigned int)(c->seq),c->clientignore,
+				extensionname,req,
 				r->name
 		      );
 		print_parameters(c->bigendian,c->clientbuffer,len,r->parameters, bigrequest);
 		if( r->request_func != NULL )
-			(void)r->request_func(c,false,bigrequest);
+			(void)r->request_func(c,false,bigrequest,NULL);
 		putchar('\n');
 	}
 	if( r->answers != NULL ) {
@@ -766,13 +835,15 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 		a->next = c->expectedreplies;
 		a->seq = c->seq;
 		a->from = r;
+		if( r->request_func != NULL )
+			(void)r->request_func(c,false,bigrequest,a);
 		c->expectedreplies = a;
 	}
 }
 
 static inline void print_server_event(struct connection *c) {
 
-	printf("%03d:>:%04llx: Event ",c->id,c->seq);
+	printf("%03d:>:%04llx: Event ",c->id,(unsigned long long)c->seq);
 	print_event(c->bigendian,c->serverbuffer);
 	putchar('\n');
 }
@@ -796,10 +867,10 @@ static inline void print_server_reply(struct connection *c) {
 
 			assert( replyto->from != NULL);
 			if( replyto->from->reply_func != NULL )
-				replyto->from->reply_func(c,&ignore,&dontremove);
+				replyto->from->reply_func(c,&ignore,&dontremove,replyto->data);
 
 			if( !ignore ) {
-				printf("%03d:>:0x%04x:%u: Reply to %s: ", c->id, seq, c->serverignore,replyto->from->name);
+				printf("%03d:>:0x%04x:%u: Reply to %s: ", c->id, seq, (unsigned int)c->serverignore,replyto->from->name);
 				print_parameters(c->bigendian,
 					c->serverbuffer,len,replyto->from->answers,false);
 				putchar('\n');
@@ -807,7 +878,7 @@ static inline void print_server_reply(struct connection *c) {
 			if( !dontremove ) {
 				*lastp = replyto->next;
 				if( replyto->next != NULL ) {
-					fprintf(stderr,"%03d:>: still waiting for reply to seq=%04llx\n",c->id,replyto->next->seq);
+					fprintf(stderr,"%03d:>: still waiting for reply to seq=%04llx\n",c->id,(unsigned long long)replyto->next->seq);
 				}
 				free(replyto);
 			}
@@ -969,11 +1040,6 @@ void parse_server(struct connection *c) {
 	assert(false);
 }
 
-struct event {
-	const char *name;
-	const struct parameter *parameters;
-};
-
 #include "events.inc"
 
 static void print_event(bool bigendian,const unsigned char *buffer) {
@@ -984,10 +1050,45 @@ static void print_event(bool bigendian,const unsigned char *buffer) {
 		fputs("(generated) ",stdout);
 	code &= 0x7F;
 	if( code <= 1 || code > NUM(events) ) {
-		printf("unknown code %hhu",code);
-		return;
-	}
-	event = &events[code];
+		struct usedextension *u = usedextensions;
+		while( u != NULL ) {
+			if( code >= u->first_event && 
+			    code-u->first_event < u->extension->numevents) {
+				event = u->extension->events + 
+						(code-u->first_event);
+				break;
+			}
+			u = u->next;
+		}
+		if( u == NULL ) {
+			printf("unknown code %hhu",code);
+			return;
+		}
+	} else
+		event = &events[code];
 	printf("%s(%hhu) ",event->name,code);
 	print_parameters(bigendian,buffer,32,event->parameters,false);
+}
+
+#include "shape.inc"
+#include "bigrequest.inc"
+
+#define EXT(a,b) { a , sizeof(a)-1, \
+	extension ## b, NUM(extension ## b), \
+	events ## b, NUM(events ## b)}
+struct extension extensions[] = {
+	EXT("SHAPE",SHAPE),
+	EXT("BIG-REQUESTS",BIGREQUEST)
+};
+#undef EXT
+
+struct extension *find_extension(u8 *name,size_t len) {
+	unsigned int i;
+	for( i = 0 ; i < NUM(extensions) ; i++ ) {
+		if( len < extensions[i].namelen )
+			continue;
+		if( strncmp(extensions[i].name,name,len) == 0 )
+			return extensions + i;
+	}
+	return NULL;
 }

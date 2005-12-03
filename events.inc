@@ -409,7 +409,7 @@ static const struct parameter eparamMappingNotify[] = {
 	{	4,	"request",	ft_ENUM8,	c_modkeypoi},
 	{	5,	"first-keycode",ft_KEYCODE,	NULL},
 	{	6,	"count",	ft_CARD8,	NULL},
-	EOC
+	EOP
 };
 
 #define ev(name) { #name , eparam ## name }
@@ -451,3 +451,5 @@ static const struct event events[] = {
 	ev(MappingNotify),
 };
 #undef ev
+#undef EOC
+#undef EOP

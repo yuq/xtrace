@@ -49,6 +49,7 @@ int connectToServer(const char *displayname,int family,const char *hostname,int 
 		struct sockaddr_in addr;
 		int tmp=1;
 
+		addr.sin_family = AF_INET;
 		addr.sin_port = calculateTCPport(display);
 		if( isdigit(hostname[0]) )
 			addr.sin_addr.s_addr = inet_addr(hostname);

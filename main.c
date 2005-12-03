@@ -46,7 +46,7 @@ int in_family,in_display,in_screen;
 
 struct connection *connections = NULL ;
 
-void acceptConnection(int listener) {
+static void acceptConnection(int listener) {
 	struct connection *c;
 	static int id = 0;
 
@@ -75,7 +75,7 @@ void acceptConnection(int listener) {
 }
 
 
-int mainqueue(int listener) {
+static int mainqueue(int listener) {
 	int n,r;
 	fd_set readfds,writefds,exceptfds;
 	struct connection *c;
@@ -147,8 +147,8 @@ int mainqueue(int listener) {
 					written = write(c->client_fd,c->serverbuffer,towrite);
 					if( written >= 0 ) {
 						if( readwritedebug )
-							printf("%03d:>:wrote %u bytes\n",c->id,written);
-						if( written < c->servercount )
+							printf("%03d:>:wrote %u bytes\n",c->id,(unsigned int)written);
+						if( (size_t)written < c->servercount )
 							memmove(c->serverbuffer,c->serverbuffer+written,c->servercount-written);
 						c->servercount -= written;
 						c->serverignore -= written;
@@ -178,7 +178,7 @@ int mainqueue(int listener) {
 					assert( toread > 0 );
 					if( wasread > 0 ) {
 						if( readwritedebug )
-							printf("%03d:<:received %u bytes\n",c->id,wasread);
+							printf("%03d:<:received %u bytes\n",c->id,(unsigned int)wasread);
 						c->clientcount += wasread;
 					} else {
 						if( readwritedebug )
@@ -192,7 +192,7 @@ int mainqueue(int listener) {
 					}
 				}
 			} else if( c->servercount > 0 && c->serverignore > 0 ) {
-				int min;
+				unsigned int min;
 				/* discard additional events */
 				min = c->servercount;
 				if( min > c->serverignore )
@@ -222,8 +222,8 @@ int mainqueue(int listener) {
 					written = write(c->server_fd,c->clientbuffer,towrite);
 					if( written >= 0 ) {
 						if( readwritedebug )
-							printf("%03d:<:wrote %u bytes\n",c->id,written);
-						if( written < c->clientcount )
+							printf("%03d:<:wrote %u bytes\n",c->id,(unsigned int)written);
+						if( (size_t)written < c->clientcount )
 							memmove(c->clientbuffer,c->clientbuffer+written,c->clientcount-written);
 						c->clientcount -= written;
 						c->clientignore -= written;
@@ -246,7 +246,7 @@ int mainqueue(int listener) {
 					assert( toread > 0 );
 					if( wasread > 0 ) {
 						if( readwritedebug )
-							printf("%03d:>:received %u bytes\n",c->id,wasread);
+							printf("%03d:>:received %u bytes\n",c->id,(unsigned int)wasread);
 						c->servercount += wasread;
 					} else {
 						if( readwritedebug )
@@ -259,7 +259,7 @@ int mainqueue(int listener) {
 					}
 				}
 			} else if( c->clientcount > 0 && c->clientignore > 0 ) {
-				int min;
+				unsigned int min;
 				/* discard additional events */
 				min = c->clientcount;
 				if( min > c->clientignore )
@@ -296,6 +296,7 @@ static const struct option longoptions[] = {
 	{"denyextensions",	no_argument,	NULL,	'e'},
 	{"readwritedebug",	no_argument,	NULL,	'w'},
 	{"maxlistlength",required_argument,	NULL,	'm'},
+	{"help",		no_argument,	NULL,	'h'},
 	{NULL,		0,			NULL,	0}
 };
 
@@ -340,13 +341,26 @@ int main(int argc, char *argv[]) {
 		 case 'm':
 			 maxshownlistlen = strtoll(optarg,NULL,0);
 			 break;
+	         case 'h':
+			 printf(
+"%s: Dump all X protocol data being tunneled from a fake X display to a real one.\n"
+"--display, -d <display to connect to>\n"
+"--fakedisplay, -D <display to fake>\n"
+"--copyauthentication, -c	Copy credentials\n"
+"--nocopyauthentication, -n	Do not copy credentials\n"
+"--authfile, -f <file instead of ~/.Xauthority to get credentials from>\n"
+"--newauthfile, -F <file instead of ~/.Xauthority to put credentials in>\n"
+"--stopwhendone, -s		Return when last client disconnects\n"
+"--keeprunning, -k		Keep running\n"
+"--denyextensions, -e		Fake unavailability of all extensions\n"
+"--readwritedebug, -w		Print amounts of data read/sent\n"
+"--maxlistlength, -m <maximum number of entries in each list shown>\n",
+argv[0]);
+			 exit(EXIT_SUCCESS);
 
-		 default:
-		 case '?':
-			 fprintf(stderr,"Unknown option '%c'!\n",optopt);
-			 exit(EXIT_FAILURE);
 		 case ':':
-			 fprintf(stderr,"Missing argument to option '%c'!\n",optopt);
+		 case '?':
+		 default:
 			 exit(EXIT_FAILURE);
 		}
 

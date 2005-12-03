@@ -1,4 +1,4 @@
-.TH XTRACE 1 "13 November, 2005" "xtrace" XTRACE
+.TH XTRACE 1 "3. December 2005" "xtrace" XTRACE
 .SH NAME
 xtrace \- trace communication between X11 client and server
 .SH SYNOPSIS
@@ -55,8 +55,9 @@ If all clients disconnected, wait for new ones to connect.
 .TP
 .B \-e \fR|\fP \-\-denyextensions
 Modify all server replies to say there are no extensions available.
-(As xtrace does support none yet anyway and call all extended
- requests "unknown" and all replies to such requests "unexpected").
+(As xtrace does supports only BIG-REQUESTS and SHAPE anyway and 
+calls all extended requests "unknown" and all replies to such 
+requests "unexpected").
 .TP
 .B \-w \fR|\fP \-\-readwritedebug
 Print how many bytes are read and/or written when.

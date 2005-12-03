@@ -1,1 +1,4 @@
-first version, so no NEWS yet
+new from 0.1 to 0.2:
+- some cleanup
+- SHAPE extension supported (and some little framework for extensions)
+- added --help option

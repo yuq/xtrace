@@ -49,7 +49,7 @@ static inline ssize_t readtoend(int fd, char *buffer, size_t len) {
 		} else if( bytesgotlast > 0 ) {
 			bytesgottotal += bytesgotlast;
 			if( bytesgottotal >= len ) {
-				fprintf(stderr,"Too many data from xauth command: more than %d\n",len);
+				fprintf(stderr,"Too much data from xauth command: more than %u\n",(unsigned int)len);
 				return -1;
 			}
 		}

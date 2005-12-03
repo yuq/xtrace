@@ -578,7 +578,7 @@ static const struct parameter parameterGetWindowAttributes[] = {
 };
 static const struct parameter returnGetWindowAttributes[] = {
 	{	1,	"backing-store",ft_ENUM8,	c_store},
-	{	8,	"visual",	ft_VISUALID	},
+	{	8,	"visual",	ft_VISUALID,	NULL},
 	{	12,	"class",	ft_ENUM16,	c_windowclass,},
 	{	14,	"bit-gravity",	ft_BITGRAVITY},
 	{	15,	"win-gravity",	ft_WINGRAVITY},
@@ -623,9 +623,9 @@ const struct value valuesConfigureWindow[] = {
 	{0x0001, "x",		ft_INT16,	NULL},
 	{0x0002, "y",		ft_INT16,	NULL},
 	{0x0004, "width",	ft_UINT16,	NULL},
-	{0x0008, "height,	ft_UINT16,	NULL"},
-	{0x0010, "border-width,	ft_UINT16,	NULL"},
-	{0x0020, "sibling,	ft_WINDOW,	NULL"},
+	{0x0008, "height",	ft_UINT16,	NULL},
+	{0x0010, "border-width",ft_UINT16,	NULL},
+	{0x0020, "sibling",	ft_WINDOW,	NULL},
 	{0x0040, "stack-mode", 	ft_ENUM8,	c_stack_mode},
 	EOV
 };
@@ -1691,9 +1691,9 @@ static const struct parameter parameterQueryExtension[] = {
 
 static const struct parameter returnQueryExtension[] = {
 	{	8,	"present",	ft_BOOL},
-	{	9,	"major-opcode",	ft_CARD8,	NULL},
-	{	10,	"first-event",	ft_CARD8,	NULL},
-	{	11,	"first-error",	ft_CARD8,	NULL},
+	{	9,	"major-opcode",	ft_UINT8,	NULL},
+	{	10,	"first-event",	ft_UINT8,	NULL},
+	{	11,	"first-error",	ft_UINT8,	NULL},
 	EOP
 };
 
@@ -1907,6 +1907,7 @@ static const struct parameter returnGetModifierMapping[] = {
 #define ra2(a) { #a , parameter ## a , NULL, request ## a ,NULL}
 #define rb(a) { #a , parameter ## a , return ## a ,NULL,NULL}
 #define rb2(a) { #a , parameter ## a , return ## a ,NULL,reply ## a}
+#define rb3(a) { #a , parameter ## a , return ## a ,request ## a,reply ## a}
 #define rw(a) { #a , parameterWINDOW, NULL,NULL,NULL}
 #define ro(a) { #a , parameterNone, NULL,NULL,NULL}
 static const struct request requests[] = {
@@ -2008,7 +2009,7 @@ static const struct request requests[] = {
 	ra(FreeCursor),
 	ra(RecolorCursor),
 	rb(QueryBestSize),
-	rb2(QueryExtension),
+	rb3(QueryExtension),
 	rb(ListExtensions),
 	ra(ChangeKeyboardMapping), /*100*/
 	rb(GetKeyboardMapping),

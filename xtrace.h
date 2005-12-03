@@ -18,10 +18,10 @@ extern struct connection {
 	int client_fd,server_fd;
 	bool bigendian;
 	unsigned char clientbuffer[16*4096];
-	int clientcount,clientignore;
+	unsigned int clientcount,clientignore;
 	enum client_state { c_start=0, c_normal, c_amlost } clientstate;
 	unsigned char serverbuffer[16*4096];
-	int servercount,serverignore;
+	unsigned int servercount,serverignore;
 	enum server_state { s_start=0, s_normal, s_amlost} serverstate;
 	struct expectedreply *expectedreplies;
 	u_int64_t seq;
@@ -32,3 +32,5 @@ bool copy_authentication(const char *fakedisplay,const char *display, const char
 
 extern bool denyallextensions;
 extern size_t maxshownlistlen;
+
+#define UNUSED __attribute__ ((unused))
