@@ -35,6 +35,7 @@ bool readwritedebug = false;
 bool copyauth = true;
 bool stopwhennone = true;
 bool denyallextensions = false;
+bool interactive = false;
 size_t maxshownlistlen = SIZE_MAX;
 
 const char *out_displayname = NULL;
@@ -79,6 +80,7 @@ static int mainqueue(int listener) {
 	int n,r;
 	fd_set readfds,writefds,exceptfds;
 	struct connection *c;
+	unsigned int allowsent = 1;
 
 	while( 1 ) {
 		n =  listener+1;
@@ -115,7 +117,8 @@ static int mainqueue(int listener) {
 				FD_SET(c->server_fd,&exceptfds);
 				if( c->server_fd >= n )
 					n = c->server_fd+1;
-				if(c->clientignore > 0 && c->clientcount > 0 )
+				if(c->clientignore > 0 && c->clientcount > 0
+						&& allowsent > 0)
 					FD_SET(c->server_fd,&writefds);
 
 			}
@@ -132,9 +135,26 @@ static int mainqueue(int listener) {
 			}
 			c = c->next;
 		}
+		if( interactive ) {
+			FD_SET(0,&readfds);
+		}
 
 		r = select(n,&readfds,&writefds,&exceptfds,NULL);
 		for( c = connections ; c != NULL ; c = c->next ) {
+			if( interactive && FD_ISSET(0,&readfds) ) {
+				char buffer[201];
+				ssize_t isread;
+				isread = read(0,buffer,200);
+				if( isread == 0 )
+					exit(EXIT_SUCCESS);
+				if( isread > 0 ) {
+					buffer[isread]='\0';
+					int number = atoi(buffer);
+					if( number <= 0 )
+						number = 1;
+					allowsent += number;
+				}
+			}
 			if( c->client_fd != -1 ) {
 				if( FD_ISSET(c->client_fd,&exceptfds) ) {
 					close(c->client_fd);
@@ -224,6 +244,8 @@ static int mainqueue(int listener) {
 					if( c->clientignore < towrite )
 						towrite = c->clientignore;
 					written = write(c->server_fd,c->clientbuffer,towrite);
+					if( interactive && allowsent > 0 )
+						allowsent--;
 					if( written >= 0 ) {
 						if( readwritedebug )
 							printf("%03d:<:wrote %u bytes\n",c->id,(unsigned int)written);
@@ -300,6 +322,7 @@ static const struct option longoptions[] = {
 	{"denyextensions",	no_argument,	NULL,	'e'},
 	{"readwritedebug",	no_argument,	NULL,	'w'},
 	{"maxlistlength",required_argument,	NULL,	'm'},
+	{"interactive",		no_argument,	NULL,	'i'},
 	{"help",		no_argument,	NULL,	'h'},
 	{NULL,		0,			NULL,	0}
 };
@@ -310,7 +333,7 @@ int main(int argc, char *argv[]) {
 	int c;
 	const char *out_authfile=NULL, *in_authfile = NULL;
 
-	while( (c=getopt_long(argc,argv,"d:D:f:F:cnskewm:",longoptions,NULL)) != -1 ) {
+	while( (c=getopt_long(argc,argv,"d:D:f:F:cnskiewm:",longoptions,NULL)) != -1 ) {
 		switch( c ) {
 		 case 'd':
 			 out_displayname = optarg;
@@ -344,6 +367,9 @@ int main(int argc, char *argv[]) {
 			 break;
 		 case 'm':
 			 maxshownlistlen = strtoll(optarg,NULL,0);
+			 break;
+		 case 'i':
+			 interactive = true;
 			 break;
 	         case 'h':
 			 printf(

@@ -115,6 +115,11 @@ bool copy_authentication(const char *fakedisplay,const char *display, const char
 	const char *name,*data;
 	int status;
 
+	if( strncmp(display,"localhost:",10) == 0 ) {
+		/* copy with remote X DISPLAYs */
+		display += 9;
+	}
+
 	pid = fork();
 	if( pid < 0 ) {
 		e = errno;

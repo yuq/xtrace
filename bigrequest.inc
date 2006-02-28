@@ -74,4 +74,6 @@ static const struct event eventsBIGREQUEST[] = {
 };
 #undef ev
 
+static const char *errorsBIGREQUEST[] = {};
+
 #undef EOP

@@ -1,0 +1,14 @@
+2006-02-28
+	* work around copyauth problems with "localhost:" DISPLAYs
+	(like ss -X sets them)
+2006-02-27
+	* fix some problems with 16 bit ints shown as uints.
+
+2006-02-24
+	* support RENDER extension
+	* fix handling of variable length structures
+	(only those before the minimal length were shown)
+
+2005-12-04  Bernhard R. Link <brlink@debian.org>
+	* add --interactive option
+	* make some widths and heights UINT instead of CARD

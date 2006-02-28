@@ -207,4 +207,6 @@ static const struct event eventsSHAPE[] = {
 };
 #undef ev
 
+static const char *errorsSHAPE[] = { };
+
 #undef EOP

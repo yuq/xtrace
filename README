@@ -1,4 +1,4 @@
-		XTRACE 0.1
+		XTRACE 0.3
 		----------
 
 What strace is for system calls, xtrace is for X11 connections:
@@ -20,8 +20,8 @@ Things still to do (any volunteers?):
 	   offsets by hand and copy&pasted a lot, there might still be
 	   some errors).
 	- implement the common extensions.
-	   (currently only the base protocol and the BIG-REQUESTS
-	    extension are implemented (and the last was never tested)).
+	   (currently only the base protocol and the BIG-REQUESTS,
+	    RENDER and SHAPE extensions are implemented).
 	- make it less verbose or even better allow to control
 	  verbosity.
 	- implement some filtering

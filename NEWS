@@ -1,3 +1,9 @@
+new after 0.2.1:
+- added --interactive
+- RENDER extensions supported
+new from 0.2 to 0.2.1:
+- --keeprunning should work now
+- better extension support for multiple clients
 new from 0.1 to 0.2:
 - some cleanup
 - SHAPE extension supported (and some little framework for extensions)

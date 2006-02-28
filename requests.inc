@@ -150,6 +150,7 @@ static const struct constant c_subwindow_mode[] = {
 	{1,	"IncludeInferiors"},
 	EOC
 };
+#define ft_SubwindowMode	ft_ENUM8, c_subwindow_mode
 static const struct constant c_arc_mode[] = {
 	{0,	"Chord"},
 	{1,	"PieSlice"},
@@ -1136,7 +1137,7 @@ const struct value valuesCreateGC[] = {
 		{0x00001000, "tile-stipple-x-origin", ft_INT16,	NULL},
 		{0x00002000, "tile-stipple-y-origin", ft_INT16,	NULL},
 		{0x00004000, "font",		ft_FONT,	NULL},
-		{0x00008000, "subwindow-mode",	ft_ENUM8,	c_subwindow_mode},
+		{0x00008000, "subwindow-mode",	ft_SubwindowMode},
 		{0x00010000, "graphics-exposures",		ft_BOOL},
 		{0x00020000, "clip-x-origin",	ft_INT16,	NULL},
 		{0x00040000, "clip-y-origin",	ft_INT16,	NULL},
@@ -1190,8 +1191,8 @@ static const struct parameter listRECTANGLE[] = {
 	LC(8),
 	{	0,	"x",		ft_INT16,	NULL},
 	{	2,	"y",		ft_INT16,	NULL},
-	{	4,	"w",		ft_CARD16,	NULL},
-	{	6,	"h",		ft_CARD16,	NULL},
+	{	4,	"w",		ft_UINT16,	NULL},
+	{	6,	"h",		ft_UINT16,	NULL},
 	EOP
 };
 #define ft_LISTofRECTANGLE ft_LISTofStruct,	(void*)listRECTANGLE
@@ -1302,8 +1303,8 @@ static const struct parameter listARC[] = {
 	LC(12),
 	{	0,	"x",		ft_INT16,	NULL},
 	{	2,	"y",		ft_INT16,	NULL},
-	{	4,	"w",		ft_CARD16,	NULL},
-	{	6,	"h",		ft_CARD16,	NULL},
+	{	4,	"w",		ft_UINT16,	NULL},
+	{	6,	"h",		ft_UINT16,	NULL},
 	{	8,	"angle1",	ft_INT16,	NULL},
 	{	10,	"angle2",	ft_INT16,	NULL},
 	EOP
@@ -1376,7 +1377,7 @@ static const struct parameter listPolyTextFont[] = {
 
 static const struct parameter listPolyText8[] = {
 	LC(3), /* minimum as VarStruct */
-	{	0,	"\377",	ft_IF8,(void*)&listPolyTextFont},
+	{	0,	"\377",	ft_IF8,(void*)listPolyTextFont},
 	/* prevent a empty string fitting in the last 3 pad bytes
 	   showing up. (as this 3 pad bytes could contain a
 	   string of length 1 I think) */
@@ -2035,5 +2036,3 @@ static const struct request requests[] = {
 
 #undef ra
 #undef rb
-
-	
