@@ -13,7 +13,7 @@ xtrace_LDFLAGS = -Wl,-z,defs
 # decodexnumbers_SOURCES = masktosymbols.c
 # decodexnumbers_LDFLAGS = -Wl,-z,syms
 
-noinst_HEADERS = xtrace.h requests.inc events.inc shape.inc bigrequest.inc render.inc
+noinst_HEADERS = xtrace.h requests.inc events.inc shape.inc bigrequest.inc render.inc randr.inc
 
 man_MANS = xtrace.1
 

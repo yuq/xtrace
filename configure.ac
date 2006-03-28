@@ -4,7 +4,7 @@ dnl
 
 AC_INIT(main.c)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(xtrace,0.3)
+AM_INIT_AUTOMAKE(xtrace,0.4)
 
 AM_MAINTAINER_MODE
 

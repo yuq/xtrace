@@ -1,5 +1,5 @@
 /*  This file is part of "xtrace"
- *  Copyright (C) 2005 Bernhard R. Link
+ *  Copyright (C) 2005,2006 Bernhard R. Link
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -95,6 +95,14 @@ struct usedextension {
 	unsigned char first_error;
 };
 
+void free_usedextensions(struct usedextension *e) {
+	while( e != NULL ) {
+		struct usedextension *h = e->next;
+		free(e);
+		e = h;
+	}
+}
+
 struct expectedreply {
 	struct expectedreply *next;
 	u_int64_t seq;
@@ -171,6 +179,8 @@ struct parameter {
 		/*	- boring ones */
 		ft_STRING8, ft_LISTofCARD32, 
 		ft_LISTofCARD8, ft_LISTofCARD16, 
+		ft_LISTofUINT8, ft_LISTofUINT16, 
+		ft_LISTofUINT32, 
 		/*	- one of the above depening on last FORMAT */
 		ft_LISTofFormat,
 		/*	- iterate of list description in constants field */
@@ -289,9 +299,9 @@ static size_t printLISTofCARD16(struct connection *c,u8 *buffer,size_t buflen,co
 			u16 = getCARD16(ofs);
 			value = findConstant(p->constants,u16);
 			if( value )
-				printf("%s(0x%hx)",value,u16);
+				printf("%s(0x%hx)",value,(unsigned short int)u16);
 			else
-				printf("0x%04hx",u16);
+				printf("0x%04hx",(unsigned short int)u16);
 		}
 		len--;ofs+=2;nr++;
 	}
@@ -324,9 +334,114 @@ static size_t printLISTofCARD32(struct connection *c,u8 *buffer,size_t buflen,co
 			u32 = getCARD32(ofs);
 			value = findConstant(p->constants,u32);
 			if( value )
-				printf("%s(0x%x)",value,u32);
+				printf("%s(0x%x)",value,(unsigned int)u32);
 			else
-				printf("0x%08x",u32);
+				printf("0x%08x",(unsigned int)u32);
+		}
+		len--;ofs+=4;nr++;
+	}
+	putchar(';');
+	return ofs;
+}
+
+static size_t printLISTofUINT8(u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( buflen - ofs <= len )
+		len = buflen - ofs;
+
+	if( print_offsets )
+		printf("[%d]",(int)ofs);
+	printf("%s=",p->name);
+	while( len > 0 ) {
+		const char *value;
+		unsigned char u8;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...",stdout);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putchar(',');
+			notfirst = true;
+			u8 = getCARD8(ofs);
+			value = findConstant(p->constants,u8);
+			if( value )
+				printf("%s(%d)",value,(unsigned int)u8);
+			else
+				printf("%d",(unsigned int)u8);
+		}
+		len--;ofs++;nr++;
+	}
+	putchar(';');
+	return ofs;
+}
+
+static size_t printLISTofUINT16(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( (buflen - ofs)/2 <= len )
+		len = (buflen - ofs)/2;
+
+	if( print_offsets )
+		printf("[%d]",(int)ofs);
+	printf("%s=",p->name);
+	while( len > 0 ) {
+		const char *value;
+		u_int16_t u16;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...",stdout);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putchar(',');
+			notfirst = true;
+			u16 = getCARD16(ofs);
+			value = findConstant(p->constants,u16);
+			if( value )
+				printf("%s(%d)",value,(unsigned int)u16);
+			else
+				printf("%d",(unsigned int)u16);
+		}
+		len--;ofs+=2;nr++;
+	}
+	putchar(';');
+	return ofs;
+}
+
+static size_t printLISTofUINT32(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( (buflen - ofs)/4 <= len )
+		len = (buflen - ofs)/4;
+
+	if( print_offsets )
+		printf("[%d]",(int)ofs);
+	printf("%s=",p->name);
+	while( len > 0 ) {
+		const char *value;
+		u_int32_t u32;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...",stdout);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putchar(',');
+			notfirst = true;
+			u32 = getCARD32(ofs);
+			value = findConstant(p->constants,u32);
+			if( value )
+				printf("%s(%x)",value,(unsigned int)u32);
+			else
+				printf("%x",(unsigned int)u32);
 		}
 		len--;ofs+=4;nr++;
 	}
@@ -610,6 +725,15 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LISTofCARD32:
 			lastofs = printLISTofCARD32(c,buffer,len,p,stored,ofs);
 			continue;
+		 case ft_LISTofUINT8:
+			lastofs = printLISTofUINT8(buffer,len,p,stored,ofs);
+			continue;
+		 case ft_LISTofUINT16:
+			lastofs = printLISTofUINT16(c,buffer,len,p,stored,ofs);
+			continue;
+		 case ft_LISTofUINT32:
+			lastofs = printLISTofUINT32(c,buffer,len,p,stored,ofs);
+			continue;
 		 case ft_LISTofFormat:
 			switch( format ) {
 			 case 8:
@@ -751,6 +875,9 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LISTofCARD8:
 		 case ft_LISTofCARD16:
 		 case ft_LISTofCARD32:
+		 case ft_LISTofUINT8:
+		 case ft_LISTofUINT16:
+		 case ft_LISTofUINT32:
 		 case ft_LISTofFormat:
 		 case ft_LISTofVALUE:
 		 case ft_Struct:
@@ -894,7 +1021,10 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 				extensionname,req,
 				r->name
 		      );
-		print_parameters(c,c->clientbuffer,len,r->parameters, bigrequest, &stack);
+		if( r->parameters != NULL )
+			print_parameters(c,c->clientbuffer,len,r->parameters, bigrequest, &stack);
+		else
+			puts("obsolete without parameter description");
 		if( r->request_func != NULL )
 			(void)r->request_func(c,false,bigrequest,NULL);
 		putchar('\n');
@@ -1060,7 +1190,7 @@ void parse_client(struct connection *c) {
 		 if( c->clientcount == sizeof(c->clientbuffer) ) 
 			 printf("%03d:<: Warning: buffer filled!\n",c->id);
 		 else if( c->clientcount < l ) {
-			 printf("%03d:<: Warning: Waiting for rest of package (yet got %u of %u)!\n",c->id,c->clientcount,l);
+			 printf("%03d:<: Warning: Waiting for rest of package (yet got %u of %u)!\n",c->id,c->clientcount,(unsigned int)l);
 			 return;
 		 }
 		 c->clientignore = l;
@@ -1174,12 +1304,14 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 #include "shape.inc"
 #include "bigrequest.inc"
 #include "render.inc"
+#include "randr.inc"
 
 #define EXT(a,b) { a , sizeof(a)-1, \
 	extension ## b, NUM(extension ## b), \
 	events ## b, NUM(events ## b), \
 	errors ## b, NUM(errors ## b)}
 struct extension extensions[] = {
+	EXT("RANDR",RANDR),
 	EXT("RENDER",RENDER),
 	EXT("SHAPE",SHAPE),
 	EXT("BIG-REQUESTS",BIGREQUEST)

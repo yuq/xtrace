@@ -1,16 +1,22 @@
-.TH XTRACE 1 "28. February 2006" "xtrace" XTRACE
+.TH XTRACE 1 "09 March 2006" "xtrace" XTRACE
 .SH NAME
 xtrace \- trace communication between X11 client and server
 .SH SYNOPSIS
-.B xtrace \fR[\fP \foptions\fP \fR]\fP -s
+.B xtrace \fR[\fP \fIoptions\fP \fR]\fP \-s
 
-.B xtrace \fR[\fP \foptions\fP \fR]\fP -k
+.B xtrace \fR[\fP \fIoptions\fP \fR]\fP \-k
 .SH DESCRIPTION
 Xtrace fakes an X server and forwards all connections to
-an real X server, printing out the communication in between
+a real X server, displaying the communication between clients
 in (well, thoretically) human readable form.
 
 .SH OPTIONS
+.TP
+.B \-s \fR|\fP \-\-stopwhendone \fR(default)\fP
+Terminate when all forwarded clients have disconnected.
+.TP
+.B \-k \fR|\fP \-\-keeprunning
+If all clients disconnected, wait for new ones to connect.
 .TP
 .B \-d \fIname\fP \fR|\fP \-\-display \fIname\fP
 Forward connections to the X server specified by \fIname\fP
@@ -47,15 +53,9 @@ would be possible.
 Do not call \fBxauth\fP and do fiddle with authentication tokens but
 leave that to the user to handle. 
 .TP
-.B \-s \fR|\fP \-\-stopwhendone \fR(default in xtrace 0.1)\fP
-Terminate when all forwarded clients have disconnected.
-.TP
-.B \-k \fR|\fP \-\-keeprunning
-If all clients disconnected, wait for new ones to connect.
-.TP
 .B \-e \fR|\fP \-\-denyextensions
 Modify all server replies to say there are no extensions available.
-(As xtrace does supports only BIG-REQUESTS, RENDER and SHAPE anyway and 
+(As xtrace does supports only BIG-REQUESTS, RENDER, RANDR and SHAPE anyway and 
 calls all extended requests "unknown" and all replies to such 
 requests "unexpected").
 .TP

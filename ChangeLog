@@ -1,3 +1,7 @@
+2006-03-09
+	* support RANDR extension
+2006-03-08
+	* manpage fixup. (Thanks to Justin Pryzby)
 2006-02-28
 	* work around copyauth problems with "localhost:" DISPLAYs
 	(like ss -X sets them)

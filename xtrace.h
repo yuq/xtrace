@@ -29,6 +29,7 @@ extern struct connection {
 } *connections;
 void parse_server(struct connection *c);
 void parse_client(struct connection *c);
+void free_usedextensions(struct usedextension *e);
 bool copy_authentication(const char *fakedisplay,const char *display, const char *infile, const char *outfile);
 
 extern bool denyallextensions;

@@ -124,6 +124,7 @@ static int mainqueue(int listener) {
 			}
 			if( c->client_fd == -1 && c->server_fd == -1 ) {
 				if( c == connections ) {
+					free_usedextensions(c->usedextensions);
 					free(c->from);
 					connections = c->next;
 					free(c);

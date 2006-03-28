@@ -1,6 +1,8 @@
+new after 0.3:
+- RANDR extension supported
 new after 0.2.1:
 - added --interactive
-- RENDER extensions supported
+- RENDER extension supported
 new from 0.2 to 0.2.1:
 - --keeprunning should work now
 - better extension support for multiple clients
