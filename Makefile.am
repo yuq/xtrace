@@ -5,7 +5,7 @@ CFLAGS ?= -g -O2
 AM_CPPFLAGS = @CPPFLAGS@ -Wall
 # for authdata.c: -I/usr/X11R6/include -DNeedFunctionPrototypes 
 
-xtrace_SOURCES = main.c x11common.c x11client.c x11server.c parse.c copyauth.c
+xtrace_SOURCES = main.c x11common.c x11client.c x11server.c parse.c copyauth.c atoms.c
 # authdata.c
 xtrace_LDFLAGS = -Wl,-z,defs
 # for authdata.c add:  -L/usr/X11R6/lib -lX11 -lXext
@@ -13,7 +13,7 @@ xtrace_LDFLAGS = -Wl,-z,defs
 # decodexnumbers_SOURCES = masktosymbols.c
 # decodexnumbers_LDFLAGS = -Wl,-z,syms
 
-noinst_HEADERS = xtrace.h requests.inc events.inc shape.inc bigrequest.inc render.inc randr.inc
+noinst_HEADERS = xtrace.h requests.inc events.inc shape.inc bigrequest.inc render.inc randr.inc mitshm.inc
 
 man_MANS = xtrace.1
 

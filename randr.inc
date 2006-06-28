@@ -89,23 +89,23 @@ static const struct constant c_appropriate[] = {
 #define EOP {0,NULL,0,NULL}
 #define LC(len) {len,NULL,0,NULL}
 
-const struct parameter parameterRandrQueryVersion[] = {
-	{	8,	"major version",	ft_UINT16,	NULL},
-	{	10,	"minor version",	ft_UINT16,	NULL},
+static const struct parameter parameterRandrQueryVersion[] = {
+	{	4,	"major-version",	ft_UINT32,	NULL},
+	{	8,	"minor-version",	ft_UINT32,	NULL},
 	EOP
 };
-const struct parameter returnRandrQueryVersion[] = {
-	{	4,	"major version",	ft_UINT16,	NULL},
-	{	8,	"minor version",	ft_UINT16,	NULL},
+static const struct parameter returnRandrQueryVersion[] = {
+	{ 	 8,	"major-version",	ft_UINT32,	NULL},
+	{	12,	"minor-version",	ft_UINT32,	NULL},
 	EOP
 };
 #define ft_Window	ft_CARD32, NULL
-const struct parameter parameterRandrGetScreenInfo[] = {
+static const struct parameter parameterRandrGetScreenInfo[] = {
 	{	4,	"window",		ft_Window},
 	EOP
 };
 
-const struct parameter listScreenSizes[] = {
+static const struct parameter listScreenSizes[] = {
 	LC(8),
 	{	 0,	"width[pixels]",	ft_UINT16,	NULL},
 	{	 2,	"height[pixels]",	ft_UINT16,	NULL},
@@ -115,7 +115,7 @@ const struct parameter listScreenSizes[] = {
 };
 #define ft_ScreenSizes	ft_LISTofStruct,(void*)listScreenSizes
 
-const struct parameter listRates[] = {
+static const struct parameter listRates[] = {
 	LC(2),
 	{	 0,	"count",		ft_COUNT16,	NULL},
 	{	 2,	"r",		ft_LISTofUINT16, NULL},
@@ -123,13 +123,13 @@ const struct parameter listRates[] = {
 };
 #define ft_Rates	ft_LISTofVarStruct,(void*)listRates
 
-const struct parameter returnRandrGetScreenInfo[] = {
+static const struct parameter returnRandrGetScreenInfo[] = {
 	{	 1,	"rotations",		ft_RANDR_RR},
 	{	 8,	"root",			ft_Window},
 	{	12,	"timestamp",		ft_TIMESTAMP,	NULL},
 	{	16,	"config-timestamp",	ft_TIMESTAMP,	NULL},
 	{	20,	"nSizes",		ft_COUNT16,	NULL},
-	{	22,	"sizeID",		ft_CARD16},
+	{	22,	"sizeID",		ft_CARD16,	NULL},
 	{	24,	"rotation",		ft_RANDR_RR},
 	{	32,	"sizes",		ft_ScreenSizes},
 	{	28,	"nrateEnts",		ft_COUNT16,	NULL},
@@ -138,7 +138,7 @@ const struct parameter returnRandrGetScreenInfo[] = {
 	EOP
 };
 
-const struct parameter parameterRandrSetScreenConfig[] = {
+static const struct parameter parameterRandrSetScreenConfig[] = {
 	{	 4,	"drawable",		ft_CARD32,	NULL},
 	{	 8,	"timestamp",		ft_TIMESTAMP,	c_curtime},
 	{	12,	"config-timestamp",	ft_TIMESTAMP,	NULL},
@@ -149,7 +149,7 @@ const struct parameter parameterRandrSetScreenConfig[] = {
 };
 
 
-const struct parameter returnRandrSetScreenConfig[] = {
+static const struct parameter returnRandrSetScreenConfig[] = {
 	{	 1,	"status",		ft_ENUM8,	c_randr_status},
 	{	 8,	"timestamp",		ft_TIMESTAMP,	NULL},
 	{	12,	"config-timestamp",	ft_TIMESTAMP,	NULL},
@@ -158,7 +158,7 @@ const struct parameter returnRandrSetScreenConfig[] = {
 	EOP
 };
 
-const struct parameter parameterRandrSelectInput[] = {
+static const struct parameter parameterRandrSelectInput[] = {
 	{	 4,	"window",		ft_Window},
 	{	 8,	"enable",		ft_RANDR_NOTIFY_MASK},
 	EOP
@@ -180,10 +180,10 @@ static const struct request extensionRANDR[] = {
 #undef rb
 #undef rc
 
-const struct parameter eparamRandrScreenChangeNotify[] = {
+static const struct parameter eparamRandrScreenChangeNotify[] = {
 	{	 1,	"rotation",		ft_RANDR_RR},
-	{	 4,	"timestamp",		ft_TIMESTAMP},
-	{	 8,	"configTimestamp",	ft_TIMESTAMP},
+	{	 4,	"timestamp",		ft_TIMESTAMP,	NULL},
+	{	 8,	"configTimestamp",	ft_TIMESTAMP,	NULL},
 	{	12,	"root",			ft_Window},
 	{	16,	"window",		ft_Window},
 	{	20,	"size-id",		ft_CARD16,	NULL},

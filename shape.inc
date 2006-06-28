@@ -83,13 +83,13 @@ static const struct constant c_shape_sort[] = {
 
 #define parameterShapeQueryVersion parameterEmpty
 
-const struct parameter returnShapeQueryVersion[] = {
+static const struct parameter returnShapeQueryVersion[] = {
 	{	8,	"major version",	ft_UINT16,	NULL},
 	{	10,	"minor version",	ft_UINT16,	NULL},
 	EOP
 };
 
-const struct parameter parameterShapeRectangles[] = {
+static const struct parameter parameterShapeRectangles[] = {
 	{	4,	"operation",		ft_SHAPE_OP},
 	{	5,	"destination kind",	ft_SHAPE_KIND},
 	{	6,	"ordering",		ft_ENUM8,	c_shape_sort},
@@ -100,7 +100,7 @@ const struct parameter parameterShapeRectangles[] = {
 	EOP
 };
 
-const struct parameter parameterShapeMask[] = {
+static const struct parameter parameterShapeMask[] = {
 	{	4,	"operation",	ft_SHAPE_OP},
 	{	5,	"destination-kind",	ft_SHAPE_KIND},
 	{	8,	"destination-window",	ft_WINDOW,	NULL},
@@ -110,7 +110,7 @@ const struct parameter parameterShapeMask[] = {
 	EOP
 };
 
-const struct parameter parameterShapeCombine[] = {
+static const struct parameter parameterShapeCombine[] = {
 	{	4,	"operation",	ft_SHAPE_OP},
 	{	5,	"destination-kind",	ft_SHAPE_KIND},
 	{	6,	"source-kind",	ft_SHAPE_KIND},
@@ -121,7 +121,7 @@ const struct parameter parameterShapeCombine[] = {
 	EOP
 };
 
-const struct parameter parameterShapeOffset[] = {
+static const struct parameter parameterShapeOffset[] = {
 	{	4,	"destination kind",	ft_SHAPE_KIND},
 	{	8,	"destination window",	ft_WINDOW,	NULL},
 	{	12,	"x offset",	ft_INT16,	NULL},
@@ -131,7 +131,7 @@ const struct parameter parameterShapeOffset[] = {
 
 #define parameterShapeQueryExtents parameterWINDOW
 
-const struct parameter returnShapeQueryExtents[] ={
+static const struct parameter returnShapeQueryExtents[] ={
 	{	8,	"bounding shaped",		ft_BOOL},
 	{	9,	"clip shaped",			ft_BOOL},
 	{	12,	"bounding shape extents x",	ft_INT16,	NULL},
@@ -145,7 +145,7 @@ const struct parameter returnShapeQueryExtents[] ={
 	EOP
 };
 
-const struct parameter parameterShapeSelectInput[] = {
+static const struct parameter parameterShapeSelectInput[] = {
 	{	4,	"destination window",	ft_WINDOW,	NULL},
 	{	8,	"enable",	ft_BOOL},
 	EOP
@@ -153,18 +153,18 @@ const struct parameter parameterShapeSelectInput[] = {
 
 #define parameterShapeInputSelected parameterWINDOW
 
-const struct parameter returnShapeInputSelected[] ={
+static const struct parameter returnShapeInputSelected[] ={
 	{	1,	"enabled",	ft_BOOL},
 	EOP
 };
 
-const struct parameter parameterShapeGetRectangles[] = {
+static const struct parameter parameterShapeGetRectangles[] = {
 	{	4,	"window",	ft_WINDOW,	NULL},
 	{	8,	"source-kind",	ft_SHAPE_KIND},
 	EOP
 };
 
-const struct parameter returnShapeGetRectangles[] ={
+static const struct parameter returnShapeGetRectangles[] ={
 	{	1,	"ordering",	ft_ENUM8,	c_shape_sort},
 	{	8,	"nrects",	ft_COUNT32,	NULL},
 	{	32,	"rectangles",	ft_LISTofRECTANGLE},
@@ -189,7 +189,7 @@ static const struct request extensionSHAPE[] = {
 #undef ra
 #undef rb
 
-const struct parameter eparamShapeNotify[] = {
+static const struct parameter eparamShapeNotify[] = {
 	{	1,	"shape kind",		ft_SHAPE_KIND},
 	{	4,	"affected window",	ft_WINDOW,	NULL},
 	{	8,	"x value of extents",	ft_INT16,	NULL},

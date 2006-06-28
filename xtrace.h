@@ -31,6 +31,10 @@ void parse_server(struct connection *c);
 void parse_client(struct connection *c);
 void free_usedextensions(struct usedextension *e);
 bool copy_authentication(const char *fakedisplay,const char *display, const char *infile, const char *outfile);
+struct atom;
+struct atom *newAtom(const char *name, size_t len);
+const char *getAtom(struct connection *c, u_int32_t atom);
+void internAtom(struct connection *c, u_int32_t atom, struct atom *data);
 
 extern bool denyallextensions;
 extern size_t maxshownlistlen;

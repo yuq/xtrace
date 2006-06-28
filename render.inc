@@ -335,8 +335,8 @@ static const struct parameter parameterRenderComposite[] = {
 	{	26,	"yMask",ft_INT16,	NULL},
 	{	28,	"xDst",	ft_INT16,	NULL},
 	{	30,	"yDst",	ft_INT16,	NULL},
-	{	32,	"width",ft_CARD16,	NULL},
-	{	34,	"height",ft_CARD16,	NULL},
+	{	32,	"width",ft_UINT16,	NULL},
+	{	34,	"height",ft_UINT16,	NULL},
 	EOP
 };
 
@@ -430,7 +430,7 @@ static const struct parameter listGlyphInfo[] = {
 static const struct parameter parameterRenderAddGlyphs[] = {
 	{	 4,	"glyphset",	ft_GLYPHSET,	NULL},
 	{	 8,	"nglyphs",	ft_COUNT32,	NULL},
-	{	12,	"glyphids",	ft_LISTofCARD32},
+	{	12,	"glyphids",	ft_LISTofCARD32, NULL},
 	{	OFS_LATER, "glyphs",	ft_LISTofGLYPHINFO},
 /*	{	OFS_LATER, "data",	ft_LISTofCARD8, NULL},*/
 	EOP

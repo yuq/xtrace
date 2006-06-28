@@ -159,28 +159,28 @@ static const struct constant c_arc_mode[] = {
 
 
 
-const struct constant c_insert_delete[] = {
+static const struct constant c_insert_delete[] = {
 		{0	,	"Insert"},
 		{1	,	"Delete"},
 		EOC
 };
-const struct constant c_windowclass[] = {
+static const struct constant c_windowclass[] = {
 		{0	,	"CopyFromParent"},
 		{1	,	"InputOutput"},
 		{2	,	"InputOnly"},
 		EOC
 };
-const struct constant c_copyfromparent[] = {
+static const struct constant c_copyfromparent[] = {
 		{0	,	"CopyFromParent"},
 		EOC
 };
-const struct constant c_store[] = {
+static const struct constant c_store[] = {
 		{0	,	"NotUseful"},
 		{1	,	"WhenMapped"},
 		{2	,	"Always"},
 		EOC
 };
-const struct constant c_bitgravity[] = {
+static const struct constant c_bitgravity[] = {
 		{0,	"Forget"},
 		{1,	"NorthWest"},
 		{2,	"North"},
@@ -194,7 +194,7 @@ const struct constant c_bitgravity[] = {
 		{10,	"Static"},
 		EOC
 };
-const struct constant c_wingravity[] = {
+static const struct constant c_wingravity[] = {
 		{0,	"Unmap"},
 		{1,	"NorthWest"},
 		{2,	"North"},
@@ -212,27 +212,27 @@ const struct constant c_wingravity[] = {
 #define ft_WINGRAVITY	ft_ENUM8,	c_wingravity
 #define ft_BITGRAVITY	ft_ENUM8,	c_bitgravity
 
-const struct constant c_mapstate[] = {
+static const struct constant c_mapstate[] = {
 		{0	,	"Unmapped"},
 		{1	,	"Unviewable"},
 		{2	,	"Viewable"},
 		EOC
 };
-const struct constant c_none[] = {
+static const struct constant c_none[] = {
 		{0	,	"None"},
 		EOC
 };
-const struct constant c_nonerelative[] = {
+static const struct constant c_nonerelative[] = {
 		{0	,	"None"},
 		{1	,	"ParentRelative"},
 		EOC
 };
-const struct constant c_any[] = {
+static const struct constant c_any[] = {
 		{0	,	"any"},
 		EOC
 };
 
-const struct constant c_setofevent[] = {
+static const struct constant c_setofevent[] = {
 		{0x00000001,"KeyPress"},
 		{0x00000002,"KeyRelease"},
 		{0x00000004,"ButtonPress"},
@@ -264,7 +264,7 @@ const struct constant c_setofevent[] = {
 #define ft_SETofDEVICEEVENT ft_SETofEVENT
 #define ft_SETofPOINTEREVENT ft_SETofEVENT
 
-const struct constant c_setofkeybutmask[] = {
+static const struct constant c_setofkeybutmask[] = {
 		{0x0001, "Shift"},
 		{0x0002, "Lock"},
 		{0x0004, "Control"},
@@ -283,44 +283,44 @@ const struct constant c_setofkeybutmask[] = {
 };
 #define ft_SETofKEYBUTMASK	ft_BITMASK16,	c_setofkeybutmask
 #define ft_SETofKEYMASK	ft_SETofKEYBUTMASK
-const struct constant c_bool[] = {
+static const struct constant c_bool[] = {
 		{0	,	"false"},
 		{1	,	"true"},
 		EOC
 };
 #define ft_BOOL	ft_ENUM8,	c_bool
 
-const struct constant c_circulate[] = {
+static const struct constant c_circulate[] = {
 		{0	, "RaiseLowest"},
 		{1	, "LowerHighest"},
 		EOC
 };
 
-const struct constant c_change_mode[] = {
+static const struct constant c_change_mode[] = {
 		{0	, "Replace"},
 		{1	, "Prepend"},
 		{2	, "Append"},
 		EOC
 };
 
-const struct constant c_curtime[] = {
+static const struct constant c_curtime[] = {
 	{ 0, "CurrentTime"},
 	EOC
 };
 
-const struct constant c_choosewindow[] = {
+static const struct constant c_choosewindow[] = {
 	{0	, "PointerWindow"},
 	{1	, "InputFocus"},
 	EOC
 };
 
-const struct constant c_synmode[] = {
+static const struct constant c_synmode[] = {
 	{0	, "Synchronous"},
 	{1	, "Asynchronous"},
 	EOC
 };
 
-const struct constant c_grabsuccess[] = {
+static const struct constant c_grabsuccess[] = {
 	{0	, "Success"},
 	{1	, "AlreadyGrabbed"},
 	{2	, "InvalidTime"},
@@ -329,7 +329,7 @@ const struct constant c_grabsuccess[] = {
 	EOC
 };
 
-const struct constant c_button[] = {
+static const struct constant c_button[] = {
 	{0, "any button"},
 	{1, "left button"},	
 	{2, "middle button"},	
@@ -338,7 +338,7 @@ const struct constant c_button[] = {
 };
 #define ft_BUTTON	ft_CARD8,	c_button
 
-const struct constant c_allowevents[] = {
+static const struct constant c_allowevents[] = {
 	{0	, "AsyncPointer"},
 	{1	, "SyncPointer"},
 	{2	, "ReplayPointer"},
@@ -350,19 +350,19 @@ const struct constant c_allowevents[] = {
 	EOC
 };
 
-const struct constant c_revertto[] = {
+static const struct constant c_revertto[] = {
 	{0	, "None"},
 	{1	, "PointerRoot"},
 	{2	, "Parent"},
 	EOC
 };
 
-const struct constant c_noneroot[] = {
+static const struct constant c_noneroot[] = {
 	{0	, "None"},
 	{1	, "PointerRoot"},
 	EOC
 };
-const struct constant c_copygcvalues[] = {
+static const struct constant c_copygcvalues[] = {
 		{0x00000001, "function"},
 		{0x00000002, "plane-mask"},
 		{0x00000004, "foreground"},
@@ -388,59 +388,59 @@ const struct constant c_copygcvalues[] = {
 		{0x00400000, "arc-mode"},
 		EOC
 };
-const struct constant c_direction[] = {
+static const struct constant c_direction[] = {
 	{0	, "LeftToRight"},
 	{1	, "RightToLeft"},
 	EOC
 };
-const struct constant c_rect_ordering[] = {
+static const struct constant c_rect_ordering[] = {
 	{0,	"UnSorted"},
 	{1,	"YSorted"},
 	{2,	"YXSorted"},
 	{3,	"YXBanded"},
 	EOC
 };
-const struct constant c_coordinate_mode[] = {
+static const struct constant c_coordinate_mode[] = {
 	{0,	"Origin"},
 	{1,	"Previous"},
 	EOC
 };
 
-const struct constant c_shape[] = {
+static const struct constant c_shape[] = {
 	{0,	"Complex"},
 	{1,	"Nonconvex"},
 	{2,	"Convex"},
 	EOC
 };
 
-const struct constant c_bitmap_format[] = {
+static const struct constant c_bitmap_format[] = {
 	{0,	"Bitmap"},
 	{1,	"XYPixmap"},
 	{2,	"ZPixmap"},
 	EOC
 };
 
-const struct constant c_alloc[] = {
+static const struct constant c_alloc[] = {
 	{0,	"None"},
 	{1,	"All"},
 	EOC
 };
 
-const struct constant c_doredgreenblue[] = {
+static const struct constant c_doredgreenblue[] = {
 	{0x01,	"red"},
 	{0x02,	"green"},
 	{0x04,	"blue"},
 	EOC
 };
 
-const struct constant c_sizeclass[] = {
+static const struct constant c_sizeclass[] = {
 	{0,	"Cursor"},
 	{1,	"Tile"},
 	{2,	"Stipple"},
 	EOC
 };
 
-const struct constant c_keyboardvaluemask[] = {
+static const struct constant c_keyboardvaluemask[] = {
 	{0x0001,	"key-click-percent"},
 	{0x0002,	"bell-percent"},
 	{0x0004,	"bell-pitch"},
@@ -452,59 +452,59 @@ const struct constant c_keyboardvaluemask[] = {
 	EOC
 };
 
-const struct constant c_nyd[] = {
+static const struct constant c_nyd[] = {
 	{0,	"No"},
 	{1,	"Yes"},
 	{2,	"Default"},
 	EOC
 };
 
-const struct constant c_insertdelete[] = {
+static const struct constant c_insertdelete[] = {
 	{0,	"Insert"},
 	{1,	"Delete"},
 	EOC
 };
 
-const struct constant c_family[] = {
+static const struct constant c_family[] = {
 	{0,	"Internet"},
 	{1,	"DECnet"},
 	{2,	"Chaos"},
 	EOC
 };
 
-const struct constant c_disabledenabled[] = {
+static const struct constant c_disabledenabled[] = {
 	{0,	"Disabled"},
 	{1,	"Enabled"},
 	EOC
 };
 
-const struct constant c_disableenable[] = {
+static const struct constant c_disableenable[] = {
 	{0,	"Disable"},
 	{1,	"Enable"},
 	EOC
 };
 
-const struct constant c_closemode[] = {
+static const struct constant c_closemode[] = {
 	{0,	"Destroy"},
 	{1,	"RetainPermanent"},
 	{2,	"RetainTemporary"},
 	EOC
 };
 
-const struct constant c_alltemporary[] = {
+static const struct constant c_alltemporary[] = {
 	{0,	"AllTemporary"},
 	EOC
 };
 
 
-const struct constant c_resetactivate[] = {
+static const struct constant c_resetactivate[] = {
 	{0,	"Reset"},
 	{1,	"Activate"},
 	EOC
 };
 
 
-const struct constant c_successbusyfailed[] = {
+static const struct constant c_successbusyfailed[] = {
 	{0,	"Success"},
 	{1,	"Busy"},
 	{2,	"Failed"},
@@ -620,7 +620,7 @@ static const struct parameter parameterReparentWindow[] = {
 	EOP
 };
 
-const struct value valuesConfigureWindow[] = {
+static const struct value valuesConfigureWindow[] = {
 	{0x0001, "x",		ft_INT16,	NULL},
 	{0x0002, "y",		ft_INT16,	NULL},
 	{0x0004, "width",	ft_UINT16,	NULL},
@@ -684,9 +684,6 @@ static const struct parameter parameterInternAtom[] = {
 	EOP
 };
 
-/* later perhaps record them to resolv them */
-#define ft_ATOM ft_CARD16
-
 static const struct parameter returnInternAtom[] = {
 	{	8,	"atom",	ft_ATOM,	c_none},
 	EOP
@@ -714,7 +711,13 @@ static const struct parameter parameterChangeProperty[] = {
 	{	12,	"type",		ft_ATOM,	NULL},
 	{	16,	"format",	ft_FORMAT8,	NULL},
 	{	20,	"length in format units",ft_COUNT32,	NULL},
+	{	12,	"STRING",	ft_IFATOM,	(void*)&parameterChangeProperty[10]},
+	{	12,	"ATOM",		ft_IFATOM,	(void*)&parameterChangeProperty[12]},
 	{	24,	"data",		ft_LISTofFormat,	NULL},
+	EOP,
+	{	24,	"data",		ft_STRING8,	NULL},
+	EOP,
+	{	24,	"data",		ft_LISTofATOM,	NULL},
 	EOP
 };
 
@@ -739,13 +742,18 @@ static const struct parameter returnGetProperty[] = {
 	{	8,	"type",		ft_ATOM,	c_none},
 	{	12,	"bytes-after",	ft_CARD32,	NULL},
 	{	16,	"length in format units",ft_COUNT32,	NULL},
+	{	8,	"STRING",	ft_IFATOM,	(void*)&returnGetProperty[8]},
+	{	8,	"ATOM",		ft_IFATOM,	(void*)&returnGetProperty[10]},
 	{	32,	"data",		ft_LISTofFormat,	NULL},
+	EOP,
+	{	32,	"data",		ft_STRING8,	NULL},
+	EOP,
+	{	32,	"data",		ft_LISTofATOM,	NULL},
 	EOP
 };
 
 #define parameterListProperties parameterWINDOW
 
-#define ft_LISTofATOM ft_LISTofCARD32
 static const struct parameter returnListProperties[] = {
 	{	8,	"#",		ft_COUNT16,	NULL},
 	{	32,	"atoms",	ft_LISTofATOM,	NULL}, 
@@ -1121,7 +1129,7 @@ static const struct parameter parameterFreePixmap[] = {
 
 #define ft_GCONTEXT ft_CARD32
 
-const struct value valuesCreateGC[] = {
+static const struct value valuesCreateGC[] = {
 		{0x00000001, "function",	ft_ENUM8,	c_function},
 		{0x00000002, "plane-mask",	ft_CARD32,	NULL},
 		{0x00000004, "foreground",	ft_CARD32,	NULL},
@@ -1928,7 +1936,7 @@ static const struct request requests[] = {
 	ra(CirculateWindow),
 	rb(GetGeometry),
 	rb(QueryTree),
-	rb(InternAtom),
+	rb3(InternAtom),
 	rb(GetAtomName),
 	ra(ChangeProperty),
 	ra(DeleteProperty),

@@ -1,10 +1,21 @@
+2006-06-10
+	* fix ATOMs to be 32 bit
+	* ChangeProperty pretty-prints types STRING and ATOM now
+2006-06-09
+	* remember atom names and print them when atoms are used
+	* STRING8 fields now print \n and \t instead of \012 and \010
+	* fix ft_IF8 processing, add ft_IFATOM
+	* GetProperty pretty-prints type "STRING" now.
+2006-06-08
+	* fix QueryVersion of RANDR
+	* implement MIT-SHM
 2006-03-09
 	* support RANDR extension
 2006-03-08
 	* manpage fixup. (Thanks to Justin Pryzby)
 2006-02-28
 	* work around copyauth problems with "localhost:" DISPLAYs
-	(like ss -X sets them)
+	(like ssh -X sets them)
 2006-02-27
 	* fix some problems with 16 bit ints shown as uints.
 

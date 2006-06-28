@@ -16,6 +16,8 @@
  */
 #include <config.h>
 
+// to get strndup
+#define _GNU_SOURCE
 #include <assert.h>
 #include <values.h>
 #include <sys/types.h>
@@ -177,7 +179,7 @@ struct parameter {
 		ft_BITMASK8, ft_BITMASK16, ft_BITMASK32,
 		/* Different forms of lists: */
 		/*	- boring ones */
-		ft_STRING8, ft_LISTofCARD32, 
+		ft_STRING8, ft_LISTofCARD32, ft_LISTofATOM,
 		ft_LISTofCARD8, ft_LISTofCARD16, 
 		ft_LISTofUINT8, ft_LISTofUINT16, 
 		ft_LISTofUINT32, 
@@ -202,8 +204,12 @@ struct parameter {
 		ft_EVENT, 
 		/* jump to other parameter list if matches */
 		ft_IF8, 
+		/* jump to other parameter list if matches atom name */
+		ft_IFATOM, 
 		/* set end of last list manually, (for LISTofVarStruct) */
-		ft_LASTMARKER, 
+		ft_LASTMARKER,
+		/* a ft_CARD32 looking into the ATOM list */
+		ft_ATOM,
 		/* always big endian */
 		ft_BE32,
 		/* get the #ofs value from the stack. (0 is the last pushed) */
@@ -227,10 +233,15 @@ static size_t printSTRING8(u8 *buffer,size_t buflen,const struct parameter *p,si
 		if( nr == maxshownlistlen ) {
 			fputs("'...",stdout);
 		} else if( nr < maxshownlistlen ) {
-			if( getCARD8(ofs)< ' ' || getCARD8(ofs) > 'z' )
-				printf("\\%03hho",getCARD8(ofs));
+			unsigned char c = getCARD8(ofs);
+			if( c == '\n' ) {
+				putchar('\\');putchar('n');
+			} else if( c == '\t' ) {
+				putchar('\\');putchar('t');
+			} else if( (c >= ' ' && c <= '~' ) )
+				putchar(c);
 			else
-				putchar(getCARD8(ofs));
+				printf("\\%03hho", c);
 		}
 		ofs++;len--;nr++;
 	}
@@ -337,6 +348,43 @@ static size_t printLISTofCARD32(struct connection *c,u8 *buffer,size_t buflen,co
 				printf("%s(0x%x)",value,(unsigned int)u32);
 			else
 				printf("0x%08x",(unsigned int)u32);
+		}
+		len--;ofs+=4;nr++;
+	}
+	putchar(';');
+	return ofs;
+}
+
+static size_t printLISTofATOM(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( (buflen - ofs)/4 <= len )
+		len = (buflen - ofs)/4;
+
+	if( print_offsets )
+		printf("[%d]",(int)ofs);
+	printf("%s=",p->name);
+	while( len > 0 ) {
+		const char *value;
+		u_int32_t u32;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...",stdout);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putchar(',');
+			notfirst = true;
+			u32 = getCARD32(ofs);
+			value = findConstant(p->constants,u32);
+			if( value )
+				printf("%s(0x%x)",value,(unsigned int)u32);
+			else if( (value = getAtom(c,u32)) == NULL )
+				printf("0x%x",(unsigned int)u32);
+			else
+				printf("0x%x(\"%s\")",(unsigned int)u32,value);
 		}
 		len--;ofs+=4;nr++;
 	}
@@ -461,6 +509,7 @@ struct value {
 static size_t printLISTofVALUE(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *param,unsigned long valuemask, size_t ofs){
 
 	const struct value *v = (const struct value*)param->constants;
+	const char *atom;
 	bool notfirst = false;
 
 	assert( v != NULL );
@@ -494,8 +543,8 @@ static size_t printLISTofVALUE(struct connection *c,u8 *buffer,size_t buflen,con
 			ofs += 4;v++;
 			continue;
 		}
-		assert( v->type < ft_STORE8 );
-		switch( v->type % 3 ) {
+		assert( v->type < ft_STORE8 || v->type == ft_ATOM );
+		switch( (v->type==ft_ATOM)?2:(v->type % 3) ) {
 		 case 0:
 			constant = findConstant(v->constants,u8);
 			break;
@@ -542,6 +591,12 @@ static size_t printLISTofVALUE(struct connection *c,u8 *buffer,size_t buflen,con
 		 case ft_CARD16:
 			 printf("0x%04x",(unsigned int)u16);
 			 break;
+		 case ft_ATOM:
+			 printf("0x%x",(unsigned int)u32);
+			 atom = getAtom(c, u32);
+			 if( atom != NULL )
+				 printf("(\"%s\")", atom);
+			 break;
 		 case ft_ENUM32:
 			 if( constant == NULL )
 				 fputs("unknown:",stdout);
@@ -577,7 +632,7 @@ static void push(struct stack *stack, unsigned long value) {
 	stack->ofs++;
 	assert(stack->ofs<stack->num);
 }
-static void pop(struct stack *stack, struct stack *oldstack) {
+static void pop(struct stack *stack UNUSED, struct stack *oldstack UNUSED) {
 }
 
 static size_t print_parameters(struct connection *c,const unsigned char *buffer,unsigned int len, const struct parameter *parameters, bool bigrequest, struct stack *oldstack);
@@ -680,6 +735,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 #endif
 		size_t ofs;
 		const char *value;
+		const char *atom;
 
 		if( p->offse == OFS_LATER )
 			ofs = lastofs;
@@ -697,9 +753,18 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			if( ofs < len && 
 			  /* some more overloading: */
 			  getCARD8(ofs) == (unsigned char)(p->name[0]) )
-				p = (struct parameter *)p->constants;
-			else
+				p = ((struct parameter *)p->constants)-1;
+			continue;
+		} else if( p->type == ft_IFATOM ) {
+			const char *atom;
+			if( ofs+4 >= len )
 				continue;
+			atom = getAtom(c, getCARD32(ofs));
+			if( atom == NULL )
+				continue;
+			if( strcmp(atom, p->name) == 0 )
+				p = ((struct parameter *)p->constants)-1;
+			continue;
 		}
 
 		switch( p->type ) {
@@ -724,6 +789,9 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			continue;
 		 case ft_LISTofCARD32:
 			lastofs = printLISTofCARD32(c,buffer,len,p,stored,ofs);
+			continue;
+		 case ft_LISTofATOM:
+			lastofs = printLISTofATOM(c,buffer,len,p,stored,ofs);
 			continue;
 		 case ft_LISTofUINT8:
 			lastofs = printLISTofUINT8(buffer,len,p,stored,ofs);
@@ -765,6 +833,22 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_EVENT:
 			if( len >= ofs + 32 )
 				print_event(c,buffer+ofs);
+			continue;
+		 case ft_ATOM:
+			if( ofs + 4 > len )
+				continue;
+			if( print_offsets )
+				printf("[%d]",(int)ofs);
+			fputs(p->name,stdout);putchar('=');
+			u32 = getCARD32(ofs);
+			value = findConstant(p->constants,u32);
+			atom = getAtom(c, u32);
+			if( value != NULL )
+				printf("%s(0x%x)",value, (unsigned int)u32);
+			else if( atom == NULL )
+				printf("0x%x(unrecognized atom)",(unsigned int)u32);
+			else
+				printf("0x%x(\"%s\")",(unsigned int)u32, atom);
 			continue;
 		 case ft_BE32:
 			if( ofs + 4 > len )
@@ -875,6 +959,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LISTofCARD8:
 		 case ft_LISTofCARD16:
 		 case ft_LISTofCARD32:
+		 case ft_LISTofATOM:
 		 case ft_LISTofUINT8:
 		 case ft_LISTofUINT16:
 		 case ft_LISTofUINT32:
@@ -884,7 +969,9 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LISTofStruct:
 		 case ft_LISTofVarStruct:
 		 case ft_IF8:
+		 case ft_IFATOM:
 		 case ft_BE32:
+		 case ft_ATOM:
 		 case ft_LASTMARKER:
 		 case ft_GET:
 		 case ft_EVENT:
@@ -926,6 +1013,21 @@ static bool requestQueryExtension(struct connection *c, bool pre, bool bigreques
 	return false;
 }
 
+static bool requestInternAtom(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply) {
+	u_int16_t len;
+	if( pre )
+		return false;
+	if( reply == NULL)
+		return false;
+	if( c->clientignore <= 8 )
+		return false;
+	len = clientCARD16(4);
+	if( c->clientignore < (unsigned int)8 + len)
+		return false;
+	reply->data = newAtom(c->clientbuffer+8,len);
+	return false;
+}
+
 /* Reactions to some replies */
 
 static void replyListFontsWithInfo(struct connection *c,bool *ignore,bool *dontremove,void *data UNUSED) {
@@ -956,6 +1058,13 @@ static void replyQueryExtension(struct connection *c,bool *ignore UNUSED,bool *d
 	}
 }
 
+static void replyInternAtom(struct connection *c,bool *ignore UNUSED,bool *dontremove UNUSED,void *data) {
+	u_int32_t atom;
+	if( data == NULL )
+		return;
+	atom = serverCARD32(8);
+	internAtom(c, atom, data);
+}
 
 #define ft_COUNT8 ft_STORE8
 #define ft_COUNT16 ft_STORE16
@@ -1305,12 +1414,14 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 #include "bigrequest.inc"
 #include "render.inc"
 #include "randr.inc"
+#include "mitshm.inc"
 
 #define EXT(a,b) { a , sizeof(a)-1, \
 	extension ## b, NUM(extension ## b), \
 	events ## b, NUM(events ## b), \
 	errors ## b, NUM(errors ## b)}
 struct extension extensions[] = {
+	EXT("MIT-SHM",MITSHM),
 	EXT("RANDR",RANDR),
 	EXT("RENDER",RENDER),
 	EXT("SHAPE",SHAPE),
@@ -1328,3 +1439,4 @@ struct extension *find_extension(u8 *name,size_t len) {
 	}
 	return NULL;
 }
+

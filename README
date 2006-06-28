@@ -21,7 +21,7 @@ Things still to do (any volunteers?):
 	   some errors).
 	- implement the common extensions.
 	   (currently only the base protocol and the BIG-REQUESTS,
-	    RANDR, RENDER and SHAPE extensions are implemented).
+	    MIT-SHM, RANDR, RENDER and SHAPE extensions are implemented).
 	- make it less verbose or even better allow to control
 	  verbosity.
 	- implement some filtering

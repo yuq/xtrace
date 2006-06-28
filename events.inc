@@ -287,7 +287,7 @@ static const struct parameter eparamConfigureNotify[] = {
 	EOP
 };
 
-const struct constant c_configure_mask[] = {
+static const struct constant c_configure_mask[] = {
 	{0x0001, "x"},
 	{0x0002, "y"},
 	{0x0004, "width"},
