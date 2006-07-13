@@ -1,3 +1,6 @@
+2006-07-12
+	* print stringlists in ListFonts, SetFontPath, GetFontPath  and 
+	  ListExtensions
 2006-06-10
 	* fix ATOMs to be 32 bit
 	* ChangeProperty pretty-prints types STRING and ATOM now

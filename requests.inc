@@ -1062,12 +1062,18 @@ static const struct parameter parameterListFonts[] = {
 	EOP
 };
 
+static const struct parameter listSTRING8[] = {
+	LC(1),
+	{	0,	"c",	ft_COUNT8,	NULL},
+	{	1,	"s",	ft_STRING8,	NULL},
+	EOP
+};
+
+#define ft_LISTofSTRING8 ft_LISTofVarStruct,	(void*)listSTRING8
+
 static const struct parameter returnListFonts[] = {
-	{	8,	"number of answers",	ft_CARD16,	NULL},
-/*
-  n  LISTofSTR		 names
-  p			 unused, p=pad(n)
-  */
+	{	 8,	"number of answers",	ft_COUNT16,	NULL},
+	{	32,	"names",		ft_LISTofSTRING8},
 	EOP
 };
 
@@ -1100,7 +1106,7 @@ static const struct parameter returnListFontsWithInfo[] = {
 
 static const struct parameter parameterSetFontPath[] = {
 	{	4,	"number of STRs in path",	ft_CARD16,	NULL},
-/*	{	8,	"path",	ft_LISTofSTR,	NULL}, */
+	{	8,	"path",				ft_LISTofSTRING8}, 
 	EOP
 };
 
@@ -1108,7 +1114,7 @@ static const struct parameter parameterSetFontPath[] = {
 
 static const struct parameter returnGetFontPath[] = {
 	{	8,	"number of STRs in path",	ft_CARD16,	NULL},
-/*	{	32,	"path",	ft_LISTofSTR,	NULL}, */
+	{	32,	"path",				ft_LISTofSTRING8},
 	EOP
 };
 
@@ -1710,10 +1716,7 @@ static const struct parameter returnQueryExtension[] = {
 
 static const struct parameter returnListExtensions[] = {
 	{	1,	"number of STRs in names",	ft_CARD8,	NULL},
-/* ofs 32:
-  n  LISTofSTR		 names
-  p			 unused, p=pad(n)
-*/
+	{	32,	"names",			ft_LISTofSTRING8},
 	EOP
 };
 

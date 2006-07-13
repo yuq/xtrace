@@ -549,15 +549,6 @@ static const struct parameter parameterRenderQueryFilters[] = {
 	EOP
 };
 
-
-static const struct parameter listSTRING8[] = {
-	LC(1),
-	{	0,	"strlen",	ft_COUNT8,	NULL},
-	{	1,	"name",		ft_STRING8,	NULL},
-	EOP
-};
-#define ft_LISTofSTRING8 ft_LISTofVarStruct,(void*)listSTRING8
-
 static const struct parameter returnRenderQueryFilters[] = {
 	{	 8,	"numAliases",	ft_CARD32,	NULL},
 	{	32,	"Aliases",	ft_LISTofCARD16,NULL},
