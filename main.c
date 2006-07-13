@@ -88,7 +88,7 @@ static int mainqueue(int listener) {
 		FD_ZERO(&exceptfds);
 		FD_SET(listener,&readfds);
 
-		c = connections ; 
+		c = connections;
 		while( c != NULL ) {
 			if( c->client_fd != -1 && c->server_fd == -1 && c->servercount == 0 ) {
 				close(c->client_fd);
@@ -429,7 +429,7 @@ argv[0]);
 	if( copyauth ) {
 		/* TODO: normalize them? or keep them so the user has more
 		 * control? */
-		if( !copy_authentication(in_displayname,out_displayname,in_authfile,out_authfile) ) 
+		if( !copy_authentication(in_displayname,out_displayname,in_authfile,out_authfile) )
 			return -1;
 	}
 	listener = listenForClients(in_displayname,in_family,in_display);

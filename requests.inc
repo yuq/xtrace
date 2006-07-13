@@ -21,7 +21,7 @@
 		    Robert W. Scheifler
 		     X Consortium, Inc.
 
-with the following trademark and copyright notices and acknowlegdgments: 
+with the following trademark and copyright notices and acknowlegdgments:
 
 X Window System is a trademark of X Consortium, Inc.
 
@@ -755,7 +755,7 @@ static const struct parameter returnGetProperty[] = {
 
 static const struct parameter returnListProperties[] = {
 	{	8,	"#",		ft_COUNT16,	NULL},
-	{	32,	"atoms",	ft_LISTofATOM,	NULL}, 
+	{	32,	"atoms",	ft_LISTofATOM,	NULL},
 	EOP
 };
 
@@ -915,7 +915,7 @@ static const struct parameter listTIMECOORD[] = {
 
 static const struct parameter returnGetMotionEvents[] = {
 	{	8,	"#",	ft_COUNT32,	NULL},
-	{	32,	"events",ft_LISTofTIMECOORD}, 
+	{	32,	"events",ft_LISTofTIMECOORD},
 	EOP
 };
 
@@ -1947,7 +1947,7 @@ static const struct request requests[] = {
 	ra(SendEvent),
 	rb(GrabPointer),
 	ra(UngrabPointer),
-	ra(GrabButton), 
+	ra(GrabButton),
 	ra(UngrabButton),
 	ra(ChangeActivePointerGrab), /*30*/
 	rb(GrabKeyboard),

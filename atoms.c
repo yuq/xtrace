@@ -108,7 +108,7 @@ void internAtom(struct connection *c UNUSED, u_int32_t atom, struct atom *data) 
 			return;
 		} else if( atom > k ) {
 			p = &(*p)->right;
-		} else { /* atom < k */ 
+		} else { /* atom < k */
 			p = &(*p)->left;
 		}
 	}

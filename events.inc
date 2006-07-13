@@ -21,7 +21,7 @@
 		    Robert W. Scheifler
 		     X Consortium, Inc.
 
-with the following trademark and copyright notices and acknowlegdgments: 
+with the following trademark and copyright notices and acknowlegdgments:
 
 X Window System is a trademark of X Consortium, Inc.
 

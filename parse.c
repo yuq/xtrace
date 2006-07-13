@@ -64,7 +64,7 @@ struct constant {
 typedef bool request_func(struct connection*,bool,bool,struct expectedreply *);
 typedef void reply_func(struct connection*,bool*,bool*,void*);
 
-struct request { 
+struct request {
 	const char *name;
 	const struct parameter *parameters;
 	const struct parameter *answers;
@@ -160,7 +160,7 @@ struct parameter {
 	 * in this parameter-list. */
 	size_t offse;
 	const char *name;
-	enum fieldtype { 
+	enum fieldtype {
 		/* signed endian specific: */
 		ft_INT8, ft_INT16, ft_INT32,
 		/* unsigned decimal endian specific: */
@@ -179,13 +179,13 @@ struct parameter {
 		/* Different forms of lists: */
 		/*	- boring ones */
 		ft_STRING8, ft_LISTofCARD32, ft_LISTofATOM,
-		ft_LISTofCARD8, ft_LISTofCARD16, 
-		ft_LISTofUINT8, ft_LISTofUINT16, 
-		ft_LISTofUINT32, 
+		ft_LISTofCARD8, ft_LISTofCARD16,
+		ft_LISTofUINT8, ft_LISTofUINT16,
+		ft_LISTofUINT32,
 		/*	- one of the above depening on last FORMAT */
 		ft_LISTofFormat,
 		/*	- iterate of list description in constants field */
-		ft_LISTofStruct, 
+		ft_LISTofStruct,
 		/*	- same but length is mininum length and
 		 *	  actual length is taken from end of last list
 		 *	  or LASTMARKER */
@@ -195,16 +195,16 @@ struct parameter {
 		 *	  offset */
 		ft_LISTofVALUE,
 		/* an LISTofStruct with count = 1 */
-		ft_Struct, 
+		ft_Struct,
 		/* specify bits per item for LISTofFormat */
 		ft_FORMAT8,
-		/* an event 
+		/* an event
 		 * (would have also been possible with Struct and many IF)*/
-		ft_EVENT, 
+		ft_EVENT,
 		/* jump to other parameter list if matches */
-		ft_IF8, 
+		ft_IF8,
 		/* jump to other parameter list if matches atom name */
-		ft_IFATOM, 
+		ft_IFATOM,
 		/* set end of last list manually, (for LISTofVarStruct) */
 		ft_LASTMARKER,
 		/* a ft_CARD32 looking into the ATOM list */
@@ -749,7 +749,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		notfirst = true;
 
 		if( p->type == ft_IF8 ) {
-			if( ofs < len && 
+			if( ofs < len &&
 			  /* some more overloading: */
 			  getCARD8(ofs) == (unsigned char)(p->name[0]) )
 				p = ((struct parameter *)p->constants)-1;
@@ -862,7 +862,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			break;
 		}
 		assert( p->type <= ft_BITMASK32);
-		 
+		
 		if( ((ofs+4)&~3) > len )
 			/* this field is missing */
 			continue;
@@ -987,7 +987,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 /* replace ra(GrabButton) in requests.inc by ra2(GrabButton)
  * and add this function and all
  * GrabButton requests will have an AnyModifier set before
- * being forwarded to the server... >:-] 
+ * being forwarded to the server... >:-]
  *
 static bool requestGrabButton(struct connection *c, bool pre, bool bigrequest,struct expectedreply *reply) {
 	if( !pre )
@@ -1175,7 +1175,7 @@ static inline void print_server_reply(struct connection *c) {
 
 	cmd = serverCARD8(1);
 	seq = serverCARD16(2);
-	for( lastp = &c->expectedreplies ; 
+	for( lastp = &c->expectedreplies ;
 			(replyto=*lastp) != NULL ; lastp=&replyto->next){
 		if( (replyto->seq & 0xFFFFFFFF ) == seq ) {
 			bool ignore = false, dontremove = false;
@@ -1295,7 +1295,7 @@ void parse_client(struct connection *c) {
 			 bigrequest = true;
 		 } else
 			 bigrequest = false;
-		 if( c->clientcount == sizeof(c->clientbuffer) ) 
+		 if( c->clientcount == sizeof(c->clientbuffer) )
 			 printf("%03d:<: Warning: buffer filled!\n",c->id);
 		 else if( c->clientcount < l ) {
 			 printf("%03d:<: Warning: Waiting for rest of package (yet got %u of %u)!\n",c->id,c->clientcount,(unsigned int)l);
@@ -1385,15 +1385,15 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 	stack.num = 30;
 	stack.ofs = 0;
 
-	if( (code & 0x80) != 0 ) 
+	if( (code & 0x80) != 0 )
 		fputs("(generated) ",stdout);
 	code &= 0x7F;
 	if( code <= 1 || code > NUM(events) ) {
 		struct usedextension *u = c->usedextensions;
 		while( u != NULL ) {
-			if( code >= u->first_event && 
+			if( code >= u->first_event &&
 			    code-u->first_event < u->extension->numevents) {
-				event = u->extension->events + 
+				event = u->extension->events +
 						(code-u->first_event);
 				break;
 			}

@@ -1,9 +1,9 @@
-bin_PROGRAMS = xtrace 
+bin_PROGRAMS = xtrace
 # decodexnumbers
 
 CFLAGS ?= -g -O2
 AM_CPPFLAGS = @CPPFLAGS@ -Wall
-# for authdata.c: -I/usr/X11R6/include -DNeedFunctionPrototypes 
+# for authdata.c: -I/usr/X11R6/include -DNeedFunctionPrototypes
 
 xtrace_SOURCES = main.c x11common.c x11client.c x11server.c parse.c copyauth.c atoms.c
 # authdata.c

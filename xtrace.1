@@ -40,7 +40,7 @@ connect to the faked X server.
 .B \-c \fR|\fP \-\-copyauthentication \fR(default)\fP
 Copy the authentication tokens for the X server to connect
 to so that clients connecting to our fake server will use
-them. 
+them.
 
 The commands run are roughly equivalent to:
 \fBxauth add $FAKEDISPLAY . `xauth list $DISPLAY | awk '$2=="MIT-MAGIC-COOKIE-1" {print $3}'`\fP
@@ -51,18 +51,18 @@ would be possible.
 .TP
 .B \-n \fR|\fP \-\-nocopyauthentication
 Do not call \fBxauth\fP and do fiddle with authentication tokens but
-leave that to the user to handle. 
+leave that to the user to handle.
 .TP
 .B \-e \fR|\fP \-\-denyextensions
 Modify all server replies to say there are no extensions available.
 (As xtrace does supports only BIG-REQUESTS, MIT-SHM, RENDER, RANDR and SHAPE
-anyway and calls all extended requests "unknown" and all replies to such 
+anyway and calls all extended requests "unknown" and all replies to such
 requests "unexpected").
 .TP
 .B \-w \fR|\fP \-\-readwritedebug
 Print how many bytes are read and/or written when.
 .TP
-.B \-m \fIcount\fP \fR|\fP \-\-maxklistlength \fIcount\fP 
+.B \-m \fIcount\fP \fR|\fP \-\-maxklistlength \fIcount\fP
 Print only the first \fIcount\fP many elements of all lists.
 .TP
 .B \-i \fR|\fP \-\-interactive
@@ -74,18 +74,18 @@ This can give funny results when multiple clients are
 tunneled.
 
 .SH "ENVIRONMENT VARIABLES"
-.TP 
+.TP
 .B DISPLAY
 Without \fB\-\-display\fP the content of this variable is used to
 determine the server to connect to. (And without \fB\-n\fP given
 to \fBxauth\fP to get the authentication tokens for this display.)
-.TP 
+.TP
 .B FAKEDISPLAY
 Without \fB\-\-fakedisplay\fP the content of this variable is used to
 determine how to listen for clients. (And without \fB\-n\fP given
 to \fBxauth\fP to set the authentication tokens for this display.)
 If neighter is given, \fBxtrace\fP will try \fB:9\fP
-.TP 
+.TP
 .B XAUTHORITY
 Without \fB-n\fP and without \fB-f\fP or \fB-F\fP your \fBxauth\fP
 program will most likely look into this variable for the file
@@ -99,6 +99,6 @@ Report bugs to <brlink@debian.org> or the Debian BTS.
 .BR x (7x),
 .SH COPYRIGHT
 Copyright \(co 2005 Bernhard R. Link
-.br 
+.br
 This is free software; see the source for copying conditions. There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

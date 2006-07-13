@@ -38,7 +38,7 @@ const char *parseDisplay(const char *displayname,
 	const char *p = displayname;
 	const char *q;
 
-/* Xlib reads display names as 
+/* Xlib reads display names as
  *            [protocol/] [hostname] : displaynumber [.screennumber]
  */
 
