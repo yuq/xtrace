@@ -1,3 +1,6 @@
+new after 0.4:
+- fix ATOMs for big-endian (by making them 32bit properly)
+- pretty print for ATOMs and some properties of format STRING.
 new after 0.3:
 - RANDR extension supported
 new after 0.2.1:
