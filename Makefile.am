@@ -17,7 +17,7 @@ noinst_HEADERS = xtrace.h requests.inc events.inc shape.inc bigrequest.inc rende
 
 man_MANS = xtrace.1
 
-MAINTAINERCLEANFILES = Makefile.in configure install-sh stamp-h.in aclocal.m4 mkinstalldirs missing config.h.in autom4te.cache config.guess config.sub
+MAINTAINERCLEANFILES = Makefile.in configure install-sh stamp-h.in aclocal.m4 mkinstalldirs missing config.h.in autom4te.cache config.guess config.sub depcomp
 
 EXTRA_DIST = autogen.sh config.h.in xtrace.1
 
