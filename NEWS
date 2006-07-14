@@ -1,3 +1,6 @@
+new after 0.5:
+- pretty print ListFonts, SetFontPath, GetFontPath and ListExtensions
+- compiles on Solaris now
 new after 0.4:
 - fix ATOMs for big-endian (by making them 32bit properly)
 - pretty print for ATOMs and some properties of format STRING.
