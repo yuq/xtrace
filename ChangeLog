@@ -1,5 +1,7 @@
 2006-07-14
 	* switch to stdint.h and uint* instead of u_int*
+	* use getaddrinfo instead of gethostbyname2
+	* implement fall-backs for strndup and asprintf
 2006-07-12
 	* print stringlists in ListFonts, SetFontPath, GetFontPath  and 
 	  ListExtensions

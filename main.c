@@ -310,6 +310,18 @@ static int mainqueue(int listener) {
 	return EXIT_SUCCESS;
 }
 
+#ifndef HAVE_STRNDUP
+/* That's not the best possible strndup implementation, but it suffices for what
+ * it is used here */
+char *strndup(const char *str,size_t n) {
+	char *r = malloc(n+1);
+	if( r == NULL )
+		return r;
+	memcpy(r,str,n);
+	r[n] = '\0';
+	return r;
+}
+#endif
 
 static const struct option longoptions[] = {
 	{"display",	required_argument,	NULL,	'd'},

@@ -15,7 +15,6 @@
  */
 #include <config.h>
 
-#define _GNU_SOURCE 1
 #include <assert.h>
 #include <errno.h>
 #include <stdint.h>
@@ -24,6 +23,7 @@
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
@@ -83,6 +83,24 @@ int listenForClients(const char *displayname,int family,int display) {
 	}
 	return fd;
 }
+
+#ifndef HAVE_ASPRINTF
+#warning using asprint replacement
+static int asprintf(char **r, const char *fmt, ...) {
+	va_list ap;
+	/* that's ugly, but we will not need longer values here... */
+	char buffer[100];
+	int len;
+
+	va_start(ap, fmt);
+	len = vsnprintf(buffer, 99, fmt, ap);
+	buffer[99] = '\0';
+	*r = strdup(buffer);
+	if( *r == NULL )
+		return -1;
+	return len;
+}
+#endif
 
 int acceptClient(int family,int listener, char **from) {
 	int fd;

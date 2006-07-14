@@ -15,8 +15,6 @@
  */
 #include <config.h>
 
-// to get strndup
-#define _GNU_SOURCE
 #include <assert.h>
 #include <values.h>
 #include <stdint.h>

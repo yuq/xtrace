@@ -40,3 +40,7 @@ extern bool denyallextensions;
 extern size_t maxshownlistlen;
 
 #define UNUSED __attribute__ ((unused))
+
+#ifndef HAVE_STRNDUP
+char *strndup(const char *,size_t);
+#endif

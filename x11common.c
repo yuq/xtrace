@@ -15,8 +15,6 @@
  */
 #include <config.h>
 
-#define _GNU_SOURCE 1
-
 #include <assert.h>
 #include <stdint.h>
 #include <sys/types.h>
