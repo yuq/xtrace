@@ -17,6 +17,7 @@
 
 #include <errno.h>
 #include <assert.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <signal.h>

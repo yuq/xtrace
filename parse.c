@@ -19,6 +19,7 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <values.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -106,7 +107,7 @@ void free_usedextensions(struct usedextension *e) {
 
 struct expectedreply {
 	struct expectedreply *next;
-	u_int64_t seq;
+	uint64_t seq;
 	const struct request *from;
 	void *data;
 };
@@ -298,7 +299,7 @@ static size_t printLISTofCARD16(struct connection *c,u8 *buffer,size_t buflen,co
 	printf("%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
-		u_int16_t u16;
+		uint16_t u16;
 
 		if( nr == maxshownlistlen ) {
 			fputs(",...",stdout);
@@ -333,7 +334,7 @@ static size_t printLISTofCARD32(struct connection *c,u8 *buffer,size_t buflen,co
 	printf("%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
-		u_int32_t u32;
+		uint32_t u32;
 
 		if( nr == maxshownlistlen ) {
 			fputs(",...",stdout);
@@ -368,7 +369,7 @@ static size_t printLISTofATOM(struct connection *c,u8 *buffer,size_t buflen,cons
 	printf("%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
-		u_int32_t u32;
+		uint32_t u32;
 
 		if( nr == maxshownlistlen ) {
 			fputs(",...",stdout);
@@ -440,7 +441,7 @@ static size_t printLISTofUINT16(struct connection *c,u8 *buffer,size_t buflen,co
 	printf("%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
-		u_int16_t u16;
+		uint16_t u16;
 
 		if( nr == maxshownlistlen ) {
 			fputs(",...",stdout);
@@ -475,7 +476,7 @@ static size_t printLISTofUINT32(struct connection *c,u8 *buffer,size_t buflen,co
 	printf("%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
-		u_int32_t u32;
+		uint32_t u32;
 
 		if( nr == maxshownlistlen ) {
 			fputs(",...",stdout);
@@ -519,7 +520,7 @@ static size_t printLISTofVALUE(struct connection *c,u8 *buffer,size_t buflen,con
 		printf("[%d]",(int)ofs);
 	printf("%s={",param->name);
 	while( buflen > ofs && buflen-ofs >= 4 ) {
-		u_int32_t u32; u_int16_t u16; u_int8_t u8;
+		uint32_t u32; uint16_t u16; uint8_t u8;
 		int32_t i32; int16_t i16; int8_t i8;
 		const char *constant;
 
@@ -622,7 +623,7 @@ struct stack {
 };
 
 static unsigned long getFromStack(struct stack *stack, size_t depth) {
-	assert(stack != NULL && stack->ofs > depth );
+	assert(stack != NULL && stack->ofs > (int)depth );
 	return stack->base[stack->ofs - 1 - depth];
 }
 
@@ -726,10 +727,10 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 	for( p = parameters; p->name != NULL; p++ ) {
 		int8_t i8; int16_t i16; int32_t i32;
 #ifdef STUPIDCC
-		u_int8_t u8=0; u_int16_t u16=0; u_int32_t u32=0;
+		uint8_t u8=0; uint16_t u16=0; uint32_t u32=0;
 		unsigned long l=0;
 #else
-		u_int8_t u8; u_int16_t u16; u_int32_t u32;
+		uint8_t u8; uint16_t u16; uint32_t u32;
 		unsigned long l;
 #endif
 		size_t ofs;
@@ -1013,7 +1014,7 @@ static bool requestQueryExtension(struct connection *c, bool pre, bool bigreques
 }
 
 static bool requestInternAtom(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply) {
-	u_int16_t len;
+	uint16_t len;
 	if( pre )
 		return false;
 	if( reply == NULL)
@@ -1058,7 +1059,7 @@ static void replyQueryExtension(struct connection *c,bool *ignore UNUSED,bool *d
 }
 
 static void replyInternAtom(struct connection *c,bool *ignore UNUSED,bool *dontremove UNUSED,void *data) {
-	u_int32_t atom;
+	uint32_t atom;
 	if( data == NULL )
 		return;
 	atom = serverCARD32(8);
@@ -1378,7 +1379,7 @@ void parse_server(struct connection *c) {
 
 static void print_event(struct connection *c,const unsigned char *buffer) {
 	const struct event *event;
-	u_int8_t code = getCARD8(0);
+	uint8_t code = getCARD8(0);
 	unsigned long stackvalues[30];
 	struct stack stack;
 	stack.base = stackvalues;

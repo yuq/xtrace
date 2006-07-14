@@ -18,6 +18,7 @@
 #define _GNU_SOURCE 1
 #include <assert.h>
 #include <errno.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <sys/socket.h>

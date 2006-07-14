@@ -9,7 +9,7 @@ int connectToServer(const char *displayname,int family,const char *hostname,int 
 int listenForClients(const char *displayname,int family,int display);
 struct sockaddr_un;
 const char *generateSocketName(struct sockaddr_un *addr,int display);
-u_int16_t calculateTCPport(int display);
+uint16_t calculateTCPport(int display);
 int acceptClient(int family,int listener, char **from);
 
 extern struct connection {
@@ -24,7 +24,7 @@ extern struct connection {
 	unsigned int servercount,serverignore;
 	enum server_state { s_start=0, s_normal, s_amlost} serverstate;
 	struct expectedreply *expectedreplies;
-	u_int64_t seq;
+	uint64_t seq;
 	struct usedextension *usedextensions;
 } *connections;
 void parse_server(struct connection *c);
@@ -33,8 +33,8 @@ void free_usedextensions(struct usedextension *e);
 bool copy_authentication(const char *fakedisplay,const char *display, const char *infile, const char *outfile);
 struct atom;
 struct atom *newAtom(const char *name, size_t len);
-const char *getAtom(struct connection *c, u_int32_t atom);
-void internAtom(struct connection *c, u_int32_t atom, struct atom *data);
+const char *getAtom(struct connection *c, uint32_t atom);
+void internAtom(struct connection *c, uint32_t atom, struct atom *data);
 
 extern bool denyallextensions;
 extern size_t maxshownlistlen;

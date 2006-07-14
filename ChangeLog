@@ -1,3 +1,5 @@
+2006-07-14
+	* switch to stdint.h and uint* instead of u_int*
 2006-07-12
 	* print stringlists in ListFonts, SetFontPath, GetFontPath  and 
 	  ListExtensions

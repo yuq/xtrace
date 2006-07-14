@@ -18,6 +18,7 @@
 #define _GNU_SOURCE 1
 
 #include <assert.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdlib.h>
