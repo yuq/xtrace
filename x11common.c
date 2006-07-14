@@ -116,6 +116,6 @@ const char *generateSocketName(struct sockaddr_un *addr,int display) {
 	return NULL;
 }
 
-u_int16_t calculateTCPport(int display) {
+uint16_t calculateTCPport(int display) {
 	return htons(X_TCP_PORT+display);
 }
