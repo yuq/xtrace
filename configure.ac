@@ -15,6 +15,13 @@ AC_DEFINE([_GNU_SOURCE],[1],[To tell glibc to make strndup visible])
 AC_CHECK_FUNCS([strndup])
 AC_CHECK_FUNCS([asprintf])
 
+AC_CHECK_FUNCS(socket)
+if test $ac_cv_func_socket = no; then
+	AC_CHECK_LIB(socket, socket, [AC_DEFINE(HAVE_SOCKET)
+LIBS="$LIBS -lsocket -lnsl"; break],[AC_MSG_ERROR([Could not find socket library function])])
+fi
+AC_CHECK_FUNC([getaddrinfo],,[AC_MSG_ERROR([Could not find getaddrinfo library function])])
+
 dnl AC_CHECK_HEADER(X11/X.h,[],[AC_MSG_ERROR([Could not find X11/X.h])])
 dnl AC_CHECK_HEADER(X11/Xlib.h,[],[AC_MSG_ERROR([Could not find X11/Xlib.h])])
 dnl AC_CHECK_HEADER(X11/extensions/security.h,[],[AC_MSG_ERROR([Could not find X11/extensions/secruity.h])],[#include <X11/Xlib.h>])
