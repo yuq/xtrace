@@ -1414,6 +1414,7 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 #include "render.inc"
 #include "randr.inc"
 #include "mitshm.inc"
+#include "xf86vidmode.inc"
 
 #define EXT(a,b) { a , sizeof(a)-1, \
 	extension ## b, NUM(extension ## b), \
@@ -1424,7 +1425,8 @@ struct extension extensions[] = {
 	EXT("RANDR",RANDR),
 	EXT("RENDER",RENDER),
 	EXT("SHAPE",SHAPE),
-	EXT("BIG-REQUESTS",BIGREQUEST)
+	EXT("BIG-REQUESTS",BIGREQUEST),
+	EXT("XFree86-VidModeExtension",XF86VidMode)
 };
 #undef EXT
 
