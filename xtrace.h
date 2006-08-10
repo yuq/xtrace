@@ -1,5 +1,6 @@
 extern size_t authdata_len;
 extern char *authdata;
+extern FILE *out;
 
 bool generateAuthorisation(const char *displayname);
 const char *parseDisplay(const char *displayname,

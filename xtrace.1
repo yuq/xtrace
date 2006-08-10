@@ -72,7 +72,15 @@ Confirmation is given by pressing enter or a number
 followed by enter via stdin.
 This can give funny results when multiple clients are
 tunneled.
-
+.TP
+.B \-o \fR|\fP \-\-outfile \fIfilename\fP
+Dump output into \fIfilename\fP instead of stdout.
+.TP
+.B \-b \fR|\fP \-\-buffered
+Do not write every line on its own but wait until buffers
+are full.
+Speeds up things a little bit when outputting to a file.
+Not very usefull at all together with \fB\-i\fP.
 .SH "ENVIRONMENT VARIABLES"
 .TP
 .B DISPLAY

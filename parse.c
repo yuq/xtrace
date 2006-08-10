@@ -120,21 +120,21 @@ static void print_bitfield(const char *name,const struct constant *constants, un
 
 	/* bitmasks should have some */
 	assert(constants != NULL);
-	printf("%s=",name);
+	fprintf(out,"%s=",name);
 
 	for( c = constants; c->name != NULL ; c++ ) {
 		if( c->value == 0 )
 			zeroname = c->name;
 		else if( (l & c->value) != 0 ) {
 			if( !first )
-				putchar(',');
+				putc(',',out);
 			first = false;
-			fputs(c->name,stdout);
+			fputs(c->name,out);
 		}
 		
 	}
 	if( first )
-		fputs(zeroname,stdout);
+		fputs(zeroname,out);
 };
 
 static const char *findConstant(const struct constant *constants, unsigned long l){
@@ -226,26 +226,26 @@ static size_t printSTRING8(u8 *buffer,size_t buflen,const struct parameter *p,si
 		len = buflen - ofs;
 
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s='",p->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s='",p->name);
 	while( len > 0 ) {
 		if( nr == maxshownlistlen ) {
-			fputs("'...",stdout);
+			fputs("'...",out);
 		} else if( nr < maxshownlistlen ) {
 			unsigned char c = getCARD8(ofs);
 			if( c == '\n' ) {
-				putchar('\\');putchar('n');
+				putc('\\',out);putc('n',out);
 			} else if( c == '\t' ) {
-				putchar('\\');putchar('t');
+				putc('\\',out);putc('t',out);
 			} else if( (c >= ' ' && c <= '~' ) )
-				putchar(c);
+				putc(c,out);
 			else
-				printf("\\%03hho", c);
+				fprintf(out,"\\%03hho", c);
 		}
 		ofs++;len--;nr++;
 	}
 	if( nr <= maxshownlistlen )
-		putchar('\'');
+		putc('\'',out);
 	return ofs;
 }
 
@@ -259,28 +259,28 @@ static size_t printLISTofCARD8(u8 *buffer,size_t buflen,const struct parameter *
 		len = buflen - ofs;
 
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s=",p->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
 		unsigned char u8;
 
 		if( nr == maxshownlistlen ) {
-			fputs(",...",stdout);
+			fputs(",...",out);
 		} else if( nr < maxshownlistlen ) {
 			if( notfirst )
-				putchar(',');
+				putc(',',out);
 			notfirst = true;
 			u8 = getCARD8(ofs);
 			value = findConstant(p->constants,u8);
 			if( value )
-				printf("%s(0x%hhx)",value,u8);
+				fprintf(out,"%s(0x%hhx)",value,u8);
 			else
-				printf("0x%02hhx",u8);
+				fprintf(out,"0x%02hhx",u8);
 		}
 		len--;ofs++;nr++;
 	}
-	putchar(';');
+	putc(';',out);
 	return ofs;
 }
 
@@ -294,28 +294,28 @@ static size_t printLISTofCARD16(struct connection *c,u8 *buffer,size_t buflen,co
 		len = (buflen - ofs)/2;
 
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s=",p->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
 		uint16_t u16;
 
 		if( nr == maxshownlistlen ) {
-			fputs(",...",stdout);
+			fputs(",...",out);
 		} else if( nr < maxshownlistlen ) {
 			if( notfirst )
-				putchar(',');
+				putc(',',out);
 			notfirst = true;
 			u16 = getCARD16(ofs);
 			value = findConstant(p->constants,u16);
 			if( value )
-				printf("%s(0x%hx)",value,(unsigned short int)u16);
+				fprintf(out,"%s(0x%hx)",value,(unsigned short int)u16);
 			else
-				printf("0x%04hx",(unsigned short int)u16);
+				fprintf(out,"0x%04hx",(unsigned short int)u16);
 		}
 		len--;ofs+=2;nr++;
 	}
-	putchar(';');
+	putc(';',out);
 	return ofs;
 }
 
@@ -329,28 +329,28 @@ static size_t printLISTofCARD32(struct connection *c,u8 *buffer,size_t buflen,co
 		len = (buflen - ofs)/4;
 
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s=",p->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
 		uint32_t u32;
 
 		if( nr == maxshownlistlen ) {
-			fputs(",...",stdout);
+			fputs(",...",out);
 		} else if( nr < maxshownlistlen ) {
 			if( notfirst )
-				putchar(',');
+				putc(',',out);
 			notfirst = true;
 			u32 = getCARD32(ofs);
 			value = findConstant(p->constants,u32);
 			if( value )
-				printf("%s(0x%x)",value,(unsigned int)u32);
+				fprintf(out,"%s(0x%x)",value,(unsigned int)u32);
 			else
-				printf("0x%08x",(unsigned int)u32);
+				fprintf(out,"0x%08x",(unsigned int)u32);
 		}
 		len--;ofs+=4;nr++;
 	}
-	putchar(';');
+	putc(';',out);
 	return ofs;
 }
 
@@ -364,30 +364,30 @@ static size_t printLISTofATOM(struct connection *c,u8 *buffer,size_t buflen,cons
 		len = (buflen - ofs)/4;
 
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s=",p->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
 		uint32_t u32;
 
 		if( nr == maxshownlistlen ) {
-			fputs(",...",stdout);
+			fputs(",...",out);
 		} else if( nr < maxshownlistlen ) {
 			if( notfirst )
-				putchar(',');
+				putc(',',out);
 			notfirst = true;
 			u32 = getCARD32(ofs);
 			value = findConstant(p->constants,u32);
 			if( value )
-				printf("%s(0x%x)",value,(unsigned int)u32);
+				fprintf(out,"%s(0x%x)",value,(unsigned int)u32);
 			else if( (value = getAtom(c,u32)) == NULL )
-				printf("0x%x",(unsigned int)u32);
+				fprintf(out,"0x%x",(unsigned int)u32);
 			else
-				printf("0x%x(\"%s\")",(unsigned int)u32,value);
+				fprintf(out,"0x%x(\"%s\")",(unsigned int)u32,value);
 		}
 		len--;ofs+=4;nr++;
 	}
-	putchar(';');
+	putc(';',out);
 	return ofs;
 }
 
@@ -401,28 +401,28 @@ static size_t printLISTofUINT8(u8 *buffer,size_t buflen,const struct parameter *
 		len = buflen - ofs;
 
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s=",p->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
 		unsigned char u8;
 
 		if( nr == maxshownlistlen ) {
-			fputs(",...",stdout);
+			fputs(",...",out);
 		} else if( nr < maxshownlistlen ) {
 			if( notfirst )
-				putchar(',');
+				putc(',',out);
 			notfirst = true;
 			u8 = getCARD8(ofs);
 			value = findConstant(p->constants,u8);
 			if( value )
-				printf("%s(%d)",value,(unsigned int)u8);
+				fprintf(out,"%s(%d)",value,(unsigned int)u8);
 			else
-				printf("%d",(unsigned int)u8);
+				fprintf(out,"%d",(unsigned int)u8);
 		}
 		len--;ofs++;nr++;
 	}
-	putchar(';');
+	putc(';',out);
 	return ofs;
 }
 
@@ -436,28 +436,28 @@ static size_t printLISTofUINT16(struct connection *c,u8 *buffer,size_t buflen,co
 		len = (buflen - ofs)/2;
 
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s=",p->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
 		uint16_t u16;
 
 		if( nr == maxshownlistlen ) {
-			fputs(",...",stdout);
+			fputs(",...",out);
 		} else if( nr < maxshownlistlen ) {
 			if( notfirst )
-				putchar(',');
+				putc(',',out);
 			notfirst = true;
 			u16 = getCARD16(ofs);
 			value = findConstant(p->constants,u16);
 			if( value )
-				printf("%s(%d)",value,(unsigned int)u16);
+				fprintf(out,"%s(%d)",value,(unsigned int)u16);
 			else
-				printf("%d",(unsigned int)u16);
+				fprintf(out,"%d",(unsigned int)u16);
 		}
 		len--;ofs+=2;nr++;
 	}
-	putchar(';');
+	putc(';',out);
 	return ofs;
 }
 
@@ -471,28 +471,28 @@ static size_t printLISTofUINT32(struct connection *c,u8 *buffer,size_t buflen,co
 		len = (buflen - ofs)/4;
 
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s=",p->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
 	while( len > 0 ) {
 		const char *value;
 		uint32_t u32;
 
 		if( nr == maxshownlistlen ) {
-			fputs(",...",stdout);
+			fputs(",...",out);
 		} else if( nr < maxshownlistlen ) {
 			if( notfirst )
-				putchar(',');
+				putc(',',out);
 			notfirst = true;
 			u32 = getCARD32(ofs);
 			value = findConstant(p->constants,u32);
 			if( value )
-				printf("%s(%x)",value,(unsigned int)u32);
+				fprintf(out,"%s(%x)",value,(unsigned int)u32);
 			else
-				printf("%x",(unsigned int)u32);
+				fprintf(out,"%x",(unsigned int)u32);
 		}
 		len--;ofs+=4;nr++;
 	}
-	putchar(';');
+	putc(';',out);
 	return ofs;
 }
 
@@ -516,8 +516,8 @@ static size_t printLISTofVALUE(struct connection *c,u8 *buffer,size_t buflen,con
 	if( ofs > buflen )
 		return ofs;
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s={",param->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s={",param->name);
 	while( buflen > ofs && buflen-ofs >= 4 ) {
 		uint32_t u32; uint16_t u16; uint8_t u8;
 		int32_t i32; int16_t i16; int8_t i8;
@@ -530,7 +530,7 @@ static size_t printLISTofVALUE(struct connection *c,u8 *buffer,size_t buflen,con
 			continue;
 		}
 		if( notfirst )
-			putchar(' ');
+			putc(' ',out);
 		notfirst = true;
 		/* this is funny, but that is the protocol... */
 		u32 = getCARD32(ofs); i32 = u32;
@@ -554,63 +554,63 @@ static size_t printLISTofVALUE(struct connection *c,u8 *buffer,size_t buflen,con
 			constant = findConstant(v->constants,u32);
 			break;
 		}
-		fputs(v->name,stdout);putchar('=');
+		fputs(v->name,out);putc('=',out);
 		if( constant != NULL ) {
-			fputs(constant,stdout);
-			putchar('(');
+			fputs(constant,out);
+			putc('(',out);
 		}
 		switch( v->type ) {
 		 case ft_INT8:
-			 printf("%d",(int)i8);
+			 fprintf(out,"%d",(int)i8);
 			 break;
 		 case ft_INT16:
-			 printf("%d",(int)i16);
+			 fprintf(out,"%d",(int)i16);
 			 break;
 		 case ft_INT32:
-			 printf("%d",(int)i32);
+			 fprintf(out,"%d",(int)i32);
 			 break;
 		 case ft_UINT8:
-			 printf("%u",(unsigned int)u8);
+			 fprintf(out,"%u",(unsigned int)u8);
 			 break;
 		 case ft_UINT16:
-			 printf("%u",(unsigned int)u16);
+			 fprintf(out,"%u",(unsigned int)u16);
 			 break;
 		 case ft_UINT32:
-			 printf("%u",(unsigned int)u32);
+			 fprintf(out,"%u",(unsigned int)u32);
 			 break;
 		 case ft_ENUM8:
 			 if( constant == NULL )
-				 fputs("unknown:",stdout);
+				 fputs("unknown:",out);
 		 case ft_CARD8:
-			 printf("0x%02x",(unsigned int)u8);
+			 fprintf(out,"0x%02x",(unsigned int)u8);
 			 break;
 		 case ft_ENUM16:
 			 if( constant == NULL )
-				 fputs("unknown:",stdout);
+				 fputs("unknown:",out);
 		 case ft_CARD16:
-			 printf("0x%04x",(unsigned int)u16);
+			 fprintf(out,"0x%04x",(unsigned int)u16);
 			 break;
 		 case ft_ATOM:
-			 printf("0x%x",(unsigned int)u32);
+			 fprintf(out,"0x%x",(unsigned int)u32);
 			 atom = getAtom(c, u32);
 			 if( atom != NULL )
-				 printf("(\"%s\")", atom);
+				 fprintf(out,"(\"%s\")", atom);
 			 break;
 		 case ft_ENUM32:
 			 if( constant == NULL )
-				 fputs("unknown:",stdout);
+				 fputs("unknown:",out);
 		 case ft_CARD32:
-			 printf("0x%08x",(unsigned int)u32);
+			 fprintf(out,"0x%08x",(unsigned int)u32);
 			 break;
 		 default:
 			 assert(0);
 		}
 		if( constant != NULL ) {
-			putchar(')');
+			putc(')',out);
 		}
 		ofs += 4; v++;
 	}
-	putchar('}');
+	putc('}',out);
 	/* TODO: print error if flags left or v!=EOV? */
 	return ofs;
 }
@@ -650,28 +650,28 @@ static size_t printLISTofStruct(struct connection *c,u8 *buffer,size_t buflen,co
 	substruct++;
 
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s=",p->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
 	while( buflen > ofs && buflen-ofs >= len && count > 0) {
 
 		if( nr == maxshownlistlen ) {
-			fputs(",...",stdout);
+			fputs(",...",out);
 			if( len == 0 )
 				ofs = SIZE_MAX;
 			break;
 		} else if( nr < maxshownlistlen ) {
 			if( notfirst )
-				putchar(',');
+				putc(',',out);
 			notfirst = true;
-			putchar('{');
+			putc('{',out);
 
 			print_parameters(c,buffer+ofs,len,substruct,false,stack);
 
-			putchar('}');
+			putc('}',out);
 		}
 		ofs += len; count--; nr++;
 	}
-	putchar(';');
+	putc(';',out);
 	return ofs;
 }
 static size_t printLISTofVarStruct(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t count, size_t ofs, struct stack *stack){
@@ -687,28 +687,28 @@ static size_t printLISTofVarStruct(struct connection *c,u8 *buffer,size_t buflen
 	substruct++;
 
 	if( print_offsets )
-		printf("[%d]",(int)ofs);
-	printf("%s=",p->name);
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
 	while( buflen > ofs && buflen-ofs >= len && count > 0) {
 		size_t lentoadd;
 
 		if( nr >= maxshownlistlen ) {
-			fputs(",...;",stdout);
+			fputs(",...;",out);
 			/* there is nothing here to calculate the rest,
 			 * so just return the unreachable */
 			return SIZE_MAX;
 		}
 		if( notfirst )
-			putchar(',');
+			putc(',',out);
 		notfirst = true;
-		putchar('{');
+		putc('{',out);
 
 		lentoadd = print_parameters(c,buffer+ofs,buflen-ofs,substruct,false,stack);
 
-		putchar('}');
+		putc('}',out);
 		ofs += lentoadd; count--; nr++;
 	}
-	putchar(';');
+	putc(';',out);
 	return ofs;
 }
 
@@ -745,7 +745,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			ofs = p->offse;
 
 		if( notfirst )
-			putchar(' ');
+			putc(' ',out);
 		notfirst = true;
 
 		if( p->type == ft_IF8 ) {
@@ -837,23 +837,23 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			if( ofs + 4 > len )
 				continue;
 			if( print_offsets )
-				printf("[%d]",(int)ofs);
-			fputs(p->name,stdout);putchar('=');
+				fprintf(out,"[%d]",(int)ofs);
+			fputs(p->name,out);putc('=',out);
 			u32 = getCARD32(ofs);
 			value = findConstant(p->constants,u32);
 			atom = getAtom(c, u32);
 			if( value != NULL )
-				printf("%s(0x%x)",value, (unsigned int)u32);
+				fprintf(out,"%s(0x%x)",value, (unsigned int)u32);
 			else if( atom == NULL )
-				printf("0x%x(unrecognized atom)",(unsigned int)u32);
+				fprintf(out,"0x%x(unrecognized atom)",(unsigned int)u32);
 			else
-				printf("0x%x(\"%s\")",(unsigned int)u32, atom);
+				fprintf(out,"0x%x(\"%s\")",(unsigned int)u32, atom);
 			continue;
 		 case ft_BE32:
 			if( ofs + 4 > len )
 				continue;
-			fputs(p->name,stdout);putchar('=');
-			printf("0x%08x",(unsigned int)getBE32(ofs));
+			fputs(p->name,out);putc('=',out);
+			fprintf(out,"0x%08x",(unsigned int)getBE32(ofs));
 			continue;
 		 case ft_GET:
 			stored = getFromStack(&newstack,p->offse);
@@ -898,57 +898,57 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		}
 		value = findConstant(p->constants,l);
 		if( print_offsets )
-			printf("[%d]",(int)ofs);
-		fputs(p->name,stdout);putchar('=');
+			fprintf(out,"[%d]",(int)ofs);
+		fputs(p->name,out);putc('=',out);
 		if( value != NULL ) {
-			fputs(value,stdout);
-			putchar('(');
+			fputs(value,out);
+			putc('(',out);
 		}
 		switch( p->type ) {
 		 case ft_INT8:
 			 i8 = u8;
-			 printf("%d",(int)i8);
+			 fprintf(out,"%d",(int)i8);
 			 break;
 		 case ft_INT16:
 			 i16 = u16;
-			 printf("%d",(int)i16);
+			 fprintf(out,"%d",(int)i16);
 			 break;
 		 case ft_INT32:
 			 i32 = u32;
-			 printf("%d",(int)i32);
+			 fprintf(out,"%d",(int)i32);
 			 break;
 		 case ft_PUSH8:
 		 case ft_STORE8:
 		 case ft_UINT8:
-			 printf("%u",(unsigned int)u8);
+			 fprintf(out,"%u",(unsigned int)u8);
 			 break;
 		 case ft_PUSH16:
 		 case ft_STORE16:
 		 case ft_UINT16:
-			 printf("%u",(unsigned int)u16);
+			 fprintf(out,"%u",(unsigned int)u16);
 			 break;
 		 case ft_PUSH32:
 		 case ft_STORE32:
 		 case ft_UINT32:
-			 printf("%u",(unsigned int)u32);
+			 fprintf(out,"%u",(unsigned int)u32);
 			 break;
 		 case ft_ENUM8:
 			 if( value == NULL )
-				 fputs("unknown:",stdout);
+				 fputs("unknown:",out);
 		 case ft_CARD8:
-			 printf("0x%02x",(unsigned int)u8);
+			 fprintf(out,"0x%02x",(unsigned int)u8);
 			 break;
 		 case ft_ENUM16:
 			 if( value == NULL )
-				 fputs("unknown:",stdout);
+				 fputs("unknown:",out);
 		 case ft_CARD16:
-			 printf("0x%04x",(unsigned int)u16);
+			 fprintf(out,"0x%04x",(unsigned int)u16);
 			 break;
 		 case ft_ENUM32:
 			 if( value == NULL )
-				 fputs("unknown:",stdout);
+				 fputs("unknown:",out);
 		 case ft_CARD32:
-			 printf("0x%08x",(unsigned int)u32);
+			 fprintf(out,"0x%08x",(unsigned int)u32);
 			 break;
 		 case ft_BITMASK8:
 		 case ft_BITMASK16:
@@ -977,7 +977,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			 assert(0);
 		}
 		if( value != NULL ) {
-			putchar(')');
+			putc(')',out);
 		}
 	}
 	pop(&newstack,oldstack);
@@ -1033,7 +1033,7 @@ static void replyListFontsWithInfo(struct connection *c,bool *ignore,bool *dontr
 	unsigned int seq = serverCARD16(2);
 	if( serverCARD8(1) == 0 ) {
 
-		printf("%03d:>:0x%04x:%u: Reply to ListFontsWithInfo: end of list\n", c->id, seq, c->serverignore);
+		fprintf(out,"%03d:>:0x%04x:%u: Reply to ListFontsWithInfo: end of list\n", c->id, seq, c->serverignore);
 		*ignore = true;
 	} else
 		*dontremove = true;
@@ -1124,7 +1124,7 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 	else
 		ignore = r->request_func(c,true,bigrequest,NULL);
 	if( !ignore ) {
-		printf("%03d:<:%04x:%3u: %sRequest(%hhu): %s ",
+		fprintf(out,"%03d:<:%04x:%3u: %sRequest(%hhu): %s ",
 				c->id,(unsigned int)(c->seq),c->clientignore,
 				extensionname,req,
 				r->name
@@ -1132,10 +1132,10 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 		if( r->parameters != NULL )
 			print_parameters(c,c->clientbuffer,len,r->parameters, bigrequest, &stack);
 		else
-			puts("obsolete without parameter description");
+			fputs("obsolete without parameter description\n",out);
 		if( r->request_func != NULL )
 			(void)r->request_func(c,false,bigrequest,NULL);
-		putchar('\n');
+		putc('\n',out);
 	}
 	if( r->answers != NULL ) {
 		/* register an awaited response */
@@ -1153,9 +1153,9 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 
 static inline void print_server_event(struct connection *c) {
 
-	printf("%03d:>:%04llx: Event ",c->id,(unsigned long long)c->seq);
+	fprintf(out,"%03d:>:%04llx: Event ",c->id,(unsigned long long)c->seq);
 	print_event(c,c->serverbuffer);
-	putchar('\n');
+	putc('\n',out);
 }
 
 
@@ -1185,10 +1185,10 @@ static inline void print_server_reply(struct connection *c) {
 				replyto->from->reply_func(c,&ignore,&dontremove,replyto->data);
 
 			if( !ignore ) {
-				printf("%03d:>:0x%04x:%u: Reply to %s: ", c->id, seq, (unsigned int)c->serverignore,replyto->from->name);
+				fprintf(out,"%03d:>:0x%04x:%u: Reply to %s: ", c->id, seq, (unsigned int)c->serverignore,replyto->from->name);
 				print_parameters(c,
 					c->serverbuffer,len,replyto->from->answers,false,&stack);
-				putchar('\n');
+				putc('\n',out);
 			}
 			if( !dontremove ) {
 				*lastp = replyto->next;
@@ -1200,7 +1200,7 @@ static inline void print_server_reply(struct connection *c) {
 			return;
 		}
 	}
-	printf("%03d:>:%04x:%u: unexpected reply\n",
+	fprintf(out,"%03d:>:%04x:%u: unexpected reply\n",
 			c->id, seq, c->serverignore);
 			
 }
@@ -1234,7 +1234,7 @@ static inline void print_server_error(struct connection *c) {
 		}
 
 	}
-	printf("%03d:>:%u:Error %hhu=%s: major=%u, minor=%u, bad=%u\n",
+	fprintf(out,"%03d:>:%u:Error %hhu=%s: major=%u, minor=%u, bad=%u\n",
 			c->id,
 			(int)serverCARD16(2),
 			cmd,
@@ -1270,7 +1270,7 @@ void parse_client(struct connection *c) {
 		 }
 		 c->clientignore =  l;
 
-		 printf("%03d:<: am %s want %d:%d authorising with '%*s' of length %d\n",
+		 fprintf(out,"%03d:<: am %s want %d:%d authorising with '%*s' of length %d\n",
 				 c->id,
 				 c->bigendian?"msb-first":"lsb-first",
 				 (int)clientCARD16(2),
@@ -1282,13 +1282,13 @@ void parse_client(struct connection *c) {
 		 return;
 	 case c_normal:
 		 if( c->clientcount < 4 ) {
-			 printf("%03d:<: Warning: Waiting for rest of package (yet only got %u)!\n",c->id,c->clientcount);
+			 fprintf(out,"%03d:<: Warning: Waiting for rest of package (yet only got %u)!\n",c->id,c->clientcount);
 			 return;
 		 }
 		 l = 4*clientCARD16(2);
 		 if( l == 0 ) {
 			 if( c->clientcount < 8 ) {
-				 printf("%03d:<: Warning: Waiting for rest of package (yet only got %u)!\n",c->id,c->clientcount);
+				 fprintf(out,"%03d:<: Warning: Waiting for rest of package (yet only got %u)!\n",c->id,c->clientcount);
 				 return;
 			 }
 			 l = 4*clientCARD32(4);
@@ -1296,9 +1296,9 @@ void parse_client(struct connection *c) {
 		 } else
 			 bigrequest = false;
 		 if( c->clientcount == sizeof(c->clientbuffer) )
-			 printf("%03d:<: Warning: buffer filled!\n",c->id);
+			 fprintf(out,"%03d:<: Warning: buffer filled!\n",c->id);
 		 else if( c->clientcount < l ) {
-			 printf("%03d:<: Warning: Waiting for rest of package (yet got %u of %u)!\n",c->id,c->clientcount,(unsigned int)l);
+			 fprintf(out,"%03d:<: Warning: Waiting for rest of package (yet got %u of %u)!\n",c->id,c->clientcount,(unsigned int)l);
 			 return;
 		 }
 		 c->clientignore = l;
@@ -1331,19 +1331,19 @@ void parse_server(struct connection *c) {
 		 cmd = serverCARD16(0);
 		 switch( cmd ) {
 		  case 0:
-			  printf("%03d:>: Failed, version is %d:%d reason is '%*s'.\n",
+			  fprintf(out,"%03d:>: Failed, version is %d:%d reason is '%*s'.\n",
 					 c->id,
 					 (int)serverCARD16(2),
 					 (int)serverCARD16(4),
 					 (int)(4*len),
 					 &c->serverbuffer[8]);
 		  case 2:
-			  printf("%03d:>: More authentication needed, reason is '%*s'.\n",
+			  fprintf(out,"%03d:>: More authentication needed, reason is '%*s'.\n",
 					 c->id,
 					 (int)(4*len),
 					 &c->serverbuffer[8]);
 		  case 1:
-			  printf("%03d:>: Success, version is %d:%d-%d.\n",
+			  fprintf(out,"%03d:>: Success, version is %d:%d-%d.\n",
 					 c->id,
 					 (int)serverCARD16(2),
 					 (int)serverCARD16(4),
@@ -1386,7 +1386,7 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 	stack.ofs = 0;
 
 	if( (code & 0x80) != 0 )
-		fputs("(generated) ",stdout);
+		fputs("(generated) ",out);
 	code &= 0x7F;
 	if( code <= 1 || code > NUM(events) ) {
 		struct usedextension *u = c->usedextensions;
@@ -1400,12 +1400,12 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 			u = u->next;
 		}
 		if( u == NULL ) {
-			printf("unknown code %hhu",code);
+			fprintf(out,"unknown code %hhu",code);
 			return;
 		}
 	} else
 		event = &events[code];
-	printf("%s(%hhu) ",event->name,code);
+	fprintf(out,"%s(%hhu) ",event->name,code);
 	print_parameters(c,buffer,32,event->parameters,false,&stack);
 }
 

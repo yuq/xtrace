@@ -1,3 +1,5 @@
+new after 0.6:
+- --outfile and --buffered options
 new after 0.5:
 - pretty print ListFonts, SetFontPath, GetFontPath and ListExtensions
 - compiles on Solaris now

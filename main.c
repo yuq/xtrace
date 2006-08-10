@@ -31,11 +31,14 @@
 
 #include "xtrace.h"
 
+FILE *out;
+
 bool readwritedebug = false;
 bool copyauth = true;
 bool stopwhennone = true;
 bool denyallextensions = false;
 bool interactive = false;
+static bool buffered = false;
 size_t maxshownlistlen = SIZE_MAX;
 
 const char *out_displayname = NULL;
@@ -95,7 +98,7 @@ static int mainqueue(int listener) {
 				close(c->client_fd);
 				c->client_fd = -1;
 				if( readwritedebug )
-					printf("%03d:>:sent EOF\n",c->id);
+					fprintf(out,"%03d:>:sent EOF\n",c->id);
 			}
 			if( c->client_fd != -1 ) {
 				if( sizeof(c->clientbuffer) > c->clientcount )
@@ -109,7 +112,7 @@ static int mainqueue(int listener) {
 				close(c->server_fd);
 				c->server_fd = -1;
 				if( readwritedebug )
-					printf("%03d:<:sent EOF\n",c->id);
+					fprintf(out,"%03d:<:sent EOF\n",c->id);
 			}
 			if( c->server_fd != -1 ) {
 				if( sizeof(c->serverbuffer) > c->servercount )
@@ -160,7 +163,7 @@ static int mainqueue(int listener) {
 				if( FD_ISSET(c->client_fd,&exceptfds) ) {
 					close(c->client_fd);
 					c->client_fd = -1;
-					printf("%03d: exception in communication with client\n",c->id);
+					fprintf(stdout,"%03d: exception in communication with client\n",c->id);
 					continue;
 				}
 				if( FD_ISSET(c->client_fd,&writefds) ) {
@@ -172,7 +175,7 @@ static int mainqueue(int listener) {
 					written = write(c->client_fd,c->serverbuffer,towrite);
 					if( written >= 0 ) {
 						if( readwritedebug )
-							printf("%03d:>:wrote %u bytes\n",c->id,(unsigned int)written);
+							fprintf(stdout,"%03d:>:wrote %u bytes\n",c->id,(unsigned int)written);
 						if( (size_t)written < c->servercount )
 							memmove(c->serverbuffer,c->serverbuffer+written,c->servercount-written);
 						c->servercount -= written;
@@ -182,7 +185,7 @@ static int mainqueue(int listener) {
 								close(c->client_fd);
 								c->client_fd = -1;
 								if( readwritedebug )
-									printf("%03d:>:send EOF\n",c->id);
+									fprintf(stdout,"%03d:>:send EOF\n",c->id);
 								continue;
 							}
 						} else if( c->serverignore == 0 ) {
@@ -193,7 +196,7 @@ static int mainqueue(int listener) {
 						close(c->client_fd);
 						c->client_fd = -1;
 						if( readwritedebug )
-							printf("%03d: error writing to client: %d=%s\n",c->id,e,strerror(e));
+							fprintf(stdout,"%03d: error writing to client: %d=%s\n",c->id,e,strerror(e));
 						continue;
 					}
 				}
@@ -203,11 +206,11 @@ static int mainqueue(int listener) {
 					assert( toread > 0 );
 					if( wasread > 0 ) {
 						if( readwritedebug )
-							printf("%03d:<:received %u bytes\n",c->id,(unsigned int)wasread);
+							fprintf(stdout,"%03d:<:received %u bytes\n",c->id,(unsigned int)wasread);
 						c->clientcount += wasread;
 					} else {
 						if( readwritedebug )
-							printf("%03d:<:got EOF\n",c->id);
+							fprintf(stdout,"%03d:<:got EOF\n",c->id);
 						close(c->client_fd);
 						c->client_fd = -1;
 						continue;
@@ -222,7 +225,7 @@ static int mainqueue(int listener) {
 				min = c->servercount;
 				if( min > c->serverignore )
 					min = c->serverignore;
-				printf("%03d:s->?: discarded last answer of %u bytes\n",c->id,min);
+				fprintf(stdout,"%03d:s->?: discarded last answer of %u bytes\n",c->id,min);
 				if( min < c->servercount )
 					memmove(c->serverbuffer,c->serverbuffer+min,c->servercount-min);
 				c->servercount -= min;
@@ -235,7 +238,7 @@ static int mainqueue(int listener) {
 				if( FD_ISSET(c->server_fd,&exceptfds) ) {
 					close(c->server_fd);
 					c->server_fd = -1;
-					printf("%03d: exception in communication with server\n",c->id);
+					fprintf(stdout,"%03d: exception in communication with server\n",c->id);
 					continue;
 				}
 				if( FD_ISSET(c->server_fd,&writefds) ) {
@@ -249,7 +252,7 @@ static int mainqueue(int listener) {
 						allowsent--;
 					if( written >= 0 ) {
 						if( readwritedebug )
-							printf("%03d:<:wrote %u bytes\n",c->id,(unsigned int)written);
+							fprintf(stdout,"%03d:<:wrote %u bytes\n",c->id,(unsigned int)written);
 						if( (size_t)written < c->clientcount )
 							memmove(c->clientbuffer,c->clientbuffer+written,c->clientcount-written);
 						c->clientcount -= written;
@@ -263,7 +266,7 @@ static int mainqueue(int listener) {
 						close(c->server_fd);
 						c->server_fd = -1;
 						if( readwritedebug )
-							printf("%03d: error writing to server: %d=%s\n",c->id,e,strerror(e));
+							fprintf(stdout,"%03d: error writing to server: %d=%s\n",c->id,e,strerror(e));
 						continue;
 					}
 				}
@@ -273,11 +276,11 @@ static int mainqueue(int listener) {
 					assert( toread > 0 );
 					if( wasread > 0 ) {
 						if( readwritedebug )
-							printf("%03d:>:received %u bytes\n",c->id,(unsigned int)wasread);
+							fprintf(stdout,"%03d:>:received %u bytes\n",c->id,(unsigned int)wasread);
 						c->servercount += wasread;
 					} else {
 						if( readwritedebug )
-							printf("%03d:>:got EOF\n",c->id);
+							fprintf(stdout,"%03d:>:got EOF\n",c->id);
 						close(c->server_fd);
 						c->server_fd = -1;
 					}
@@ -291,7 +294,7 @@ static int mainqueue(int listener) {
 				min = c->clientcount;
 				if( min > c->clientignore )
 					min = c->clientignore;
-				printf("%03d:<: discarding last request of %u bytes\n",c->id,min);
+				fprintf(stdout,"%03d:<: discarding last request of %u bytes\n",c->id,min);
 				if( min < c->clientcount )
 					memmove(c->clientbuffer,c->clientbuffer+min,c->clientcount-min);
 				c->clientcount -= min;
@@ -335,6 +338,8 @@ static const struct option longoptions[] = {
 	{"denyextensions",	no_argument,	NULL,	'e'},
 	{"readwritedebug",	no_argument,	NULL,	'w'},
 	{"maxlistlength",required_argument,	NULL,	'm'},
+	{"outfile",	required_argument,	NULL,	'o'},
+	{"buffered",		no_argument,	NULL,	'b'},
 	{"interactive",		no_argument,	NULL,	'i'},
 	{"help",		no_argument,	NULL,	'h'},
 	{NULL,		0,			NULL,	0}
@@ -346,7 +351,8 @@ int main(int argc, char *argv[]) {
 	int c;
 	const char *out_authfile=NULL, *in_authfile = NULL;
 
-	while( (c=getopt_long(argc,argv,"d:D:f:F:cnskiewm:",longoptions,NULL)) != -1 ) {
+	out = stdout;
+	while( (c=getopt_long(argc,argv,"d:D:f:F:cnskiewm:o:b",longoptions,NULL)) != -1 ) {
 		switch( c ) {
 		 case 'd':
 			 out_displayname = optarg;
@@ -384,6 +390,24 @@ int main(int argc, char *argv[]) {
 		 case 'i':
 			 interactive = true;
 			 break;
+		 case 'b':
+			 buffered = true;
+			 break;
+		 case 'o':
+			 if( out != stdout ) {
+				 fprintf(stderr, "Multiple -o options!\n");
+				 exit(EXIT_FAILURE);
+			 }
+			 if( strcmp(optarg,"-") == 0 )
+				 out = stdout;
+			 else
+				 out = fopen(optarg,"a");
+			 if( out == NULL ) {
+				 fprintf(stderr, "Error opening %s: %s\n",
+						 optarg,strerror(errno));
+				 exit(EXIT_FAILURE);
+			 }
+			 break;
 	         case 'h':
 			 printf(
 "%s: Dump all X protocol data being tunneled from a fake X display to a real one.\n"
@@ -397,7 +421,9 @@ int main(int argc, char *argv[]) {
 "--keeprunning, -k		Keep running\n"
 "--denyextensions, -e		Fake unavailability of all extensions\n"
 "--readwritedebug, -w		Print amounts of data read/sent\n"
-"--maxlistlength, -m <maximum number of entries in each list shown>\n",
+"--maxlistlength, -m <maximum number of entries in each list shown>\n"
+"--outfile, -o <filename>	Output to file instead of stdout\n"
+"--buffered, -b			Do not output every line but only when buffer is full\n",
 argv[0]);
 			 exit(EXIT_SUCCESS);
 
@@ -445,11 +471,18 @@ argv[0]);
 		if( !copy_authentication(in_displayname,out_displayname,in_authfile,out_authfile) )
 			return -1;
 	}
+	setvbuf(out, NULL, buffered?_IOFBF:_IOLBF, BUFSIZ);
 	listener = listenForClients(in_displayname,in_family,in_display);
 	if( listener < 0 ) {
 		exit(EXIT_FAILURE);
 	}
 	r = mainqueue(listener);
 	close(listener);
+	if( out != stdout ) {
+		if( fclose(out) != 0 ) {
+			fprintf(stderr, "Error writing to output file!\n");
+			return EXIT_FAILURE;
+		}
+	}
 	return r;
 }

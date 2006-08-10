@@ -1,3 +1,5 @@
+2006-08-10
+	* add --outfile and --buffered command line options
 2006-07-24
 	* add support for XFree86-VidModeExtension extension
 2006-07-14
