@@ -23,7 +23,7 @@ Things still to do (any volunteers?):
 	   (currently only implemented are the base protocol and
 	    the following extensions:
 	    BIG-REQUESTS, MIT-SHM, RANDR, RENDER,
-	    SHAPE and XFree86-VidModeExtension)
+	    SHAPE, XFree86-VidModeExtension and XFree86-Bigfont)
 	- make it less verbose or even better allow to control
 	  verbosity.
 	- implement some filtering
