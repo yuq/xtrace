@@ -20,8 +20,10 @@ Things still to do (any volunteers?):
 	   offsets by hand and copy&pasted a lot, there might still be
 	   some errors).
 	- implement the common extensions.
-	   (currently only the base protocol and the BIG-REQUESTS,
-	    MIT-SHM, RANDR, RENDER and SHAPE extensions are implemented).
+	   (currently only implemented are the base protocol and
+	    the following extensions:
+	    BIG-REQUESTS, MIT-SHM, RANDR, RENDER,
+	    SHAPE and XFree86-VidModeExtension)
 	- make it less verbose or even better allow to control
 	  verbosity.
 	- implement some filtering
