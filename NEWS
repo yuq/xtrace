@@ -1,5 +1,6 @@
 new after 0.7:
 - XFree86-Bigfont extension added
+- several cleanups and beautifiers
 new after 0.6:
 - --outfile and --buffered options
 new after 0.5:
