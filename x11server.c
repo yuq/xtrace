@@ -58,7 +58,6 @@ int listenForClients(const char *displayname,int family,int display) {
 		address = (struct sockaddr*)&inaddr;
 		addresslen = sizeof(inaddr);
 	} else {
-		
 		msg = generateSocketName(&unaddr,display);
 		if( msg != NULL )  {
 			close(fd);

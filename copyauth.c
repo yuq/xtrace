@@ -112,7 +112,11 @@ bool copy_authentication(const char *fakedisplay,const char *display, const char
 	/* if this is not enough, copy manually */
 	char buffer[4096];
 	ssize_t bytesgot;
+#ifdef STUPIDCC
+	const char *name = NULL, *data = NULL;
+#else
 	const char *name,*data;
+#endif
 	int status;
 
 	if( strncmp(display,"localhost:",10) == 0 ) {

@@ -80,7 +80,7 @@ int connectToServer(const char *displayname,int family,const char *hostname,int 
 			fprintf(stderr,"Error calculating socket name for '%s': %s\n",displayname,msg);
 			return -1;
 		}
-		
+
 		if( connect(fd,(struct sockaddr*)&addr,sizeof(addr)) < 0 ) {
 			int e = errno;
 			close(fd);

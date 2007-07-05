@@ -37,8 +37,10 @@ static inline unsigned int padded(unsigned int s) {
 	return (s+3)&(~3);
 }
 
-#define CARD16(bigendian,buffer,ofs) ((bigendian)?(buffer[ofs]*256+buffer[ofs+1]):(buffer[ofs+1]*256+buffer[ofs]))
-#define CARD32(bigendian,buffer,ofs) ((bigendian)?(((buffer[ofs]*256+buffer[ofs+1])*256+buffer[ofs+2])*256+buffer[ofs+3]):(buffer[ofs]+256*(buffer[ofs+1]+256*(buffer[ofs+2]+256*buffer[ofs+3]))))
+#define U256 ((unsigned int)256)
+#define UL256 ((unsigned long)256)
+#define CARD16(bigendian,buffer,ofs) ((bigendian)?(buffer[ofs]*U256+buffer[ofs+1]):(buffer[ofs+1]*U256+buffer[ofs]))
+#define CARD32(bigendian,buffer,ofs) ((bigendian)?(((buffer[ofs]*U256+buffer[ofs+1])*UL256+buffer[ofs+2])*UL256+buffer[ofs+3]):(buffer[ofs]+UL256*(buffer[ofs+1]+UL256*(buffer[ofs+2]+U256*buffer[ofs+3]))))
 #define clientCARD32(ofs) CARD32(c->bigendian,c->clientbuffer,ofs)
 #define clientCARD16(ofs) CARD16(c->bigendian,c->clientbuffer,ofs)
 #define clientCARD8(ofs) c->clientbuffer[ofs]
@@ -179,7 +181,6 @@ static void print_bitfield(const char *name,const struct constant *constants, un
 			first = false;
 			fputs(c->name,out);
 		}
-		
 	}
 	if( first )
 		fputs(zeroname,out);
@@ -910,7 +911,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			break;
 		}
 		assert( p->type <= ft_BITMASK32);
-		
+
 		if( ((ofs+4)&~3) > len )
 			/* this field is missing */
 			continue;
@@ -1079,7 +1080,7 @@ static bool requestInternAtom(struct connection *c, bool pre, bool bigrequest UN
 	len = clientCARD16(4);
 	if( c->clientignore < (unsigned int)8 + len)
 		return false;
-	reply->data = newAtom(c->clientbuffer+8,len);
+	reply->data = newAtom((const char*)c->clientbuffer+8,len);
 	return false;
 }
 
@@ -1290,7 +1291,6 @@ static inline void print_server_reply(struct connection *c) {
 	}
 	fprintf(out,"%03d:>:%04x:%u: unexpected reply\n",
 			c->id, seq, c->serverignore);
-			
 }
 
 const char *errors[] = {
@@ -1526,7 +1526,7 @@ struct extension *find_extension(u8 *name,size_t len) {
 		if( len < extensions[i].namelen )
 			continue;
 // TODO: why only compare up the length here?
-		if( strncmp(extensions[i].name,name,len) == 0 )
+		if( strncmp((const char*)extensions[i].name,(const char*)name,len) == 0 )
 			return extensions + i;
 	}
 

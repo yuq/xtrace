@@ -311,7 +311,6 @@ static int mainqueue(int listener) {
 		}
 
 	}
-	
 	return EXIT_SUCCESS;
 }
 
