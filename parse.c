@@ -1266,7 +1266,7 @@ static inline void print_server_reply(struct connection *c) {
 	seq = serverCARD16(2);
 	for( lastp = &c->expectedreplies ;
 			(replyto=*lastp) != NULL ; lastp=&replyto->next){
-		if( (replyto->seq & 0xFFFFFFFF ) == seq ) {
+		if( (replyto->seq & 0xFFFF ) == seq ) {
 			bool ignore = false, dontremove = false;
 
 			assert( replyto->from != NULL);

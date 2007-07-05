@@ -2,6 +2,7 @@
 	* add support for XFree86-Bigfont extension
 	* show extension names even in requests from unknown extensions
 	* quiet some compiler warnings
+	* fix typo to mismatch replies after 65535 requests
 2006-08-10
 	* add --outfile and --buffered command line options
 2006-07-24
