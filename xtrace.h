@@ -27,10 +27,12 @@ extern struct connection {
 	struct expectedreply *expectedreplies;
 	uint64_t seq;
 	struct usedextension *usedextensions;
+	struct unknownextension *waiting, *unknownextensions;
 } *connections;
 void parse_server(struct connection *c);
 void parse_client(struct connection *c);
-void free_usedextensions(struct usedextension *e);
+void free_usedextensions(struct usedextension *);
+void free_unknownextensions(struct unknownextension *);
 bool copy_authentication(const char *fakedisplay,const char *display, const char *infile, const char *outfile);
 struct atom;
 struct atom *newAtom(const char *name, size_t len);
