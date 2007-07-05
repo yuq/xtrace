@@ -1305,6 +1305,8 @@ static inline void print_server_error(struct connection *c) {
 	unsigned int cmd = serverCARD8(1);
 	struct usedextension *u;
 	const char *errorname;
+	uint16_t seq;
+	struct expectedreply *replyto,**lastp;
 
 	if( cmd < NUM(errors) )
 		errorname = errors[cmd];
@@ -1322,14 +1324,24 @@ static inline void print_server_error(struct connection *c) {
 		}
 
 	}
-	fprintf(out,"%03d:>:%u:Error %hhu=%s: major=%u, minor=%u, bad=%u\n",
+	seq = (unsigned int)serverCARD16(2);
+	fprintf(out,"%03d:>:%x:Error %hhu=%s: major=%u, minor=%u, bad=%u\n",
 			c->id,
-			(int)serverCARD16(2),
+			seq,
 			cmd,
 			errorname,
 			(int)serverCARD16(8),
 			(int)serverCARD8(10),
 			(int)serverCARD32(4));
+	/* don't wait for any answer */
+	for( lastp = &c->expectedreplies ;
+			(replyto=*lastp) != NULL ; lastp=&replyto->next){
+		if( (replyto->seq & 0xFFFF ) == seq ) {
+			*lastp = replyto->next;
+			free(replyto);
+			return;
+		}
+	}
 }
 
 void parse_client(struct connection *c) {

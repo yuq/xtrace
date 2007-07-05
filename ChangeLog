@@ -3,6 +3,7 @@
 	* show extension names even in requests from unknown extensions
 	* quiet some compiler warnings
 	* fix typo to mismatch replies after 65535 requests
+	* don't wait for replies for requests that got an error
 2006-08-10
 	* add --outfile and --buffered command line options
 2006-07-24
