@@ -1644,8 +1644,8 @@ static const struct parameter parameterCreateCursor[] = {
 	{	22,	"back-red",	ft_CARD16,	NULL},
 	{	24,	"back-green",	ft_CARD16,	NULL},
 	{	26,	"back-blue",	ft_CARD16,	NULL},
-	{	28,	"x",		ft_CARD16,	NULL},
-	{	30,	"y",		ft_CARD16,	NULL},
+	{	28,	"x",		ft_UINT16,	NULL},
+	{	30,	"y",		ft_UINT16,	NULL},
 	EOP
 };
 

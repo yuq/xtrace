@@ -1,3 +1,5 @@
+2007-10-03
+	* make some x and y UINT instead of CARD
 2007-07-05
 	* add support for XFree86-Bigfont extension
 	* show extension names even in requests from unknown extensions

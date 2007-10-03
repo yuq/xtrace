@@ -185,8 +185,8 @@ static const struct parameter eparamKeymapNotify[] = {
 
 static const struct parameter eparamExpose[] = {
 	{	4,	"window",	ft_WINDOW,	NULL},
-	{	8,	"x",		ft_CARD16,	NULL},
-	{	10,	"y",		ft_CARD16,	NULL},
+	{	8,	"x",		ft_UINT16,	NULL},
+	{	10,	"y",		ft_UINT16,	NULL},
 	{	12,	"width",	ft_UINT16,	NULL},
 	{	14,	"height",	ft_UINT16,	NULL},
 	{	16,	"count",	ft_CARD16,	NULL},
@@ -195,8 +195,8 @@ static const struct parameter eparamExpose[] = {
 
 static const struct parameter eparamGraphicsExposure[] = {
 	{	4,	"drawable",	ft_DRAWABLE,	NULL},
-	{	8,	"x",		ft_CARD16,	NULL},
-	{	10,	"y",		ft_CARD16,	NULL},
+	{	8,	"x",		ft_UINT16,	NULL},
+	{	10,	"y",		ft_UINT16,	NULL},
 	{	12,	"width",	ft_UINT16,	NULL},
 	{	13,	"height",	ft_UINT16,	NULL},
 	{	14,	"minor-opcode",	ft_CARD16,	NULL},
