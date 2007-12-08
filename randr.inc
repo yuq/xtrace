@@ -233,8 +233,8 @@ static const struct parameter listRates[] = {
 static const struct parameter returnRandrGetScreenInfo[] = {
 	{	 1,	"rotations",		ft_RANDR_RR},
 	{	 8,	"root",			ft_Window},
-	{	12,	"timestamp",		ft_TIMESTAMP},
-	{	16,	"config-timestamp",	ft_TIMESTAMP},
+	{	12,	"timestamp",		ft_TIMESTAMP,	NULL},
+	{	16,	"config-timestamp",	ft_TIMESTAMP,	NULL},
 	{	20,	"nSizes",		ft_COUNT16,	NULL},
 	{	22,	"sizeID",		ft_CARD16,	NULL},
 	{	24,	"rotation",		ft_RANDR_RR},
@@ -248,7 +248,7 @@ static const struct parameter returnRandrGetScreenInfo[] = {
 static const struct parameter parameterRandrSetScreenConfig[] = {
 	{	 4,	"window",		ft_CARD32,	NULL},
 	{	 8,	"timestamp",		ft_TIMESTAMP,	c_curtime},
-	{	12,	"config-timestamp",	ft_TIMESTAMP},
+	{	12,	"config-timestamp",	ft_TIMESTAMP,	NULL},
 	{	16,	"sizei index",		ft_CARD16,	NULL},
 	{	18,	"rotation",		ft_RANDR_RR,},
 	{	20,	"rate",			ft_UINT16,	c_appropriate},
@@ -258,8 +258,8 @@ static const struct parameter parameterRandrSetScreenConfig[] = {
 
 static const struct parameter returnRandrSetScreenConfig[] = {
 	{	 1,	"status",		ft_ENUM8,	c_randr_status},
-	{	 8,	"timestamp",		ft_TIMESTAMP},
-	{	12,	"config-timestamp",	ft_TIMESTAMP},
+	{	 8,	"timestamp",		ft_TIMESTAMP,	NULL},
+	{	12,	"config-timestamp",	ft_TIMESTAMP,	NULL},
 	{	16,	"root",			ft_Window},
 	{	20,	"subpixelOrder",	ft_SUBPIXELORDER},
 	EOP
@@ -291,12 +291,12 @@ static const struct parameter parameterRandrSetScreenSize[] = {
 	EOP
 };
 static const struct parameter parameterRandrGetScreenResources[] = {
-	{	 4,	"window",	ft_WINDOW},
+	{	 4,	"window",	ft_WINDOW,	NULL},
 	EOP
 };
 static const struct parameter returnRandrGetScreenResources[] = {
-	{	  8,	"timestamp",	ft_TIMESTAMP},
-	{	 12,	"config-timestamp",	ft_TIMESTAMP},
+	{	  8,	"timestamp",	ft_TIMESTAMP,	NULL},
+	{	 12,	"config-timestamp",	ft_TIMESTAMP,	NULL},
 	{	 16,	"#CRTCs",	ft_COUNT16,	NULL},
 	{	 32,	"crtcs",	ft_LISTofCRTC},
 	{	 18,	"#outputs",	ft_COUNT16,	NULL},
@@ -310,11 +310,11 @@ static const struct parameter returnRandrGetScreenResources[] = {
 };
 static const struct parameter parameterRandrGetOutputInfo[] = {
 	{	 4,	"output",		ft_OUTPUT},
-	{	 8,	"config-timestamp",	ft_TIMESTAMP},
+	{	 8,	"config-timestamp",	ft_TIMESTAMP,	NULL},
 	EOP
 };
 static const struct parameter returnRandrGetOutputInfo[] = {
-	{	 8,	"timestamp",	ft_TIMESTAMP},
+	{	 8,	"timestamp",	ft_TIMESTAMP,	NULL},
 	{	12,	"current connected crtc",	ft_CRTC},
 	{	16,	"width[mm]",	ft_UINT32,	NULL},
 	{	20,	"height[mm]",	ft_UINT32,	NULL},
@@ -336,12 +336,12 @@ static const struct parameter parameterRandrListOutputProperties[] = {
 };
 static const struct parameter returnRandrListOutputProperties[] = {
 	{	 8,	"#atoms",	ft_COUNT16,	NULL},
-	{	32,	"atoms",	ft_LISTofATOM},
+	{	32,	"atoms",	ft_LISTofATOM,	NULL},
 	EOP
 };
 static const struct parameter parameterRandrQueryOutputProperty[] = {
 	{	 4,	"output",	ft_OUTPUT},
-	{	 8,	"property",	ft_ATOM},
+	{	 8,	"property",	ft_ATOM,	NULL},
 	EOP
 };
 static const struct parameter returnRandrQueryOutputProperty[] = {
@@ -353,17 +353,17 @@ static const struct parameter returnRandrQueryOutputProperty[] = {
 };
 static const struct parameter parameterRandrConfigureOutputProperty[] = {
 	{	 4,	"output",	ft_OUTPUT},
-	{	 8,	"property",	ft_ATOM},
+	{	 8,	"property",	ft_ATOM,	 NULL},
 	{	12,	"pending",	ft_BOOL},
 	{	13,	"range",	ft_BOOL},
-	{	16,	"valid values",	ft_LISTofUINT32},
+	{	16,	"valid values",	ft_LISTofUINT32, NULL},
 	EOP
 };
 static const struct parameter parameterRandrChangeOutputProperty[] = {
 	{	 4,	"output",	ft_OUTPUT},
-	{	 8,	"property",	ft_ATOM},
-	{	12,	"type",		ft_ATOM},
-	{	16,	"format",	ft_FORMAT8},
+	{	 8,	"property",	ft_ATOM,	NULL},
+	{	12,	"type",		ft_ATOM,	NULL},
+	{	16,	"format",	ft_FORMAT8,	NULL},
 	{	17,	"mode",		ft_ENUM8,	c_randr_changemode},
 	{	20,	"length",	ft_COUNT32,	NULL},
 	{	24,	"data",		ft_LISTofVALUE,	NULL},
@@ -395,7 +395,7 @@ static const struct parameter returnRandrGetOutputProperty[] = {
 static const struct parameter parameterRandrCreateMode[] = {
 	{	 4,	"window",	ft_WINDOW,	NULL},
 	{	 8,	"mode",		ft_MODEINFO},
-	{	40,	"mode name",	ft_STRING8},
+	{	40,	"mode name",	ft_STRING8,	NULL},
 	EOP
 };
 static const struct parameter returnRandrCreateMode[] = {
@@ -414,12 +414,12 @@ static const struct parameter parameterRandrAddOutputMode[] = {
 #define parameterRandrDeleteOutputMode parameterRandrAddOutputMode
 static const struct parameter parameterRandrGetCrtcInfo[] = {
 	{	 4,	"crtc",			ft_CRTC},
-	{	 8,	"config-timestamp",	ft_TIMESTAMP},
+	{	 8,	"config-timestamp",	ft_TIMESTAMP, NULL},
 	EOP
 };
 static const struct parameter returnRandrGetCrtcInfo[] = {
 	{	 1,	"status",	ft_RRCONFIGSTATUS},
-	{	 8,	"timestamp",	ft_TIMESTAMP},
+	{	 8,	"timestamp",	ft_TIMESTAMP, NULL},
 	{	12,	"x",		ft_INT16,	NULL},
 	{	14,	"y",		ft_INT16,	NULL},
 	{	16,	"width",	ft_UINT16,	NULL},
@@ -435,8 +435,8 @@ static const struct parameter returnRandrGetCrtcInfo[] = {
 };
 static const struct parameter parameterRandrSetCrtcConfig[] = {
 	{	 4,	"crtc",			ft_CRTC},
-	{	 8,	"timestamp",		ft_TIMESTAMP},
-	{	12,	"config timestamp",	ft_TIMESTAMP},
+	{	 8,	"timestamp",		ft_TIMESTAMP,	NULL},
+	{	12,	"config timestamp",	ft_TIMESTAMP,	NULL},
 	{	16,	"x",			ft_INT16,	NULL},
 	{	18,	"y",			ft_INT16,	NULL},
 	{	20,	"mode",			ft_MODE},
@@ -517,8 +517,8 @@ static const struct request extensionRANDR[] = {
 
 static const struct parameter eparamRandrScreenChangeNotify[] = {
 	{	 1,	"rotation",		ft_RANDR_RR},
-	{	 4,	"timestamp",		ft_TIMESTAMP},
-	{	 8,	"configTimestamp",	ft_TIMESTAMP},
+	{	 4,	"timestamp",		ft_TIMESTAMP,	NULL},
+	{	 8,	"configTimestamp",	ft_TIMESTAMP,	NULL},
 	{	12,	"root",			ft_Window},
 	{	16,	"window",		ft_Window},
 	{	20,	"size-id",		ft_CARD16,	NULL},
@@ -543,7 +543,7 @@ static const struct parameter eparamRandrChangeNotifyWindow[] = {
 };
 
 static const struct parameter eparamRandrChangeNotify0[] = {
-	{	 4,	"timestamp",		ft_TIMESTAMP},
+	{	 4,	"timestamp",		ft_TIMESTAMP,	NULL},
 	{	 8,	"request window",	ft_WINDOW,	NULL},
 	{	12,	"crtc affected",	ft_CRTC},
 	{	16,	"mode in use",		ft_MODE},
@@ -556,9 +556,9 @@ static const struct parameter eparamRandrChangeNotify0[] = {
 };
 
 static const struct parameter eparamRandrChangeNotify1[] = {
-	{	 4,	"timestamp",		ft_TIMESTAMP},
-	{	 8,	"config timestamp",	ft_TIMESTAMP},
-	{	12,	"request window",	ft_WINDOW},
+	{	 4,	"timestamp",		ft_TIMESTAMP,	NULL},
+	{	 8,	"config timestamp",	ft_TIMESTAMP,	NULL},
+	{	12,	"request window",	ft_WINDOW,	NULL},
 	{	16,	"output affected",	ft_OUTPUT},
 	{	20,	"crtc in use",		ft_CRTC},
 	{	24,	"mode in use",		ft_MODE},
@@ -569,10 +569,10 @@ static const struct parameter eparamRandrChangeNotify1[] = {
 };
 
 static const struct parameter eparamRandrChangeNotify2[] = {
-	{	 4,	"window",	ft_WINDOW},
+	{	 4,	"window",	ft_WINDOW,	NULL},
 	{	 8,	"output",	ft_OUTPUT},
-	{	12,	"atom",		ft_ATOM},
-	{	16,	"time",		ft_TIMESTAMP},
+	{	12,	"atom",		ft_ATOM,	NULL},
+	{	16,	"time",		ft_TIMESTAMP,	NULL},
 	{	20,	"state",	ft_ENUM8, c_randr_changenotifystate},
 	EOP
 };
