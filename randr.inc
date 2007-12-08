@@ -38,6 +38,45 @@
 * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 *
 * Author:  Jim Gettys, HP Labs, Hewlett-Packard, Inc.
+*
+* modified for Xrandr1.2 using /usr/share/doc/x11proto-randr-dev/randrproto.txt.gz:
+               The X Resize, Rotate and Reflect Extension
+                              Version 1.2
+                               2006-4-13
+
+                              Jim Gettys
+                           Jim.Gettys@hp.com
+                     Cambridge Research Laboratory
+                                HP Labs
+                        Hewlett Packard Company
+
+                             Keith Packard
+                        keith.packard@intel.com
+                     Open Source Technology Center
+                           Intel Corporation
+
+* from x11proto-randr-dev which states:
+Copyright © 2000 Compaq Computer Corporation
+Copyright © 2002 Hewlett-Packard Company
+Copyright © 2006 Intel Corporation
+
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that copyright
+notice and this permission notice appear in supporting documentation, and
+that the name of the copyright holders not be used in advertising or
+publicity pertaining to distribution of the software without specific,
+written prior permission.  The copyright holders make no representations
+about the suitability of this software for any purpose.  It is provided "as
+is" without express or implied warranty.
+
+THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+OF THIS SOFTWARE.
 */
 
 #define EOV {0, NULL, -1, NULL}
@@ -50,6 +89,8 @@ static const struct constant c_randr_notify[] = {
 #define ft_RANDR_NOTIFY ft_ENUM8,c_randr_notify
 static const struct constant c_randr_notify_mask[] = {
 	{(1L << 0),	"ScreenChangeNotifyMask"},
+	{(1L << 2),	"OutputChangeNotifyMask"},
+	{(1L << 3),	"OutputPropertyNotifyMask"},
 	EOC
 };
 #define ft_RANDR_NOTIFY_MASK ft_BITMASK8,c_randr_notify_mask
@@ -80,13 +121,80 @@ static const struct constant c_randr_status[] = {
 	{3,	"Failed"},
 	EOC
 };
+#define ft_RRCONFIGSTATUS	ft_ENUM8,	c_randr_status
 static const struct constant c_appropriate[] = {
 	{0,	"appropriate"},
 	EOC
 };
+static const struct constant c_randr_connection[] = {
+	{0,	"Connected"},
+	{1,     "Disconnected"},
+	{2,     "UnknownConnection"},
+	EOC
+};
+#define ft_CONNECTION	ft_CARD8,	c_randr_connection
+static const struct constant c_randr_modeflags[] = {
+	{0x00000001,	"HSyncPositive"},
+	{0x00000002,	"HSyncNegative"},
+	{0x00000004,	"VSyncPositive"},
+	{0x00000008,	"VSyncNegative"},
+	{0x00000010,	"Interlace"},
+	{0x00000020,	"DoubleScan"},
+	{0x00000040,	"CSync"},
+	{0x00000080,	"CSyncPositive"},
+	{0x00000100,	"CSyncNegative"},
+	{0x00000200,	"HSkewPresent"},
+	{0x00000400,	"BCast"},
+	{0x00000800,	"PixelMultiplex"},
+	{0x00001000,	"DoubleClock"},
+	{0x00002000,	"ClockDivideBy2"},
+	EOC
+};
+#define ft_SETofMODEFLAG  ft_BITMASK32, c_randr_modeflags
+
+static const struct constant c_randr_changemode[] = {
+	{0,	"Replace"},
+	{1,	"Prepend"},
+	{2,	"Append"},
+	EOC
+};
+
+static const struct constant c_randr_changenotifystate[] = {
+	{0,	"NewValue"},
+	{1,	"Deleted"},
+	EOC
+};
+
 #undef EOC
 #define EOP {0,NULL,0,NULL}
 #define LC(len) {len,NULL,0,NULL}
+
+#define ft_OUTPUT	ft_CARD32, NULL
+#define ft_LISTofOUTPUT	ft_LISTofCARD32, NULL
+#define ft_CRTC		ft_CARD32, NULL
+#define ft_LISTofCRTC	ft_LISTofCARD32, NULL
+#define ft_MODE		ft_CARD32, NULL
+#define ft_LISTofMODE	ft_LISTofCARD32, NULL
+
+#define ft_LISTofMODEINFO ft_LISTofStruct, (void*)randrModeInfo
+#define ft_MODEINFO	  ft_Struct, (void*)randrModeInfo
+static const struct parameter randrModeInfo[] = {
+	LC(32),
+	{	 0,	"id",			ft_CARD32,	NULL},
+	{	 4,	"width in pixels",	ft_UINT16,	NULL},
+	{	 6,	"height in pixels",	ft_UINT16,	NULL},
+	{	 8,	"dot clock",		ft_UINT32,	NULL},
+	{	 12,	"h sync start",		ft_UINT16,	NULL},
+	{	 14,	"h sync end",		ft_UINT16,	NULL},
+	{	 16,	"h total",		ft_UINT16,	NULL},
+	{	 18,	"h skew",		ft_UINT16,	NULL},
+	{	 20,	"v sync start",		ft_UINT16,	NULL},
+	{	 22,	"v sync end",		ft_UINT16,	NULL},
+	{	 24,	"v total",		ft_UINT16,	NULL},
+	{	 26,	"name length",		ft_UINT16,	NULL},
+	{	 28,	"mode flags",		ft_SETofMODEFLAG},
+	EOP
+};
 
 static const struct parameter parameterRandrQueryVersion[] = {
 	{	4,	"major-version",	ft_UINT32,	NULL},
@@ -125,8 +233,8 @@ static const struct parameter listRates[] = {
 static const struct parameter returnRandrGetScreenInfo[] = {
 	{	 1,	"rotations",		ft_RANDR_RR},
 	{	 8,	"root",			ft_Window},
-	{	12,	"timestamp",		ft_TIMESTAMP,	NULL},
-	{	16,	"config-timestamp",	ft_TIMESTAMP,	NULL},
+	{	12,	"timestamp",		ft_TIMESTAMP},
+	{	16,	"config-timestamp",	ft_TIMESTAMP},
 	{	20,	"nSizes",		ft_COUNT16,	NULL},
 	{	22,	"sizeID",		ft_CARD16,	NULL},
 	{	24,	"rotation",		ft_RANDR_RR},
@@ -138,10 +246,10 @@ static const struct parameter returnRandrGetScreenInfo[] = {
 };
 
 static const struct parameter parameterRandrSetScreenConfig[] = {
-	{	 4,	"drawable",		ft_CARD32,	NULL},
+	{	 4,	"window",		ft_CARD32,	NULL},
 	{	 8,	"timestamp",		ft_TIMESTAMP,	c_curtime},
-	{	12,	"config-timestamp",	ft_TIMESTAMP,	NULL},
-	{	16,	"size-id",		ft_CARD16,	NULL},
+	{	12,	"config-timestamp",	ft_TIMESTAMP},
+	{	16,	"sizei index",		ft_CARD16,	NULL},
 	{	18,	"rotation",		ft_RANDR_RR,},
 	{	20,	"rate",			ft_UINT16,	c_appropriate},
 	EOP
@@ -150,8 +258,8 @@ static const struct parameter parameterRandrSetScreenConfig[] = {
 
 static const struct parameter returnRandrSetScreenConfig[] = {
 	{	 1,	"status",		ft_ENUM8,	c_randr_status},
-	{	 8,	"timestamp",		ft_TIMESTAMP,	NULL},
-	{	12,	"config-timestamp",	ft_TIMESTAMP,	NULL},
+	{	 8,	"timestamp",		ft_TIMESTAMP},
+	{	12,	"config-timestamp",	ft_TIMESTAMP},
 	{	16,	"root",			ft_Window},
 	{	20,	"subpixelOrder",	ft_SUBPIXELORDER},
 	EOP
@@ -163,6 +271,214 @@ static const struct parameter parameterRandrSelectInput[] = {
 	EOP
 };
 
+static const struct parameter parameterRandrGetScreenSizeRange[] = {
+	{	 4,	"window",	ft_WINDOW,	NULL},
+	EOP
+};
+static const struct parameter returnRandrGetScreenSizeRange[] = {
+	{	  8,	"minWidth",	ft_CARD16,	NULL},
+	{	 10,	"minHeight",	ft_CARD16,	NULL},
+	{	 12,	"maxWidth",	ft_CARD16,	NULL},
+	{	 14,	"maxHeight",	ft_CARD16,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrSetScreenSize[] = {
+	{	  4,	"window",	ft_WINDOW,	NULL},
+	{	  8,	"width",	ft_UINT16,	NULL},
+	{	 10,	"height",	ft_UINT16,	NULL},
+	{	 12,	"width[mm]",	ft_UINT32,	NULL},
+	{	 16,	"height[mm]",	ft_UINT32,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrGetScreenResources[] = {
+	{	 4,	"window",	ft_WINDOW},
+	EOP
+};
+static const struct parameter returnRandrGetScreenResources[] = {
+	{	  8,	"timestamp",	ft_TIMESTAMP},
+	{	 12,	"config-timestamp",	ft_TIMESTAMP},
+	{	 16,	"#CRTCs",	ft_COUNT16,	NULL},
+	{	 32,	"crtcs",	ft_LISTofCRTC},
+	{	 18,	"#outputs",	ft_COUNT16,	NULL},
+	{ OFS_LATER,	"outputs",	ft_LISTofOUTPUT},
+	{	 20,	"#modeinfos",	ft_COUNT16,	NULL},
+	{ OFS_LATER,	"modeinfos",	ft_LISTofMODEINFO},
+	{	 22,	"total bytes in mode names",	ft_COUNT16,	NULL},
+	/* a way to seperate them would be nice: */
+	{ OFS_LATER,	"mode names",	ft_STRING8,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrGetOutputInfo[] = {
+	{	 4,	"output",		ft_OUTPUT},
+	{	 8,	"config-timestamp",	ft_TIMESTAMP},
+	EOP
+};
+static const struct parameter returnRandrGetOutputInfo[] = {
+	{	 8,	"timestamp",	ft_TIMESTAMP},
+	{	12,	"current connected crtc",	ft_CRTC},
+	{	16,	"width[mm]",	ft_UINT32,	NULL},
+	{	20,	"height[mm]",	ft_UINT32,	NULL},
+	{	24,	"connection",	ft_CONNECTION},
+	{	25,	"subpixel-order",	ft_SUBPIXELORDER},
+	{	26,	"#CRTCs",	ft_COUNT16,	NULL},
+	{	36,	"crtcs",	ft_LISTofCRTC},
+	{	28,	"#modes",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"modes",	ft_LISTofMODE},
+	{	30,	"preferred modes",ft_UINT16,	NULL},
+	{	32,	"clonecount",	ft_UINT16,	NULL},
+	{	34,	"length of name",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"name",		ft_STRING8,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrListOutputProperties[] = {
+	{	 4,	"output",	ft_OUTPUT},
+	EOP
+};
+static const struct parameter returnRandrListOutputProperties[] = {
+	{	 8,	"#atoms",	ft_COUNT16,	NULL},
+	{	32,	"atoms",	ft_LISTofATOM},
+	EOP
+};
+static const struct parameter parameterRandrQueryOutputProperty[] = {
+	{	 4,	"output",	ft_OUTPUT},
+	{	 8,	"property",	ft_ATOM},
+	EOP
+};
+static const struct parameter returnRandrQueryOutputProperty[] = {
+	{	 8,	"pending",	ft_BOOL},
+	{	 9,	"range",	ft_BOOL},
+	{	10,	"immutable",	ft_BOOL},
+	{	32,	"valid values",	ft_LISTofUINT32,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrConfigureOutputProperty[] = {
+	{	 4,	"output",	ft_OUTPUT},
+	{	 8,	"property",	ft_ATOM},
+	{	12,	"pending",	ft_BOOL},
+	{	13,	"range",	ft_BOOL},
+	{	16,	"valid values",	ft_LISTofUINT32},
+	EOP
+};
+static const struct parameter parameterRandrChangeOutputProperty[] = {
+	{	 4,	"output",	ft_OUTPUT},
+	{	 8,	"property",	ft_ATOM},
+	{	12,	"type",		ft_ATOM},
+	{	16,	"format",	ft_FORMAT8},
+	{	17,	"mode",		ft_ENUM8,	c_randr_changemode},
+	{	20,	"length",	ft_COUNT32,	NULL},
+	{	24,	"data",		ft_LISTofVALUE,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrDeleteOutputProperty[] = {
+	{	 4,	"output",	ft_OUTPUT},
+	{	 4,	"property",	ft_ATOM,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrGetOutputProperty[] = {
+	{	 4,	"output",	ft_OUTPUT},
+	{	 8,	"property",	ft_ATOM,	NULL},
+	{	12,	"type",		ft_ATOM,	c_any},
+	{	16,	"offset",	ft_CARD32,	NULL},
+	{	20,	"length",	ft_CARD32,	NULL},
+	{	24,	"delete",	ft_BOOL},
+	{	25,	"pending",	ft_BOOL},
+	EOP
+};
+static const struct parameter returnRandrGetOutputProperty[] = {
+	{	 0,	"format",	ft_FORMAT8,	NULL},
+	{	 8,	"type",		ft_ATOM,	c_none},
+	{	12,	"bytes-after",	ft_CARD32,	NULL},
+	{	16,	"length",	ft_COUNT32,	NULL},
+	{	32,	"value",	ft_LISTofVALUE, NULL},
+	EOP
+};
+static const struct parameter parameterRandrCreateMode[] = {
+	{	 4,	"window",	ft_WINDOW,	NULL},
+	{	 8,	"mode",		ft_MODEINFO},
+	{	40,	"mode name",	ft_STRING8},
+	EOP
+};
+static const struct parameter returnRandrCreateMode[] = {
+	{	 8,	"mode",		ft_MODE},
+	EOP
+};
+static const struct parameter parameterRandrDestroyMode[] = {
+	{	 4,	"mode",		ft_MODE},
+	EOP
+};
+static const struct parameter parameterRandrAddOutputMode[] = {
+	{	 4,	"output",	ft_OUTPUT},
+	{	 8,	"mode",		ft_MODE},
+	EOP
+};
+#define parameterRandrDeleteOutputMode parameterRandrAddOutputMode
+static const struct parameter parameterRandrGetCrtcInfo[] = {
+	{	 4,	"crtc",			ft_CRTC},
+	{	 8,	"config-timestamp",	ft_TIMESTAMP},
+	EOP
+};
+static const struct parameter returnRandrGetCrtcInfo[] = {
+	{	 1,	"status",	ft_RRCONFIGSTATUS},
+	{	 8,	"timestamp",	ft_TIMESTAMP},
+	{	12,	"x",		ft_INT16,	NULL},
+	{	14,	"y",		ft_INT16,	NULL},
+	{	16,	"width",	ft_UINT16,	NULL},
+	{	18,	"height",	ft_UINT16,	NULL},
+	{	20,	"mode",		ft_MODE},
+	{	24,	"current rr",	ft_RANDR_RR},
+	{	26,	"possible rr",	ft_RANDR_RR},
+	{	28,	"#outputs",	ft_COUNT16,	NULL},
+	{	32,	"outputs",	ft_LISTofOUTPUT},
+	{	30,	"#possible outputs",ft_COUNT16,	NULL},
+	{OFS_LATER,	"possible outputs", ft_LISTofOUTPUT},
+	EOP
+};
+static const struct parameter parameterRandrSetCrtcConfig[] = {
+	{	 4,	"crtc",			ft_CRTC},
+	{	 8,	"timestamp",		ft_TIMESTAMP},
+	{	12,	"config timestamp",	ft_TIMESTAMP},
+	{	16,	"x",			ft_INT16,	NULL},
+	{	18,	"y",			ft_INT16,	NULL},
+	{	20,	"mode",			ft_MODE},
+	{	24,	"rr",			ft_RANDR_RR},
+	{	28,	"outputs",		ft_LISTofOUTPUT},
+	EOP
+};
+static const struct parameter returnRandrSetCrtcConfig[] = {
+	{	 1,	"status",	ft_RRCONFIGSTATUS},
+	EOP
+};
+static const struct parameter parameterRandrGetCrtcGammaSize[] = {
+	{	 4,	"crtc",		ft_CRTC},
+	EOP
+};
+static const struct parameter returnRandrGetCrtcGammaSize[] = {
+	{	 8,	"size",		ft_CARD16,	NULL},
+	EOP
+};
+#define parameterRandrGetCrtcGamma parameterRandrGetCrtcGammaSize
+static const struct parameter returnRandrGetCrtcGamma[] = {
+	{	 8,	"size",	ft_COUNT16,	NULL},
+	/* is this really 22?? */
+	{	22,	"red",	ft_LISTofCARD16,	NULL},
+	{	 8,	"size",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"green",ft_LISTofCARD16,	NULL},
+	{	 8,	"size",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"blue",	ft_LISTofCARD16,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrSetCrtcGamma[] = {
+	{	 4,	"crtc",	ft_CRTC},
+	{	 8,	"size",	ft_COUNT16,	NULL},
+	{	12,	"red",	ft_LISTofCARD16,	NULL},
+	{	 8,	"size",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"green",ft_LISTofCARD16,	NULL},
+	{	 8,	"size",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"blue",	ft_LISTofCARD16,	NULL},
+	EOP
+};
+
+
 #undef EOV
 #define ra(a) { #a , parameter ## a , NULL,NULL,NULL}
 #define rb(a) { #a , parameter ## a , return ## a ,NULL,NULL}
@@ -173,7 +489,27 @@ static const struct request extensionRANDR[] = {
 	rb(RandrSetScreenConfig),
 	rc(RandrOldScreenChangeSelectInput),
 	ra(RandrSelectInput),
-	rb(RandrGetScreenInfo)
+	rb(RandrGetScreenInfo),
+	/* RandR 1.2 */
+	rb(RandrGetScreenSizeRange),
+	ra(RandrSetScreenSize),
+	rb(RandrGetScreenResources),
+	rb(RandrGetOutputInfo),
+	rb(RandrListOutputProperties),
+	rb(RandrQueryOutputProperty),
+	ra(RandrConfigureOutputProperty),
+	ra(RandrChangeOutputProperty),
+	ra(RandrDeleteOutputProperty),
+	rb(RandrGetOutputProperty),
+	rb(RandrCreateMode),
+	ra(RandrDestroyMode),
+	ra(RandrAddOutputMode),
+	ra(RandrDeleteOutputMode),
+	rb(RandrGetCrtcInfo),
+	rb(RandrSetCrtcConfig),
+	rb(RandrGetCrtcGammaSize),
+	rb(RandrGetCrtcGamma),
+	ra(RandrSetCrtcGamma)
 };
 #undef ra
 #undef rb
@@ -181,8 +517,8 @@ static const struct request extensionRANDR[] = {
 
 static const struct parameter eparamRandrScreenChangeNotify[] = {
 	{	 1,	"rotation",		ft_RANDR_RR},
-	{	 4,	"timestamp",		ft_TIMESTAMP,	NULL},
-	{	 8,	"configTimestamp",	ft_TIMESTAMP,	NULL},
+	{	 4,	"timestamp",		ft_TIMESTAMP},
+	{	 8,	"configTimestamp",	ft_TIMESTAMP},
 	{	12,	"root",			ft_Window},
 	{	16,	"window",		ft_Window},
 	{	20,	"size-id",		ft_CARD16,	NULL},
@@ -194,12 +530,67 @@ static const struct parameter eparamRandrScreenChangeNotify[] = {
 	EOP
 };
 
+static const struct parameter eparamRandrChangeNotifyWindow[] = {
+	{	 8,	"request window",	ft_WINDOW,	NULL},
+	{	12,	"crtc affected",	ft_CRTC},
+	{	16,	"mode in use",		ft_MODE},
+	{	20,	"new rr",		ft_RANDR_RR},
+	{	24,	"x",			ft_INT16,	NULL},
+	{	26,	"y",			ft_INT16,	NULL},
+	{	28,	"width",		ft_UINT16,	NULL},
+	{	30,	"height",		ft_UINT16,	NULL},
+	EOP
+};
+
+static const struct parameter eparamRandrChangeNotify0[] = {
+	{	 4,	"timestamp",		ft_TIMESTAMP},
+	{	 8,	"request window",	ft_WINDOW,	NULL},
+	{	12,	"crtc affected",	ft_CRTC},
+	{	16,	"mode in use",		ft_MODE},
+	{	20,	"new rr",		ft_RANDR_RR},
+	{	24,	"x",			ft_INT16,	NULL},
+	{	26,	"y",			ft_INT16,	NULL},
+	{	28,	"width",		ft_UINT16,	NULL},
+	{	30,	"height",		ft_UINT16,	NULL},
+	EOP
+};
+
+static const struct parameter eparamRandrChangeNotify1[] = {
+	{	 4,	"timestamp",		ft_TIMESTAMP},
+	{	 8,	"config timestamp",	ft_TIMESTAMP},
+	{	12,	"request window",	ft_WINDOW},
+	{	16,	"output affected",	ft_OUTPUT},
+	{	20,	"crtc in use",		ft_CRTC},
+	{	24,	"mode in use",		ft_MODE},
+	{	28,	"rr",			ft_RANDR_RR},
+	{	30,	"connection status",	ft_CONNECTION},
+	{	31,	"subpixel order",	ft_SUBPIXELORDER},
+	EOP
+};
+
+static const struct parameter eparamRandrChangeNotify2[] = {
+	{	 4,	"window",	ft_WINDOW},
+	{	 8,	"output",	ft_OUTPUT},
+	{	12,	"atom",		ft_ATOM},
+	{	16,	"time",		ft_TIMESTAMP},
+	{	20,	"state",	ft_ENUM8, c_randr_changenotifystate},
+	EOP
+};
+
+static const struct parameter eparamRandrChangeNotify1dot2[] = {
+	{	 1,	"\0",	ft_IF8,	(void*)eparamRandrChangeNotify0 },
+	{	 1,	"\1",	ft_IF8,	(void*)eparamRandrChangeNotify1 },
+	{	 1,	"\2",	ft_IF8,	(void*)eparamRandrChangeNotify2 },
+	EOP
+};
+
 #define ev(name) { #name , eparam ## name }
 static const struct event eventsRANDR[] = {
 	ev(RandrScreenChangeNotify),
+	ev(RandrChangeNotify1dot2),
 };
 #undef ev
 
-static const char *errorsRANDR[] = { };
+static const char *errorsRANDR[] = { "BadOutput", "BadCrtc", "BadMode" };
 
 #undef EOP
