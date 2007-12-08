@@ -1513,6 +1513,7 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 #include "bigrequest.inc"
 #include "render.inc"
 #include "randr.inc"
+#include "xinerama.inc"
 #include "mitshm.inc"
 #include "xf86vidmode.inc"
 #include "xf86bigfont.inc"
@@ -1524,6 +1525,7 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 struct extension extensions[] = {
 	EXT("MIT-SHM",MITSHM),
 	EXT("RANDR",RANDR),
+	EXT("XINERAMA",XINERAMA),
 	EXT("RENDER",RENDER),
 	EXT("SHAPE",SHAPE),
 	EXT("BIG-REQUESTS",BIGREQUEST),

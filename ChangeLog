@@ -1,5 +1,6 @@
 2007-12-08
 	* add support for XRANDR 1.2
+	* add support for XINERAMA extension
 2007-10-03
 	* make some x and y UINT instead of CARD
 2007-07-05

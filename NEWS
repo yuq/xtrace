@@ -1,5 +1,6 @@
 new after 0.8.1:
 - RANDR 1.2 support
+- XINERAMA extension supported
 new after 0.8:
 - minor beautifiers
 new after 0.7:
