@@ -366,7 +366,7 @@ static const struct parameter parameterRandrChangeOutputProperty[] = {
 	{	16,	"format",	ft_FORMAT8,	NULL},
 	{	17,	"mode",		ft_ENUM8,	c_randr_changemode},
 	{	20,	"length",	ft_COUNT32,	NULL},
-	{	24,	"data",		ft_LISTofVALUE,	NULL},
+	{	24,	"data",		ft_LISTofFormat,	NULL},
 	EOP
 };
 static const struct parameter parameterRandrDeleteOutputProperty[] = {
@@ -385,11 +385,11 @@ static const struct parameter parameterRandrGetOutputProperty[] = {
 	EOP
 };
 static const struct parameter returnRandrGetOutputProperty[] = {
-	{	 0,	"format",	ft_FORMAT8,	NULL},
+	{	 1,	"format",	ft_FORMAT8,	NULL},
 	{	 8,	"type",		ft_ATOM,	c_none},
 	{	12,	"bytes-after",	ft_CARD32,	NULL},
 	{	16,	"length",	ft_COUNT32,	NULL},
-	{	32,	"value",	ft_LISTofVALUE, NULL},
+	{	32,	"value",	ft_LISTofFormat, NULL},
 	EOP
 };
 static const struct parameter parameterRandrCreateMode[] = {
