@@ -276,10 +276,10 @@ static const struct parameter parameterRandrGetScreenSizeRange[] = {
 	EOP
 };
 static const struct parameter returnRandrGetScreenSizeRange[] = {
-	{	  8,	"minWidth",	ft_CARD16,	NULL},
-	{	 10,	"minHeight",	ft_CARD16,	NULL},
-	{	 12,	"maxWidth",	ft_CARD16,	NULL},
-	{	 14,	"maxHeight",	ft_CARD16,	NULL},
+	{	  8,	"minWidth",	ft_UINT16,	NULL},
+	{	 10,	"minHeight",	ft_UINT16,	NULL},
+	{	 12,	"maxWidth",	ft_UINT16,	NULL},
+	{	 14,	"maxHeight",	ft_UINT16,	NULL},
 	EOP
 };
 static const struct parameter parameterRandrSetScreenSize[] = {
