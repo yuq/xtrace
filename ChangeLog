@@ -1,3 +1,5 @@
+2007-12-10
+	* fix ROUND_32 (thanks to Julien Cristau)
 2007-12-09
 	* fix bug in RANDR 1.2 parsing (thanks to Julien Cristau)
 2007-12-08

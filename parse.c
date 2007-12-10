@@ -817,7 +817,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 
 		switch( p->type ) {
 		 case ft_LASTMARKER:
-			 if( ofs == ROUND_32 )
+			 if( p->offse == ROUND_32 )
 				 lastofs = (lastofs+3)& ~3;
 			 else
 				 lastofs = ofs;
