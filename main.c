@@ -503,7 +503,7 @@ argv[0]);
 		}
 	}
 	if( in_displayname == NULL ) {
-		in_displayname = getenv("INDISPLAY");
+		in_displayname = getenv("FAKEDISPLAY");
 		if( in_displayname == NULL ) {
 			fprintf(stderr,"No display name to create specified, trying :9\n");
 			in_displayname = ":9";
