@@ -1,22 +1,36 @@
-.TH XTRACE 1 "08 June 2006" "xtrace" XTRACE
+.TH XTRACE 1 "12 February 2008" "xtrace" XTRACE
 .SH NAME
 xtrace \- trace communication between X11 client and server
 .SH SYNOPSIS
-.B xtrace \fR[\fP \fIoptions\fP \fR]\fP \-s
-
-.B xtrace \fR[\fP \fIoptions\fP \fR]\fP \-k
+.BR xtrace " [ " \fIoptions\fP " ] [ " \-s " | " \-k " ] [ [ " \-W " ] [ " -- " ] " "\fIcommand args ...\fP" " ]"
 .SH DESCRIPTION
 Xtrace fakes an X server and forwards all connections to
 a real X server, displaying the communication between clients
 in (well, theoretically) human readable form.
-
+If a command is given,
+.B xtrace
+executes the named command with
+.B $DISPLAY
+set to the faked X server. If that command exits before any connections
+are made,
+.B xtrace
+exits immediately unless
+.B \-W
+is specified.
 .SH OPTIONS
 .TP
 .B \-s \fR|\fP \-\-stopwhendone \fR(default)\fP
 Terminate when all forwarded clients have disconnected.
+(Or when a program was run once the program has finished
+and all connections are closed).
 .TP
 .B \-k \fR|\fP \-\-keeprunning
 If all clients disconnected, wait for new ones to connect.
+.TP
+.B \-W \fR|\fP \-\-waitforclient
+Do not stop when the started program terminates before any connection
+was made.
+(Might be necessary if the program forks to background).
 .TP
 .B \-d \fIname\fP \fR|\fP \-\-display \fIname\fP
 Forward connections to the X server specified by \fIname\fP

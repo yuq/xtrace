@@ -1,3 +1,6 @@
+2008-02-11
+	* allow to give a program to start
+	(based on patch supplied by Bruce Guenter) 
 2007-12-10
 	* fix ROUND_32 (thanks to Julien Cristau)
 2007-12-09

@@ -1,3 +1,5 @@
+
+
 extern size_t authdata_len;
 extern char *authdata;
 extern FILE *out;
@@ -42,7 +44,11 @@ void internAtom(struct connection *c, uint32_t atom, struct atom *data);
 extern bool denyallextensions;
 extern size_t maxshownlistlen;
 
+#ifdef __GNUC__
 #define UNUSED __attribute__ ((unused))
+#else
+#define UNUSED
+#endif
 
 #ifndef HAVE_STRNDUP
 char *strndup(const char *,size_t);

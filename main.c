@@ -1,5 +1,5 @@
 /*  This file is part of "xtrace"
- *  Copyright (C) 2005 Bernhard R. Link
+ *  Copyright (C) 2005, 2007 Bernhard R. Link
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
  *  published by the Free Software Foundation.
@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/select.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <getopt.h>
 
@@ -36,6 +37,7 @@ FILE *out;
 bool readwritedebug = false;
 bool copyauth = true;
 bool stopwhennone = true;
+bool waitforclient = false;
 bool denyallextensions = false;
 bool interactive = false;
 static bool buffered = false;
@@ -47,6 +49,8 @@ int out_family,out_display,out_screen;
 const char *in_displayname = NULL;
 char *in_protocol,*in_hostname;
 int in_family,in_display,in_screen;
+static volatile bool caught_child_signal = false;
+static pid_t child_pid = 0;
 
 struct connection *connections = NULL ;
 
@@ -65,6 +69,7 @@ static void acceptConnection(int listener) {
 		free(c);
 		return;
 	}
+	waitforclient = false;
 	fprintf(stderr,"Got connection from %s\n",c->from);
 	c->server_fd = connectToServer(out_displayname,out_family,out_hostname,out_display);
 	if( c->server_fd < 0 ) {
@@ -80,10 +85,11 @@ static void acceptConnection(int listener) {
 
 
 static int mainqueue(int listener) {
-	int n,r;
+	int n, r = 0;
 	fd_set readfds,writefds,exceptfds;
 	struct connection *c;
 	unsigned int allowsent = 1;
+	int status;
 
 	while( 1 ) {
 		n =  listener+1;
@@ -134,7 +140,8 @@ static int mainqueue(int listener) {
 					connections = c->next;
 					free(c);
 					c = connections;
-					if( connections == NULL && stopwhennone )
+					if( connections == NULL &&
+				            ( stopwhennone || child_pid != 0 ))
 						return EXIT_SUCCESS;
 					continue;
 				}
@@ -145,7 +152,30 @@ static int mainqueue(int listener) {
 			FD_SET(0,&readfds);
 		}
 
+		if( child_pid != 0 && (r == -1 || caught_child_signal) ) {
+			caught_child_signal = false;
+			if( waitpid(child_pid,&status,WNOHANG) == child_pid ) {
+				child_pid = 0;
+				if( connections == NULL && !waitforclient ) {
+					/* TODO: instead wait a bit before
+					 * terminating? */
+					if( WIFEXITED(status) )
+						return WEXITSTATUS(status);
+					else
+						return WTERMSIG(status) + 128;
+				}
+			}
+		}
 		r = select(n,&readfds,&writefds,&exceptfds,NULL);
+		if( r == -1 ) {
+			int e = errno;
+
+			if( e != 0 && e != EINTR ) {
+				fprintf(stderr,"Error %d in select: %s\n",
+						e, strerror(e));
+			}
+			continue;
+		}
 		for( c = connections ; c != NULL ; c = c->next ) {
 			if( interactive && FD_ISSET(0,&readfds) ) {
 				char buffer[201];
@@ -314,6 +344,23 @@ static int mainqueue(int listener) {
 	return EXIT_SUCCESS;
 }
 
+static void startClient(char *argv[]) {
+	child_pid = fork();
+	if( child_pid == -1 ) {
+		fprintf(stderr, "Error forking: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	if( child_pid == 0 ) {
+		if (setenv("DISPLAY", in_displayname, 1) != 0) {
+			fprintf(stderr,"Error setting $DISPLAY: %s\n", strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+		execvp(argv[0], argv);
+		fprintf(stderr, "Could not exec '%s': %s\n", argv[0], strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+}
+
 #ifndef HAVE_STRNDUP
 /* That's not the best possible strndup implementation, but it suffices for what
  * it is used here */
@@ -334,6 +381,7 @@ static const struct option longoptions[] = {
 	{"newauthfile",	required_argument,	NULL,	'F'},
 	{"copyauthentication",	no_argument,	NULL,	'c'},
 	{"nocopyauthentication",no_argument,	NULL,	'n'},
+	{"waitforclient",	no_argument,	NULL,	'w'},
 	{"stopwhendone",	no_argument,	NULL,	's'},
 	{"keeprunning",		no_argument,	NULL,	'k'},
 	{"denyextensions",	no_argument,	NULL,	'e'},
@@ -346,6 +394,11 @@ static const struct option longoptions[] = {
 	{NULL,		0,			NULL,	0}
 };
 
+static void catchsig(int signal UNUSED)
+{
+  caught_child_signal = true;
+}
+
 int main(int argc, char *argv[]) {
 	int listener,r;
 	const char *msg;
@@ -353,7 +406,7 @@ int main(int argc, char *argv[]) {
 	const char *out_authfile=NULL, *in_authfile = NULL;
 
 	out = stdout;
-	while( (c=getopt_long(argc,argv,"d:D:f:F:cnskiewm:o:b",longoptions,NULL)) != -1 ) {
+	while( (c=getopt_long(argc,argv,"+d:D:f:F:cnWskiewm:o:b",longoptions,NULL)) != -1 ) {
 		switch( c ) {
 		 case 'd':
 			 out_displayname = optarg;
@@ -372,6 +425,9 @@ int main(int argc, char *argv[]) {
 			 break;
 		 case 'n':
 			 copyauth = false;
+			 break;
+		 case 'W':
+			 waitforclient = true;
 			 break;
 		 case 's':
 			 stopwhennone = true;
@@ -412,12 +468,14 @@ int main(int argc, char *argv[]) {
 	         case 'h':
 			 printf(
 "%s: Dump all X protocol data being tunneled from a fake X display to a real one.\n"
+"usage: xtrace [options] [[--] command args ...]\n"
 "--display, -d <display to connect to>\n"
 "--fakedisplay, -D <display to fake>\n"
 "--copyauthentication, -c	Copy credentials\n"
 "--nocopyauthentication, -n	Do not copy credentials\n"
 "--authfile, -f <file instead of ~/.Xauthority to get credentials from>\n"
 "--newauthfile, -F <file instead of ~/.Xauthority to put credentials in>\n"
+"--waitforclient, -W		wait for connection even if command terminates\n"
 "--stopwhendone, -s		Return when last client disconnects\n"
 "--keeprunning, -k		Keep running\n"
 "--denyextensions, -e		Fake unavailability of all extensions\n"
@@ -434,10 +492,6 @@ argv[0]);
 			 exit(EXIT_FAILURE);
 		}
 
-	}
-	if( optind < argc && strcmp(argv[optind],"--") != 0 ) {
-		fprintf(stderr,"Unexpected argument: '%s'\n",argv[optind+1]);
-		exit(EXIT_FAILURE);
 	}
 
 	signal(SIGPIPE,SIG_IGN);
@@ -476,6 +530,10 @@ argv[0]);
 	listener = listenForClients(in_displayname,in_family,in_display);
 	if( listener < 0 ) {
 		exit(EXIT_FAILURE);
+	}
+	if( optind < argc && strcmp(argv[optind],"--") != 0 ) {
+		signal(SIGCHLD, catchsig);
+		startClient(argv + optind);
 	}
 	r = mainqueue(listener);
 	close(listener);
