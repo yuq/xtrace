@@ -1,5 +1,5 @@
 2008-08-01
-	* add support for DPMS extension
+	* add support for DPMS and MIT-SCREEN-SAVER extensions
 	* print GetScreenSaver timeout and interval in decimal
 2008-02-11
 	* allow to give a program to start
