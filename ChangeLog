@@ -1,5 +1,6 @@
 2008-08-01
 	* add support for DPMS extension
+	* print GetScreenSaver timeout and interval in decimal
 2008-02-11
 	* allow to give a program to start
 	(based on patch supplied by Bruce Guenter)

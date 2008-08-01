@@ -1819,8 +1819,8 @@ static const struct parameter parameterSetScreenSaver[] = {
 #define parameterGetScreenSaver parameterNone
 
 static const struct parameter returnGetScreenSaver[] = {
-	{	8,	"timeout",		ft_CARD16,	NULL},
-	{	10,	"interval",		ft_CARD16,	NULL},
+	{	8,	"timeout",		ft_UINT16,	NULL},
+	{	10,	"interval",		ft_UINT16,	NULL},
 	{	12,	"prefer-blanking",	ft_ENUM8,	c_nyd},
 	{	13,	"allow-exposures",	ft_ENUM8,	c_nyd},
 	EOP
