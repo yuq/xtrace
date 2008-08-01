@@ -1,3 +1,5 @@
+new after 0.9.1:
+- DPMS extension support
 new after 0.9.0:
 - bugfix in new RANDR rules
 new after 0.8.1:
