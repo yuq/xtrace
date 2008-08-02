@@ -1,5 +1,5 @@
 new after 0.9.1:
-- DPMS and MIT-SCREEN-SAVER extension support
+- XFIXES, DAMAGE, DPMS and MIT-SCREEN-SAVER extension support
 - start program given at command line
 new after 0.9.0:
 - bugfix in new RANDR rules

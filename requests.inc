@@ -1209,6 +1209,7 @@ static const struct parameter listRECTANGLE[] = {
 	EOP
 };
 #define ft_LISTofRECTANGLE ft_LISTofStruct,	(void*)listRECTANGLE
+#define ft_RECTANGLE ft_Struct,	(void*)listRECTANGLE
 
 
 static const struct parameter parameterSetClipRectangles[] = {

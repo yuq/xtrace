@@ -1519,6 +1519,8 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 #include "xf86bigfont.inc"
 #include "dpms.inc"
 #include "saver.inc"
+#include "fixes.inc"
+#include "damage.inc"
 
 #define EXT(a,b) { a , sizeof(a)-1, \
 	extension ## b, NUM(extension ## b), \
@@ -1534,6 +1536,8 @@ struct extension extensions[] = {
 	EXT("XFree86-VidModeExtension",XF86VidMode),
 	EXT("XFree86-Bigfont",XF86Bigfont),
 	EXT("DPMS",DPMS),
+	EXT("XFIXES",FIXES),
+	EXT("DAMAGE",DAMAGE),
 	EXT("MIT-SCREEN-SAVER",Saver)
 };
 #undef EXT

@@ -1,3 +1,5 @@
+2008-08-02
+	* add support for XFIXES and DAMAGE extensions
 2008-08-01
 	* add support for DPMS and MIT-SCREEN-SAVER extensions
 	* print GetScreenSaver timeout and interval in decimal
