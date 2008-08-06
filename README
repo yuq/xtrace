@@ -1,5 +1,5 @@
-		XTRACE 0.9
-		----------
+		XTRACE 0.10
+		-----------
 
 What strace is for system calls, xtrace is for X11 connections:
 you hook it between one or more X11 clients and an X server and
@@ -22,8 +22,9 @@ Things still to do (any volunteers?):
 	- implement the common extensions.
 	   (currently only implemented are the base protocol and
 	    the following extensions:
-	    BIG-REQUESTS, MIT-SHM, RANDR, RENDER, XINERAMA
-	    SHAPE, XFree86-VidModeExtension and XFree86-Bigfont)
+	    BIG-REQUESTS, DAMAGE, DPMS, MIT-SCREEN-SAVER, MIT-SHM,
+	    RANDR, RENDER, SHAPE, XFIXES, XFree86-VidModeExtension,
+	    XFree86-Bigfont and XINERAMA)
 	- make it less verbose or even better allow to control
 	  verbosity.
 	- implement some filtering
