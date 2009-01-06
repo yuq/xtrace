@@ -633,7 +633,7 @@ static const struct value valuesConfigureWindow[] = {
 static const struct parameter parameterConfigureWindow[] = {
 	{	4,	"window",	ft_WINDOW,	NULL},
 	{	8,	"value-mask",	ft_STORE16,	NULL},
-	{	8,	"values",	ft_LISTofVALUE,(void*)valuesConfigureWindow},
+	{	12,	"values",	ft_LISTofVALUE,(void*)valuesConfigureWindow},
 	EOP
 };
 
