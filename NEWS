@@ -1,5 +1,6 @@
 new after 0.10.0:
-- bugfix: correct ConfigureWindow values now
+- bugfix: correct field offsets in ConfigureWindow,
+	  RandrDeleteOutputProperty and XF86BigfontQueryVersion.
 new after 0.9.1:
 - XFIXES, DAMAGE, DPMS and MIT-SCREEN-SAVER extension support
 - start program given at command line

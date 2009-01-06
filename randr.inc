@@ -371,7 +371,7 @@ static const struct parameter parameterRandrChangeOutputProperty[] = {
 };
 static const struct parameter parameterRandrDeleteOutputProperty[] = {
 	{	 4,	"output",	ft_OUTPUT},
-	{	 4,	"property",	ft_ATOM,	NULL},
+	{	 8,	"property",	ft_ATOM,	NULL},
 	EOP
 };
 static const struct parameter parameterRandrGetOutputProperty[] = {

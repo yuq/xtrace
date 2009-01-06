@@ -63,7 +63,7 @@ static const struct parameter returnXF86BigfontQueryVersion[] = {
 	{	 1,	"capabilities",		ft_xf86bigfont_capabilities},
 	{	12,	"uid",			ft_UINT32,	NULL},
 	{	16,	"gid",			ft_UINT32,	NULL},
-	{	16,	"signature",		ft_UINT32,	NULL},
+	{	20,	"signature",		ft_UINT32,	NULL},
 	EOP
 };
 
