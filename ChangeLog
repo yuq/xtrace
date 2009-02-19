@@ -3,6 +3,7 @@
 	* (cosmetic) use ft_RRCONFIGSTATUS for RRSetScreenConfig reply
 	* fix decoding of RRGetOutputInfo reply
 	* display FIXED as fixed-point numbers
+	* RandR 1.3 support
 2009-01-06
 	* fix decoding of ConfigureWindow request
 	(thanks to Yann Droneaud)

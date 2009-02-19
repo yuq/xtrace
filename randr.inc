@@ -196,6 +196,13 @@ static const struct parameter randrModeInfo[] = {
 	EOP
 };
 
+#define ft_TRANSFORM	ft_Struct,	(void*)randr_transform
+static const struct parameter randr_transform[] = {
+	LC(36),
+	{	0,	"matrix",		ft_LISTofFIXED,	NULL},
+	EOP
+};
+
 static const struct parameter parameterRandrQueryVersion[] = {
 	{	4,	"major-version",	ft_UINT32,	NULL},
 	{	8,	"minor-version",	ft_UINT32,	NULL},
@@ -290,6 +297,9 @@ static const struct parameter parameterRandrSetScreenSize[] = {
 	{	 16,	"height[mm]",	ft_UINT32,	NULL},
 	EOP
 };
+
+#define parameterRandrGetScreenResourcesCurrent parameterRandrGetScreenResources
+#define returnRandrGetScreenResourcesCurrent returnRandrGetScreenResources
 static const struct parameter parameterRandrGetScreenResources[] = {
 	{	 4,	"window",	ft_WINDOW,	NULL},
 	EOP
@@ -478,7 +488,91 @@ static const struct parameter parameterRandrSetCrtcGamma[] = {
 	{OFS_LATER,	"blue",	ft_LISTofCARD16,	NULL},
 	EOP
 };
-
+static const struct parameter parameterRandrSetCrtcTransform[] = {
+	{	 4,	"crtc",			ft_CRTC},
+	{	 8,	"transform",		ft_TRANSFORM},
+	{	44,	"filter length",	ft_COUNT16,	NULL},
+	{	48,	"filter name",		ft_STRING8,	NULL},
+	ROUND,
+	{OFS_LATER,	"filter params",	ft_LISTofFIXED,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrGetCrtcTransform[] = {
+	{	 4,	"crtc",		ft_CRTC},
+	EOP
+};
+static const struct parameter returnRandrGetCrtcTransform[] = {
+	{	 8,	"pending transform",		ft_TRANSFORM},
+	{	44,	"has transforms",		ft_BOOL},
+	{	48,	"current transform",		ft_TRANSFORM},
+	{	88,	"pending filter name length",	ft_COUNT16,	NULL},
+	{	96,	"pending filter name",		ft_STRING8,	NULL},
+	ROUND,
+	{	90,	"pending filter num params",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"pending filter params",	ft_LISTofFIXED,	NULL},
+	{	92,	"current filter name length",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"current filter name",		ft_STRING8,	NULL},
+	ROUND,
+	{	94,	"current filter num params",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"current filter params",	ft_LISTofFIXED,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrGetPanning[] = {
+	{	4,	"crtc",		ft_CRTC},
+	EOP
+};
+static const struct parameter returnRandrGetPanning[] = {
+	{	 1,	"status",	ft_RRCONFIGSTATUS},
+	{	 8,	"timestamp",	ft_TIMESTAMP,	NULL},
+	{	12,	"left",		ft_UINT16,	NULL},
+	{	14,	"top",		ft_UINT16,	NULL},
+	{	16,	"width",	ft_UINT16,	NULL},
+	{	18,	"height",	ft_UINT16,	NULL},
+	{	20,	"track_left",	ft_UINT16,	NULL},
+	{	22,	"track_top",	ft_UINT16,	NULL},
+	{	24,	"track_width",	ft_UINT16,	NULL},
+	{	26,	"track_height",	ft_UINT16,	NULL},
+	{	28,	"border_left",	ft_INT16,	NULL},
+	{	30,	"border_top",	ft_INT16,	NULL},
+	{	32,	"border_right",	ft_INT16,	NULL},
+	{	34,	"border_bottom",ft_INT16,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrSetPanning[] = {
+	{	 4,	"crtc",		ft_CRTC},
+	{	 8,	"timestamp",	ft_TIMESTAMP,	NULL},
+	{	12,	"left",		ft_UINT16,	NULL},
+	{	14,	"top",		ft_UINT16,	NULL},
+	{	16,	"width",	ft_UINT16,	NULL},
+	{	18,	"height",	ft_UINT16,	NULL},
+	{	20,	"track_left",	ft_UINT16,	NULL},
+	{	22,	"track_top",	ft_UINT16,	NULL},
+	{	24,	"track_width",	ft_UINT16,	NULL},
+	{	26,	"track_height",	ft_UINT16,	NULL},
+	{	28,	"border_left",	ft_INT16,	NULL},
+	{	30,	"border_top",	ft_INT16,	NULL},
+	{	32,	"border_right",	ft_INT16,	NULL},
+	{	34,	"border_bottom",ft_INT16,	NULL},
+	EOP
+};
+static const struct parameter returnRandrSetPanning[] = {
+	{	 1,	"status",	ft_RRCONFIGSTATUS},
+	{	 8,	"timestamp",	ft_TIMESTAMP,	NULL},
+	EOP
+};
+static const struct parameter parameterRandrSetOutputPrimary[] = {
+	{	 4,	"window",	ft_WINDOW,	NULL},
+	{	 8,	"output",	ft_OUTPUT},
+	EOP
+};
+static const struct parameter parameterRandrGetOutputPrimary[] = {
+	{	 4,	"window",	ft_WINDOW,	NULL},
+	EOP
+};
+static const struct parameter returnRandrGetOutputPrimary[] = {
+	{	 8,	"output",	ft_OUTPUT},
+	EOP
+};
 
 #undef EOV
 #define ra(a) { #a , parameter ## a , NULL,NULL,NULL}
@@ -510,7 +604,16 @@ static const struct request extensionRANDR[] = {
 	rb(RandrSetCrtcConfig),
 	rb(RandrGetCrtcGammaSize),
 	rb(RandrGetCrtcGamma),
-	ra(RandrSetCrtcGamma)
+	ra(RandrSetCrtcGamma),
+	
+	/* RandR 1.3 */
+	rb(RandrGetScreenResourcesCurrent),
+	ra(RandrSetCrtcTransform),
+	rb(RandrGetCrtcTransform),
+	rb(RandrGetPanning),
+	rb(RandrSetPanning),
+	ra(RandrSetOutputPrimary),
+	rb(RandrGetOutputPrimary)
 };
 #undef ra
 #undef rb
