@@ -257,7 +257,7 @@ static const struct parameter parameterRandrSetScreenConfig[] = {
 
 
 static const struct parameter returnRandrSetScreenConfig[] = {
-	{	 1,	"status",		ft_ENUM8,	c_randr_status},
+	{	 1,	"status",		ft_RRCONFIGSTATUS},
 	{	 8,	"timestamp",		ft_TIMESTAMP,	NULL},
 	{	12,	"config-timestamp",	ft_TIMESTAMP,	NULL},
 	{	16,	"root",			ft_Window},
