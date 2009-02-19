@@ -698,7 +698,7 @@ static const struct parameter parameterAtom[] = {
 #define parameterGetAtomName parameterAtom
 
 static const struct parameter returnGetAtomName[] = {
-	{	8,	"length of name",	ft_COUNT32,	NULL},
+	{	8,	"length of name",	ft_COUNT16,	NULL},
 	{	32,	"name",	ft_STRING8,	NULL},
 	EOP
 };

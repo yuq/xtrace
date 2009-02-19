@@ -1,3 +1,5 @@
+new after 0.10.1:
+- bugfix: correct field length in GetAtomName
 new after 0.10.0:
 - bugfix: correct field offsets in ConfigureWindow,
 	  RandrDeleteOutputProperty and XF86BigfontQueryVersion.
