@@ -420,7 +420,7 @@ static size_t printLISTofFIXED(struct connection *c,u8 *buffer,size_t buflen,con
 		fprintf(out,"[%d]",(int)ofs);
 	fprintf(out,"%s=",p->name);
 	while( len > 0 ) {
-		uint32_t u32;
+		int32_t i32;
 		double d;
 
 		if( nr == maxshownlistlen ) {
@@ -429,8 +429,8 @@ static size_t printLISTofFIXED(struct connection *c,u8 *buffer,size_t buflen,con
 			if( notfirst )
 				putc(',',out);
 			notfirst = true;
-			u32 = getCARD32(ofs);
-			d = u32 / 65536.0;
+			i32 = getCARD32(ofs);
+			d = i32 / 65536.0;
 			fprintf(out,"%.6f", d);
 		}
 		len--;ofs+=4;nr++;
@@ -921,8 +921,8 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			if( print_offsets )
 				fprintf(out,"[%d]",(int)ofs);
 			fputs(p->name,out);putc('=',out);
-			u32 = getCARD32(ofs);
-			d = u32 / 65536.0;
+			i32 = getCARD32(ofs);
+			d = i32 / 65536.0;
 			fprintf(out,"%.6f", d);
 			continue;
 		 case ft_LISTofFIXED:
