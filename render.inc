@@ -134,7 +134,7 @@ static const struct constant c_subpixel[] = {
 
 #define ft_PICTURE	ft_CARD32
 #define ft_PICTFORMAT	ft_CARD32
-#define ft_Fixed	ft_INT32
+#define ft_Fixed	ft_FIXED
 #define ft_GLYPHSET    	ft_CARD32
 
 static const struct parameter listPictFormInfo[] = {

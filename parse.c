@@ -261,7 +261,11 @@ struct parameter {
 		/* always big endian */
 		ft_BE32,
 		/* get the #ofs value from the stack. (0 is the last pushed) */
-		ft_GET
+		ft_GET,
+		/* a fixed-point number 16+16 bit */
+		ft_FIXED,
+		/* a list of those */
+		ft_LISTofFIXED
 		} type;
 	const struct constant *constants;
 };
@@ -396,6 +400,38 @@ static size_t printLISTofCARD32(struct connection *c,u8 *buffer,size_t buflen,co
 				fprintf(out,"%s(0x%x)",value,(unsigned int)u32);
 			else
 				fprintf(out,"0x%08x",(unsigned int)u32);
+		}
+		len--;ofs+=4;nr++;
+	}
+	putc(';',out);
+	return ofs;
+}
+
+static size_t printLISTofFIXED(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( (buflen - ofs)/4 <= len )
+		len = (buflen - ofs)/4;
+
+	if( print_offsets )
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
+	while( len > 0 ) {
+		uint32_t u32;
+		double d;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...",out);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putc(',',out);
+			notfirst = true;
+			u32 = getCARD32(ofs);
+			d = u32 / 65536.0;
+			fprintf(out,"%.6f", d);
 		}
 		len--;ofs+=4;nr++;
 	}
@@ -784,6 +820,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		size_t ofs;
 		const char *value;
 		const char *atom;
+		double d;
 
 		if( p->offse == OFS_LATER )
 			ofs = lastofs;
@@ -877,6 +914,19 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			continue;
 		 case ft_LISTofVALUE:
 			lastofs = printLISTofVALUE(c,buffer,len,p,stored,ofs);
+			continue;
+		 case ft_FIXED:
+			if( ofs + 4 > len )
+				continue;
+			if( print_offsets )
+				fprintf(out,"[%d]",(int)ofs);
+			fputs(p->name,out);putc('=',out);
+			u32 = getCARD32(ofs);
+			d = u32 / 65536.0;
+			fprintf(out,"%.6f", d);
+			continue;
+		 case ft_LISTofFIXED:
+			lastofs = printLISTofFIXED(c,buffer,len,p,stored,ofs);
 			continue;
 		 case ft_EVENT:
 			if( len >= ofs + 32 )
@@ -1023,6 +1073,8 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LASTMARKER:
 		 case ft_GET:
 		 case ft_EVENT:
+		 case ft_FIXED:
+		 case ft_LISTofFIXED:
 			 assert(0);
 		}
 		if( value != NULL ) {
