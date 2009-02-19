@@ -1,6 +1,7 @@
 2009-02-19
 	* fix decoding of GetAtomName reply
 	* (cosmetic) use ft_RRCONFIGSTATUS for RRSetScreenConfig reply
+	* fix decoding of RRGetOutputInfo reply
 2009-01-06
 	* fix decoding of ConfigureWindow request
 	(thanks to Yann Droneaud)

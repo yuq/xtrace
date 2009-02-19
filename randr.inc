@@ -325,7 +325,8 @@ static const struct parameter returnRandrGetOutputInfo[] = {
 	{	28,	"#modes",	ft_COUNT16,	NULL},
 	{OFS_LATER,	"modes",	ft_LISTofMODE},
 	{	30,	"preferred modes",ft_UINT16,	NULL},
-	{	32,	"clonecount",	ft_UINT16,	NULL},
+	{	32,	"clonecount",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"clones",	ft_LISTofOUTPUT},
 	{	34,	"length of name",	ft_COUNT16,	NULL},
 	{OFS_LATER,	"name",		ft_STRING8,	NULL},
 	EOP
