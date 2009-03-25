@@ -52,6 +52,7 @@ int listenForClients(const char *displayname,int family,int display) {
 	if( family == AF_INET ) {
 		int tmp=1;
 
+		inaddr.sin_family = family;
 		inaddr.sin_port = calculateTCPport(display);
 		inaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		setsockopt(fd,SOL_SOCKET,SO_KEEPALIVE,(char *)&tmp,sizeof(tmp));

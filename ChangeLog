@@ -1,3 +1,5 @@
+2009-03-25
+	* Properly set the address family when listening on a tcp socket
 2009-02-19
 	* fix decoding of GetAtomName reply
 	* (cosmetic) use ft_RRCONFIGSTATUS for RRSetScreenConfig reply
