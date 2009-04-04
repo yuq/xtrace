@@ -46,8 +46,10 @@ extern size_t maxshownlistlen;
 
 #ifdef __GNUC__
 #define UNUSED __attribute__ ((unused))
+#define FORMAT(func,fmtarg,dotarg) __attribute__((format(func,fmtarg,dotarg)));
 #else
 #define UNUSED
+#define FORMAT(func,fmtarg,dotarg)
 #endif
 
 #ifndef HAVE_STRNDUP

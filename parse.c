@@ -22,6 +22,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,11 +31,24 @@
 
 #include "xtrace.h"
 
+enum package_direction { TO_SERVER, TO_CLIENT };
+
+static void startline(struct connection *c, enum package_direction d, const char *format, ...) FORMAT(printf,3,4);
+
 static const bool print_counts = false;
 static const bool print_offsets = false;
 
 static inline unsigned int padded(unsigned int s) {
 	return (s+3)&(~3);
+}
+
+static void startline(struct connection *c, enum package_direction d, const char *format, ...) {
+	va_list ap;
+
+	va_start(ap, format);
+	fprintf(out, "%03d:%c:", c->id, (d == TO_SERVER)?'<':'>');
+	vfprintf(out, format, ap);
+	va_end(ap);
 }
 
 #define U256 ((unsigned int)256)
@@ -1142,7 +1156,7 @@ static void replyListFontsWithInfo(struct connection *c,bool *ignore,bool *dontr
 	unsigned int seq = serverCARD16(2);
 	if( serverCARD8(1) == 0 ) {
 
-		fprintf(out,"%03d:>:0x%04x:%u: Reply to ListFontsWithInfo: end of list\n", c->id, seq, c->serverignore);
+		startline(c, TO_CLIENT, "0x%04x:%u: Reply to ListFontsWithInfo: end of list\n", seq, c->serverignore);
 		*ignore = true;
 	} else
 		*dontremove = true;
@@ -1259,13 +1273,13 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 		ignore = r->request_func(c,true,bigrequest,NULL);
 	if( !ignore ) {
 		if( extensionname[0] == '\0' )
-			fprintf(out,"%03d:<:%04x:%3u: Request(%hhu): %s ",
-				c->id,(unsigned int)(c->seq),c->clientignore,
+			startline(c, TO_SERVER, "%04x:%3u: Request(%hhu): %s ",
+				(unsigned int)(c->seq),c->clientignore,
 				req, r->name
 		      );
 		else
-			fprintf(out,"%03d:<:%04x:%3u: %s-Request(%hhu,%hhu): %s ",
-				c->id, (unsigned int)(c->seq),
+			startline(c, TO_SERVER, "%04x:%3u: %s-Request(%hhu,%hhu): %s ",
+				(unsigned int)(c->seq),
 				c->clientignore,
 				extensionname, req, subreq,
 				r->name
@@ -1294,7 +1308,7 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 
 static inline void print_server_event(struct connection *c) {
 
-	fprintf(out,"%03d:>:%04llx: Event ",c->id,(unsigned long long)c->seq);
+	startline(c, TO_CLIENT, "%04llx: Event ", (unsigned long long)c->seq);
 	print_event(c,c->serverbuffer);
 	putc('\n',out);
 }
@@ -1326,7 +1340,7 @@ static inline void print_server_reply(struct connection *c) {
 				replyto->from->reply_func(c,&ignore,&dontremove,replyto->datatype,replyto->data);
 
 			if( !ignore ) {
-				fprintf(out,"%03d:>:0x%04x:%u: Reply to %s: ", c->id, seq, (unsigned int)c->serverignore,replyto->from->name);
+				startline(c, TO_CLIENT, "0x%04x:%u: Reply to %s: ", seq, (unsigned int)c->serverignore,replyto->from->name);
 				print_parameters(c,
 					c->serverbuffer,len,replyto->from->answers,false,&stack);
 				putc('\n',out);
@@ -1334,15 +1348,15 @@ static inline void print_server_reply(struct connection *c) {
 			if( !dontremove ) {
 				*lastp = replyto->next;
 				if( replyto->next != NULL ) {
-					fprintf(stderr,"%03d:>: still waiting for reply to seq=%04llx\n",c->id,(unsigned long long)replyto->next->seq);
+					startline(c, " still waiting for reply to seq=%04llx\n", (unsigned long long)replyto->next->seq);
 				}
 				free(replyto);
 			}
 			return;
 		}
 	}
-	fprintf(out,"%03d:>:%04x:%u: unexpected reply\n",
-			c->id, seq, c->serverignore);
+	startline(c, TO_CLIENT, "%04x:%u: unexpected reply\n",
+			seq, c->serverignore);
 }
 
 const char *errors[] = {
@@ -1377,8 +1391,7 @@ static inline void print_server_error(struct connection *c) {
 
 	}
 	seq = (unsigned int)serverCARD16(2);
-	fprintf(out,"%03d:>:%x:Error %hhu=%s: major=%u, minor=%u, bad=%u\n",
-			c->id,
+	startline(c, TO_CLIENT, "%x:Error %hhu=%s: major=%u, minor=%u, bad=%u\n",
 			seq,
 			cmd,
 			errorname,
@@ -1410,7 +1423,7 @@ void parse_client(struct connection *c) {
 		 else if( c->clientbuffer[0] == 'l' )
 			 c->bigendian = false;
 		 else  {
-			fprintf(stderr,"%03d:<: Byteorder (%d='%c') is neighter 'B' nor 'l', ignoring all further data!",c->id,(int)c->clientbuffer[0],c->clientbuffer[0]);
+			startline(c, TO_SERVER, " Byteorder (%d='%c') is neighter 'B' nor 'l', ignoring all further data!", (int)c->clientbuffer[0],c->clientbuffer[0]);
 			c->clientstate = c_amlost;
 			c->serverstate = s_amlost;
 			return;
@@ -1422,8 +1435,7 @@ void parse_client(struct connection *c) {
 		 }
 		 c->clientignore =  l;
 
-		 fprintf(out,"%03d:<: am %s want %d:%d authorising with '%*s' of length %d\n",
-				 c->id,
+		 startline(c, TO_SERVER, " am %s want %d:%d authorising with '%*s' of length %d\n",
 				 c->bigendian?"msb-first":"lsb-first",
 				 (int)clientCARD16(2),
 				 (int)clientCARD16(4),
@@ -1434,13 +1446,13 @@ void parse_client(struct connection *c) {
 		 return;
 	 case c_normal:
 		 if( c->clientcount < 4 ) {
-			 fprintf(out,"%03d:<: Warning: Waiting for rest of package (yet only got %u)!\n",c->id,c->clientcount);
+			 startline(c, TO_SERVER, " Warning: Waiting for rest of package (yet only got %u)!\n", c->clientcount);
 			 return;
 		 }
 		 l = 4*clientCARD16(2);
 		 if( l == 0 ) {
 			 if( c->clientcount < 8 ) {
-				 fprintf(out,"%03d:<: Warning: Waiting for rest of package (yet only got %u)!\n",c->id,c->clientcount);
+				 startline(c, TO_SERVER, " Warning: Waiting for rest of package (yet only got %u)!\n", c->clientcount);
 				 return;
 			 }
 			 l = 4*clientCARD32(4);
@@ -1448,9 +1460,9 @@ void parse_client(struct connection *c) {
 		 } else
 			 bigrequest = false;
 		 if( c->clientcount == sizeof(c->clientbuffer) )
-			 fprintf(out,"%03d:<: Warning: buffer filled!\n",c->id);
+			 startline(c, TO_SERVER, " Warning: buffer filled!\n");
 		 else if( c->clientcount < l ) {
-			 fprintf(out,"%03d:<: Warning: Waiting for rest of package (yet got %u of %u)!\n",c->id,c->clientcount,(unsigned int)l);
+			 startline(c, TO_SERVER, " Warning: Waiting for rest of package (yet got %u of %u)!\n", c->clientcount,(unsigned int)l);
 			 return;
 		 }
 		 c->clientignore = l;
@@ -1483,20 +1495,17 @@ void parse_server(struct connection *c) {
 		 cmd = serverCARD16(0);
 		 switch( cmd ) {
 		  case 0:
-			  fprintf(out,"%03d:>: Failed, version is %d:%d reason is '%*s'.\n",
-					 c->id,
+			  startline(c, TO_CLIENT, " Failed, version is %d:%d reason is '%*s'.\n",
 					 (int)serverCARD16(2),
 					 (int)serverCARD16(4),
 					 (int)(4*len),
 					 &c->serverbuffer[8]);
 		  case 2:
-			  fprintf(out,"%03d:>: More authentication needed, reason is '%*s'.\n",
-					 c->id,
+			  startline(c, TO_CLIENT, " More authentication needed, reason is '%*s'.\n",
 					 (int)(4*len),
 					 &c->serverbuffer[8]);
 		  case 1:
-			  fprintf(out,"%03d:>: Success, version is %d:%d-%d.\n",
-					 c->id,
+			  startline(c, TO_CLIENT, " Success, version is %d:%d-%d.\n",
 					 (int)serverCARD16(2),
 					 (int)serverCARD16(4),
 					 (int)serverCARD16(8));

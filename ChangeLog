@@ -1,3 +1,9 @@
+2009-04-04
+	* move start of output lines generation into common function
+	(this makes some messages that until now got to stderr to go
+	 to the usual output, too. While that might hide them a bit,
+	 this also ensures they appear at the right place, which might
+	 be better).
 2009-03-25
 	* Properly set the address family when listening on a tcp socket
 2009-02-19
