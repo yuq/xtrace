@@ -1423,7 +1423,7 @@ void parse_client(struct connection *c) {
 		 else if( c->clientbuffer[0] == 'l' )
 			 c->bigendian = false;
 		 else  {
-			startline(c, TO_SERVER, " Byteorder (%d='%c') is neighter 'B' nor 'l', ignoring all further data!", (int)c->clientbuffer[0],c->clientbuffer[0]);
+			startline(c, TO_SERVER, " Byteorder (%d='%c') is neither 'B' nor 'l', ignoring all further data!", (int)c->clientbuffer[0],c->clientbuffer[0]);
 			c->clientstate = c_amlost;
 			c->serverstate = s_amlost;
 			return;
