@@ -1348,7 +1348,7 @@ static inline void print_server_reply(struct connection *c) {
 			if( !dontremove ) {
 				*lastp = replyto->next;
 				if( replyto->next != NULL ) {
-					startline(c, " still waiting for reply to seq=%04llx\n", (unsigned long long)replyto->next->seq);
+					startline(c, TO_CLIENT, " still waiting for reply to seq=%04llx\n", (unsigned long long)replyto->next->seq);
 				}
 				free(replyto);
 			}
