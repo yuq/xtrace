@@ -1,4 +1,4 @@
-.TH XTRACE 1 "12 February 2008" "xtrace" XTRACE
+.TH XTRACE 1 "16 April 2009" "xtrace" XTRACE
 .SH NAME
 xtrace \- trace communication between X11 client and server
 .SH SYNOPSIS
@@ -95,6 +95,23 @@ Do not write every line on its own but wait until buffers
 are full.
 Speeds up things a little bit when outputting to a file.
 Not very usefull at all together with \fB\-i\fP.
+.TP
+.B \-\-timestamps
+Print a timestamp before each line.
+Print a timestamp relative to the beginning of the connection
+before each line.
+
+Note that the time a packet is printed is between the time
+a packet is received and the time a packet is sent,
+but it gives no other information than that.
+.TP
+.B \-\-relative-timestamps
+Print a timestamp relative to the beginning of the connection
+before each line.
+
+Note that the time a packet is printed is between the time
+a packet is received and the time a packet is sent,
+but it gives no other information than that.
 .SH "ENVIRONMENT VARIABLES"
 .TP
 .B DISPLAY

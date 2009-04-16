@@ -30,6 +30,7 @@ extern struct connection {
 	uint64_t seq;
 	struct usedextension *usedextensions;
 	struct unknownextension *waiting, *unknownextensions;
+	unsigned long long starttime;
 } *connections;
 void parse_server(struct connection *c);
 void parse_client(struct connection *c);
@@ -43,6 +44,8 @@ void internAtom(struct connection *c, uint32_t atom, struct atom *data);
 
 extern bool denyallextensions;
 extern size_t maxshownlistlen;
+extern bool print_timestamps;
+extern bool print_reltimestamps;
 
 #ifdef __GNUC__
 #define UNUSED __attribute__ ((unused))

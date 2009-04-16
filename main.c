@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <stdbool.h>
 #include <signal.h>
 #include <stdio.h>
@@ -40,6 +41,8 @@ bool stopwhennone = true;
 bool waitforclient = false;
 bool denyallextensions = false;
 bool interactive = false;
+bool print_timestamps = false;
+bool print_reltimestamps = false;
 static bool buffered = false;
 size_t maxshownlistlen = SIZE_MAX;
 
@@ -55,6 +58,7 @@ static pid_t child_pid = 0;
 struct connection *connections = NULL ;
 
 static void acceptConnection(int listener) {
+	struct timeval tv;
 	struct connection *c;
 	static int id = 0;
 
@@ -62,6 +66,16 @@ static void acceptConnection(int listener) {
 	if( c == NULL ) {
 		fprintf(stderr,"Out of memory!\n");
 		exit(EXIT_FAILURE);
+	}
+	if( print_reltimestamps ) {
+		if( gettimeofday(&tv, NULL) != 0 ) {
+			int e = errno;
+			fprintf(stderr, "gettimeofday error %d : %s!\n",
+					e, strerror(e));
+			exit(EXIT_FAILURE);
+		}
+		c->starttime = tv.tv_sec*(unsigned long long)1000 +
+				tv.tv_usec/1000;
 	}
 	c->next = connections;
 	c->client_fd = acceptClient(in_family,listener, &c->from);
@@ -374,6 +388,8 @@ char *strndup(const char *str,size_t n) {
 }
 #endif
 
+enum {LO_DEFAULT=0, LO_TIMESTAMPS, LO_RELTIMESTAMPS, LO_VERSION, LO_HELP};
+static int long_only_option = 0;
 static const struct option longoptions[] = {
 	{"display",	required_argument,	NULL,	'd'},
 	{"fakedisplay",	required_argument,	NULL,	'D'},
@@ -390,7 +406,10 @@ static const struct option longoptions[] = {
 	{"outfile",	required_argument,	NULL,	'o'},
 	{"buffered",		no_argument,	NULL,	'b'},
 	{"interactive",		no_argument,	NULL,	'i'},
-	{"help",		no_argument,	NULL,	'h'},
+	{"help",		no_argument, &long_only_option,	LO_HELP},
+	{"version",		no_argument, &long_only_option,	LO_VERSION},
+	{"timestamps",		no_argument, &long_only_option,	LO_TIMESTAMPS},
+	{"relative-timestamps",	no_argument, &long_only_option,	LO_RELTIMESTAMPS},
 	{NULL,		0,			NULL,	0}
 };
 
@@ -465,8 +484,10 @@ int main(int argc, char *argv[]) {
 				 exit(EXIT_FAILURE);
 			 }
 			 break;
-	         case 'h':
-			 printf(
+		 case '\0':
+			 switch( long_only_option ) {
+	         		case LO_HELP:
+					 printf(
 "%s: Dump all X protocol data being tunneled from a fake X display to a real one.\n"
 "usage: xtrace [options] [[--] command args ...]\n"
 "--display, -d <display to connect to>\n"
@@ -484,8 +505,18 @@ int main(int argc, char *argv[]) {
 "--outfile, -o <filename>	Output to file instead of stdout\n"
 "--buffered, -b			Do not output every line but only when buffer is full\n",
 argv[0]);
-			 exit(EXIT_SUCCESS);
-
+					 exit(EXIT_SUCCESS);
+				 case LO_VERSION:
+					 puts(PACKAGE " version " VERSION);
+					 exit(EXIT_SUCCESS);
+				 case LO_TIMESTAMPS:
+					 print_timestamps = true;
+					 break;
+				 case LO_RELTIMESTAMPS:
+					 print_reltimestamps = true;
+					 break;
+			 }
+			 break;
 		 case ':':
 		 case '?':
 		 default:
