@@ -16,4 +16,4 @@ autoconf
 curdir="$(pwd)"
 mkdir -p -- "$configindir"
 cd "$configindir" || exit 1
-"$curdir"/configure --enable-maintainer-mode CFLAGS="-Wall -O2 -g -Wmissing-prototypes -Wstrict-prototypes -W -DSTUPIDCC=1"
+"$curdir"/configure --enable-maintainer-mode CFLAGS="-Wall -O2 -g -Wmissing-prototypes -Wstrict-prototypes -W -Wshadow -DSTUPIDCC=1"

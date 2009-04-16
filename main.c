@@ -413,7 +413,7 @@ static const struct option longoptions[] = {
 	{NULL,		0,			NULL,	0}
 };
 
-static void catchsig(int signal UNUSED)
+static void catchsig(int signum UNUSED)
 {
   caught_child_signal = true;
 }

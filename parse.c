@@ -85,8 +85,6 @@ static void startline(struct connection *c, enum package_direction d, const char
 
 #define NUM(array) (sizeof(array)/sizeof(array[0]))
 
-typedef const unsigned char u8;
-
 struct constant {
 	unsigned long value;
 	const char *name;
@@ -190,7 +188,7 @@ struct expectedreply {
 	void *data;
 };
 
-struct extension *find_extension(u8 *name,size_t len);
+struct extension *find_extension(const uint8_t *name,size_t len);
 
 static void print_bitfield(const char *name,const struct constant *constants, unsigned long l){
 	const struct constant *c;
@@ -299,7 +297,7 @@ struct parameter {
 	const struct constant *constants;
 };
 
-static size_t printSTRING8(u8 *buffer,size_t buflen,const struct parameter *p,size_t len,size_t ofs){
+static size_t printSTRING8(const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len,size_t ofs){
 	size_t nr = 0;
 
 	if( buflen < ofs )
@@ -331,7 +329,7 @@ static size_t printSTRING8(u8 *buffer,size_t buflen,const struct parameter *p,si
 	return ofs;
 }
 
-static size_t printLISTofCARD8(u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofCARD8(const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -366,7 +364,7 @@ static size_t printLISTofCARD8(u8 *buffer,size_t buflen,const struct parameter *
 	return ofs;
 }
 
-static size_t printLISTofCARD16(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofCARD16(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -401,7 +399,7 @@ static size_t printLISTofCARD16(struct connection *c,u8 *buffer,size_t buflen,co
 	return ofs;
 }
 
-static size_t printLISTofCARD32(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofCARD32(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -436,7 +434,7 @@ static size_t printLISTofCARD32(struct connection *c,u8 *buffer,size_t buflen,co
 	return ofs;
 }
 
-static size_t printLISTofFIXED(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofFIXED(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -468,7 +466,7 @@ static size_t printLISTofFIXED(struct connection *c,u8 *buffer,size_t buflen,con
 	return ofs;
 }
 
-static size_t printLISTofATOM(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofATOM(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -505,7 +503,7 @@ static size_t printLISTofATOM(struct connection *c,u8 *buffer,size_t buflen,cons
 	return ofs;
 }
 
-static size_t printLISTofUINT8(u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofUINT8(const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -540,7 +538,7 @@ static size_t printLISTofUINT8(u8 *buffer,size_t buflen,const struct parameter *
 	return ofs;
 }
 
-static size_t printLISTofUINT16(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofUINT16(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -575,7 +573,7 @@ static size_t printLISTofUINT16(struct connection *c,u8 *buffer,size_t buflen,co
 	return ofs;
 }
 
-static size_t printLISTofUINT32(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofUINT32(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -619,7 +617,7 @@ struct value {
 	const struct constant *constants;
 };
 
-static size_t printLISTofVALUE(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *param,unsigned long valuemask, size_t ofs){
+static size_t printLISTofVALUE(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *param,unsigned long valuemask, size_t ofs){
 
 	const struct value *v = (const struct value*)param->constants;
 	const char *atom;
@@ -750,7 +748,7 @@ static void pop(struct stack *stack UNUSED, struct stack *oldstack UNUSED) {
 
 static size_t print_parameters(struct connection *c,const unsigned char *buffer,unsigned int len, const struct parameter *parameters, bool bigrequest, struct stack *oldstack);
 
-static size_t printLISTofStruct(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t count, size_t ofs, struct stack *stack){
+static size_t printLISTofStruct(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t count, size_t ofs, struct stack *stack){
 	bool notfirst = false;
 	/* This is a gross hack: the constants for ft_LISTofStruct are
 	 * in reality a parameter structure */
@@ -788,7 +786,7 @@ static size_t printLISTofStruct(struct connection *c,u8 *buffer,size_t buflen,co
 	putc(';',out);
 	return ofs;
 }
-static size_t printLISTofVarStruct(struct connection *c,u8 *buffer,size_t buflen,const struct parameter *p,size_t count, size_t ofs, struct stack *stack){
+static size_t printLISTofVarStruct(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t count, size_t ofs, struct stack *stack){
 	bool notfirst = false;
 //	size_t ofs = (p->offset<0)?lastofs:p->offset;
 	const struct parameter *substruct = (const void*)p->constants;
@@ -870,13 +868,13 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 				p = ((struct parameter *)p->constants)-1;
 			continue;
 		} else if( p->type == ft_IFATOM ) {
-			const char *atom;
+			const char *atomname;
 			if( ofs+4 >= len )
 				continue;
-			atom = getAtom(c, getCARD32(ofs));
-			if( atom == NULL )
+			atomname = getAtom(c, getCARD32(ofs));
+			if( atomname == NULL )
 				continue;
-			if( strcmp(atom, p->name) == 0 )
+			if( strcmp(atomname, p->name) == 0 )
 				p = ((struct parameter *)p->constants)-1;
 			continue;
 		}
@@ -1618,7 +1616,7 @@ struct extension extensions[] = {
 };
 #undef EXT
 
-struct extension *find_extension(u8 *name,size_t len) {
+struct extension *find_extension(const uint8_t *name,size_t len) {
 	unsigned int i;
 	for( i = 0 ; i < NUM(extensions) ; i++ ) {
 		if( len < extensions[i].namelen )
