@@ -1,5 +1,5 @@
 /*  This file is part of "xtrace"
- *  Copyright (C) 2005,2006 Bernhard R. Link
+ *  Copyright (C) 2005,2006,2009 Bernhard R. Link
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
  *  published by the Free Software Foundation.
@@ -292,7 +292,9 @@ struct parameter {
 		/* a fixed-point number 16+16 bit */
 		ft_FIXED,
 		/* a list of those */
-		ft_LISTofFIXED
+		ft_LISTofFIXED,
+		/* set stored value to specific value */
+		ft_SET
 		} type;
 	const struct constant *constants;
 };
@@ -810,8 +812,11 @@ static size_t printLISTofVarStruct(struct connection *c,const uint8_t *buffer,si
 			 * so just return the unreachable */
 			return SIZE_MAX;
 		}
-		if( notfirst )
+		if( notfirst ) {
 			putc(',',out);
+			if( print_offsets )
+				fprintf(out,"[%d]",(int)ofs);
+		}
 		notfirst = true;
 		putc('{',out);
 
@@ -984,6 +989,9 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_GET:
 			stored = getFromStack(&newstack,p->offse);
 			continue;
+		 case ft_SET:
+			stored = p->offse;
+			continue;
 		 default:
 			break;
 		}
@@ -1099,6 +1107,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_ATOM:
 		 case ft_LASTMARKER:
 		 case ft_GET:
+		 case ft_SET:
 		 case ft_EVENT:
 		 case ft_FIXED:
 		 case ft_LISTofFIXED:
@@ -1222,6 +1231,7 @@ static void replyInternAtom(struct connection *c,bool *ignore UNUSED,bool *dontr
 #define ft_COUNT8 ft_STORE8
 #define ft_COUNT16 ft_STORE16
 #define ft_COUNT32 ft_STORE32
+#define RESET_COUNTER	{ INT_MAX,	"",		ft_SET,		NULL}
 #include "requests.inc"
 
 static inline void free_expectedreplylist(struct expectedreply *r) {
@@ -1595,6 +1605,7 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 #include "saver.inc"
 #include "fixes.inc"
 #include "damage.inc"
+#include "xinput.inc"
 
 #define EXT(a,b) { a , sizeof(a)-1, \
 	extension ## b, NUM(extension ## b), \
@@ -1604,6 +1615,7 @@ struct extension extensions[] = {
 	EXT("MIT-SHM",MITSHM),
 	EXT("RANDR",RANDR),
 	EXT("XINERAMA",XINERAMA),
+	EXT("XInputExtension",XInput),
 	EXT("RENDER",RENDER),
 	EXT("SHAPE",SHAPE),
 	EXT("BIG-REQUESTS",BIGREQUEST),

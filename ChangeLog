@@ -1,3 +1,6 @@
+2009-04-18
+	* start with XInputExtension support (only some opcodes yet)
+
 2009-04-16
 	* add --timestamps and --relative-timestamps options to print
 	timestamps before each line.
