@@ -353,6 +353,7 @@ static const struct constant c_revertto[] = {
 	{0	, "None"},
 	{1	, "PointerRoot"},
 	{2	, "Parent"},
+	{3	, "FollowKeyboard"},
 	EOC
 };
 

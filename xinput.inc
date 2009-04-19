@@ -9,12 +9,37 @@ static const struct constant c_device_change[] = {
 	EOC
 };
 
+static const struct constant c_syncmode[] = {
+	{0,	"AsyncThisDevice"},
+	{1,	"SyncThisDevice"},
+	{2,	"ReplayThisDevice"},
+	{3,	"AsyncOtherDevice"},
+	{4,	"AsyncAll"},
+	{5,	"SyncAll"},
+	EOC
+};
+
 static const struct constant c_device_use[] = {
 	{0,	"Pointer"},
 	{1,	"Keyboard"},
 	{2,	"ExtensionDevice"},
 	{3,	"ExtensionKeyboard"},
 	{4,	"ExtensionPointer"},
+	EOC
+};
+
+static const struct constant c_usexkeyboard[] = {
+	{0xFF,	"UseXKeyboard"},
+	EOC
+};
+
+static const struct constant c_anykey[] = {
+	{0x00,	"AnyKey"},
+	EOC
+};
+
+static const struct constant c_anybutton[] = {
+	{0x00,	"AnyButton"},
 	EOC
 };
 
@@ -53,6 +78,16 @@ static const struct constant c_classes_reported[] = {
 	{0x04,	"reporting valuators"},
 	{0x40,	"absolute"},
 	{0x80,	"out of proximity"},
+	EOC
+};
+
+static const struct constant c_feedback_class[] = {
+	{0,	"Kbd"},
+	{1,	"Ptr"},
+	{2,	"String"},
+	{3,	"Integer"},
+	{4,	"Led"},
+	{5,	"Bell"},
 	EOC
 };
 
@@ -202,7 +237,7 @@ static const struct parameter returnXInputListInputDevices[] = {
    above, that might mean the actual code is totally different, too */
 
 static const struct parameter parameterXInputDevice[] = {
-	{	 4,	"device id",	ft_CARD8,	NULL},
+	{	 4,	"device",	ft_CARD8,	NULL},
 	EOP
 };
 #define  parameterXInputOpenDevice parameterXInputDevice
@@ -213,8 +248,7 @@ static const struct parameter structINPUTCLASSINFO[] = {
 	{	1,	"event type base",	ft_CARD8,	NULL},
 	EOP
 };
-
-#define ft_LISTofINPUTCLASSINFO	ft_LISTofStruct, (void*)structDEVICEINFO
+#define ft_LISTofINPUTCLASSINFO	ft_LISTofStruct, (void*)structINPUTCLASSINFO
 static const struct parameter returnXInputOpenDevice[] = {
 	{	 8,	"#classes",	ft_COUNT8,	NULL},
 	{	32,	"classes",	ft_LISTofINPUTCLASSINFO},
@@ -224,7 +258,7 @@ static const struct parameter returnXInputOpenDevice[] = {
 #define  parameterXInputCloseDevice parameterXInputDevice
 
 static const struct parameter parameterXInputSetDeviceMode[] = {
-	{	 4,	"device id",	ft_CARD8,	NULL},
+	{	 4,	"device",	ft_CARD8,	NULL},
 	{	 5,	"mode",	ft_ENUM8,	c_device_mode},
 	EOP
 };
@@ -275,7 +309,7 @@ static const struct parameter returnXInputGetDeviceDontPropagateList[] = {
 static const struct parameter parameterXInputGetDeviceMotionEvents[] = {
 	{	 4,	"start-time",	ft_TIMESTAMP,	c_curtime},
 	{	 8,	"stop-time",	ft_TIMESTAMP,	c_curtime},
-	{	10,	"device-id",	ft_CARD8,	NULL},
+	{	10,	"device",	ft_CARD8,	NULL},
 	EOP
 };
 
@@ -303,7 +337,7 @@ static const struct parameter returnXInputGetDeviceMotionEvents[] = {
 static const struct parameter parameterXInputChangePointerDevice[] = {
 	{	 4,	"xaxis",	ft_CARD8,	NULL},
 	{	 5,	"yaxis",	ft_CARD8,	NULL},
-	{	 6,	"device id",	ft_CARD8,	NULL},
+	{	 6,	"device",	ft_CARD8,	NULL},
 	EOP
 };
 #define returnXInputChangePointerDevice returnXInputStatus
@@ -315,7 +349,7 @@ static const struct parameter parameterXInputGrabDevice[] = {
 	{	14,	"this-device-mode",	ft_ENUM8,	c_synmode},
 	{	15,	"other-device-mode",	ft_ENUM8,	c_synmode},
 	{	16,	"owner-events",	ft_BOOL},
-	{	17,	"device id",	ft_CARD8,	NULL},
+	{	17,	"device",	ft_CARD8,	NULL},
 	{	20,	"events",	ft_LISTofEVENTCLASS},
 	EOP
 };
@@ -323,15 +357,159 @@ static const struct parameter parameterXInputGrabDevice[] = {
 
 static const struct parameter parameterXInputUngrabDevice[] = {
 	{	 4,	"time",	ft_TIMESTAMP,	c_curtime},
-	{	 8,	"device id",	ft_CARD8,	NULL},
+	{	 8,	"device",	ft_CARD8,	NULL},
+	EOP
+};
+
+static const struct parameter parameterXInputGrabDeviceKey[] = {
+	{	 4,	"window",	ft_WINDOW,	NULL},
+	{	 8,	"#event",	ft_COUNT16,	NULL},
+	{	10,	"modifiers",	ft_SETofKEYMASK},
+	{	12,	"modifier_device",	ft_CARD8,	c_usexkeyboard},
+	{	13,	"grabbed_device",	ft_CARD8,	NULL},
+	{	14,	"key",	ft_CARD8,	c_anykey},
+	{	15,	"this-device-mode",	ft_ENUM8,	c_synmode},
+	{	16,	"other-device-mode",	ft_ENUM8,	c_synmode},
+	{	17,	"owner-events",	ft_BOOL},
+	{	20,	"events",	ft_LISTofEVENTCLASS},
+	EOP
+};
+
+static const struct parameter parameterXInputUngrabDeviceKey[] = {
+	{	 4,	"window",	ft_WINDOW,	NULL},
+	{	 8,	"modifiers",	ft_SETofKEYMASK},
+	{	10,	"modifier_device",	ft_CARD8,	c_usexkeyboard},
+	{	11,	"key",	ft_CARD8,	c_anykey},
+	{	12,	"grabbed_device",	ft_CARD8,	NULL},
+	EOP
+};
+
+
+static const struct parameter parameterXInputGrabDeviceButton[] = {
+	{	 4,	"window",	ft_WINDOW,	NULL},
+	{	 8,	"grabbed_device",	ft_CARD8,	NULL},
+	{	 9,	"modifier_device",	ft_CARD8,	c_usexkeyboard},
+	{	10,	"#event",	ft_COUNT16,	NULL},
+	{	12,	"modifiers",	ft_SETofKEYMASK},
+	{	14,	"this-device-mode",	ft_ENUM8,	c_synmode},
+	{	15,	"other-device-mode",	ft_ENUM8,	c_synmode},
+	{	16,	"button",	ft_UINT8,	c_anybutton},
+	{	17,	"owner-events",	ft_BOOL},
+	{	20,	"events",	ft_LISTofEVENTCLASS},
+	EOP
+};
+
+static const struct parameter parameterXInputUngrabDeviceButton[] = {
+	{	 4,	"window",	ft_WINDOW,	NULL},
+	{	 8,	"modifiers",	ft_SETofKEYMASK},
+	{	10,	"modifier_device",	ft_CARD8,	c_usexkeyboard},
+	{	11,	"button",	ft_UINT8,	c_anybutton},
+	{	12,	"grabbed_device",	ft_CARD8,	NULL},
+	EOP
+};
+
+static const struct parameter parameterXInputAllowDeviceEvents[] = {
+	{	 4,	"time",	ft_TIMESTAMP,	c_curtime},
+	{	 8,	"mode",	ft_ENUM8,	c_syncmode},
+	{	 9,	"device",	ft_CARD8,	NULL},
 	EOP
 };
 
 #define  parameterXInputGetDeviceFocus parameterXInputDevice
+static const struct parameter returnXInputGetDeviceFocus[] = {
+	{	 8,	"focus",	ft_WINDOW,	c_revertto},
+	{	12,	"time",	ft_TIMESTAMP,	NULL},
+	{	16,	"revert-to",	ft_ENUM8,	c_revertto},
+	EOP
+};
+
+static const struct parameter parameterXInputSetDeviceFocus[] = {
+	{	 4,	"focus",	ft_WINDOW,	c_revertto},
+	{	 8,	"time",	ft_TIMESTAMP,	NULL},
+	{	12,	"revert-to",	ft_ENUM8,	c_revertto},
+	{	13,	"device",	ft_CARD8,	NULL},
+	EOP
+};
+
+static const struct parameter structFRACTION[] = {
+	LC(4),
+	{	 0,	"numerator",	ft_UINT16,	NULL},
+	{	 2,	"denominator",	ft_UINT16,	NULL},
+	EOP
+};
+#define ft_FRACTION	ft_Struct, (void*)structFRACTION
+
+static const struct parameter feedbackstateKBD[] = {
+	{	 4,	"pitch",	ft_UINT16,	NULL},
+	{	 6,	"duration",	ft_UINT16,	NULL},
+	{	 8,	"led_mask",	ft_CARD32,	NULL},
+	{	12,	"led_values",	ft_CARD32,	NULL},
+	{	16,	"global-auto-repeat",	ft_BOOL},
+	{	17,	"click",	ft_UINT8,	NULL},
+	{	18,	"percent",	ft_UINT8,	NULL},
+	SET_COUNTER(32),
+	{	20,	"auto-repeats",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+static const struct parameter feedbackstatePTR[] = {
+	{	 6,	"acceleration",	ft_FRACTION},
+	{	10,	"treshold",	ft_UINT16,	NULL},
+	{ 	12,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter feedbackstateSTRING[] = {
+	{	 4,	"max symbols",	ft_UINT16,	NULL},
+	{	 6,	"#keysyms",	ft_COUNT16,	NULL},
+	{	 8,	"keysyms",	ft_LISTofKEYSYM,	NULL},
+	EOP
+};
+static const struct parameter feedbackstateINTEGER[] = {
+	{	 4,	"resolution",	ft_UINT32,	NULL},
+	{	 8,	"min",	ft_INT32,	NULL},
+	{	12,	"max",	ft_INT32,	NULL},
+	{ 	16,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter feedbackstateLED[] = {
+	{	 4,	"mask",	ft_CARD32,	NULL},
+	{	 8,	"values",	ft_CARD32,	NULL},
+	{ 	12,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter feedbackstateBELL[] = {
+	{	 4,	"percent",	ft_UINT8,	NULL},
+	{	 8,	"pitch",	ft_UINT16,	NULL},
+	{	10,	"duration",	ft_UINT16,	NULL},
+	{ 	12,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter structFEEDBACKSTATE[] = {
+	LC(4),
+	/* XIproto.ps has strange values here, XI.h looks more reasonable: */
+	{	 0,	"feedback class",	ft_ENUM8,	c_feedback_class},
+	{	 1,	"id",	ft_CARD8,	NULL},
+	{	 0,	"\0",	ft_IF8,	(void*)feedbackstateKBD},
+	{	 0,	"\1",	ft_IF8,	(void*)feedbackstatePTR},
+	{	 0,	"\2",	ft_IF8,	(void*)feedbackstateSTRING},
+	{	 0,	"\3",	ft_IF8,	(void*)feedbackstateINTEGER},
+	{	 0,	"\4",	ft_IF8,	(void*)feedbackstateLED},
+	{	 0,	"\5",	ft_IF8,	(void*)feedbackstateBELL},
+	/* fallback in case of unsupported: */
+	{	 2,	"length",		ft_COUNT16,	NULL},
+	{	 0,	"sunsupported",		ft_LISTofCARD8,	NULL},
+	EOP
+};
+#define ft_LISTofFEEDBACKSTATE ft_LISTofVarStruct, (void*)structFEEDBACKSTATE
+
 #define  parameterXInputGetFeedbackControl parameterXInputDevice
+static const struct parameter returnXInputGetFeedbackControl[] = {
+	{	 8,	"#feedbacks",	ft_COUNT16,	NULL},
+	{	32,	"feedbacks",	ft_LISTofFEEDBACKSTATE},
+	EOP
+};
+
 #define  parameterXInputGetDeviceButtonMapping parameterXInputDevice
 #define  parameterXInputQueryDeviceState parameterXInputDevice
-
 
 #define ra(a) { #a , parameterXInput ## a , NULL,NULL,NULL}
 #define rb(a) { #a , parameterXInput ## a , returnXInput ## a ,NULL,NULL}
@@ -353,14 +531,14 @@ static const struct request extensionXInput[] = {
 	rb(ChangePointerDevice), /* 12 */
 	rb(GrabDevice), /* 13 */
 	ra(UngrabDevice), /* 14 */
-	re(GrabDeviceKey), /* 15 */
-	re(UngrabDeviceKey), /* 16 */
-	re(GrabDeviceButton), /* 17 */
-	re(UngrabDeviceButton), /* 18 */
-	re(AllowDeviceEvents), /* 19 */
-	rf(GetDeviceFocus), /* 20 */
-	re(SetDeviceFocus), /* 21 */
-	rf(GetFeedbackControl), /* 22 */
+	ra(GrabDeviceKey), /* 15 */
+	ra(UngrabDeviceKey), /* 16 */
+	ra(GrabDeviceButton), /* 17 */
+	ra(UngrabDeviceButton), /* 18 */
+	ra(AllowDeviceEvents), /* 19 */
+	rb(GetDeviceFocus), /* 20 */
+	ra(SetDeviceFocus), /* 21 */
+	rb(GetFeedbackControl), /* 22 */
 	re(ChangeFeedbackControl), /* 23 */
 	rf(GetDeviceKeyMapping), /* 24 */
 	re(ChangeDeviceKeyMapping), /* 25 */
@@ -386,7 +564,7 @@ static const struct request extensionXInput[] = {
    how to express that? */
 
 static const struct parameter eparamXInputDeviceValuator[] = {
-	{	 1,	"device-id",	ft_CARD8,	NULL},
+	{	 1,	"device",	ft_CARD8,	NULL},
 	{	 4,	"state",	ft_SETofKEYBUTMASK},
 	{	 6,	"#valuators",	ft_COUNT8,	NULL},
 	{	 7,	"first axis",	ft_CARD8,	NULL},
@@ -408,7 +586,7 @@ static const struct parameter eparamXInputKeyButtonPointer[] = {
 	{	26,	"event-y",	ft_INT16,	NULL},
 	{	28,	"state",	ft_SETofKEYBUTMASK},
 	{	30,	"same-screen",	ft_BOOL},
-	{	31,	"device-id",	ft_CARD8,	NULL},
+	{	31,	"device",	ft_CARD8,	NULL},
 	EOP
 };
 #define eparamXInputDeviceKeyPress eparamXInputKeyButtonPointer
@@ -428,7 +606,7 @@ static const struct parameter eparamXInputDeviceMotionNotify[] = {
 	{	26,	"event-y",	ft_INT16,	NULL},
 	{	28,	"state",	ft_SETofKEYBUTMASK},
 	{	30,	"same-screen",	ft_BOOL},
-	{	31,	"device-id",	ft_CARD8,	NULL},
+	{	31,	"device",	ft_CARD8,	NULL},
 	EOP
 };
 
@@ -443,7 +621,7 @@ static const struct parameter eparamXInputProximity[] = {
 	{	26,	"event-y",	ft_INT16,	NULL},
 	{	28,	"state",	ft_SETofKEYBUTMASK},
 	{	30,	"same-screen",	ft_BOOL},
-	{	31,	"device-id",	ft_CARD8,	NULL},
+	{	31,	"device",	ft_CARD8,	NULL},
 	EOP
 };
 #define eparamXInputProximityIn eparamXInputProximity
@@ -454,14 +632,14 @@ static const struct parameter eparamXInputDeviceFocus[] = {
 	{        4,     "timestamp",    ft_TIMESTAMP,   NULL},
 	{	 8,	"event window",	ft_WINDOW,	NULL},
 	{	12,	"mode",		ft_ENUM8,	c_grabmode},
-	{	13,	"device-id",	ft_CARD8,	NULL},
+	{	13,	"device",	ft_CARD8,	NULL},
 	EOP
 };
 #define eparamXInputDeviceFocusOut eparamXInputDeviceFocus
 #define eparamXInputDeviceFocusIn eparamXInputDeviceFocus
 
 static const struct parameter eparamXInputDeviceStateNotify[] = {
-	{	 1,	"device-id",	ft_CARD8,	NULL},
+	{	 1,	"device",	ft_CARD8,	NULL},
 	{        4,     "timestamp",    ft_TIMESTAMP,   NULL},
 	{	11,	"reported",	ft_BITMASK8,	c_classes_reported},
 	{	 8,	"#keys",	ft_COUNT8,	NULL},
@@ -474,19 +652,19 @@ static const struct parameter eparamXInputDeviceStateNotify[] = {
 };
 
 static const struct parameter eparamXInputDeviceKeystateNotify[] = {
-	{	 1,	"device-id",	ft_CARD8,	NULL},
+	{	 1,	"device",	ft_CARD8,	NULL},
 	{	 4,	"keys",		ft_LISTofCARD8,	NULL},
 	EOP
 };
 
 static const struct parameter eparamXInputDeviceButtonstateNotify[] = {
-	{	 1,	"device-id",	ft_CARD8,	NULL},
+	{	 1,	"device",	ft_CARD8,	NULL},
 	{	 4,	"buttons",	ft_LISTofCARD8,	NULL},
 	EOP
 };
 
 static const struct parameter eparamXInputDeviceMappingNotify[] = {
-	{	 1,	"device-id",	ft_CARD8,	NULL},
+	{	 1,	"device",	ft_CARD8,	NULL},
 	{	 4,	"request",	ft_CARD8,	NULL},
 	{	 5,	"first key code",	ft_KEYCODE,	NULL},
 	{	 6,	"count",	ft_UINT8,	NULL},
@@ -495,7 +673,7 @@ static const struct parameter eparamXInputDeviceMappingNotify[] = {
 };
 
 static const struct parameter eparamXInputChangeDeviceNotify[] = {
-	{	 1,	"device-id",	ft_CARD8,	NULL},
+	{	 1,	"device",	ft_CARD8,	NULL},
 	{        4,     "timestamp",    ft_TIMESTAMP,   NULL},
 	{	 8,	"request",	ft_CARD8,	NULL},
 	EOP
@@ -504,7 +682,7 @@ static const struct parameter eparamXInputChangeDeviceNotify[] = {
 static const struct parameter eparamXInputDevicePresenceNotify[] = {
 	{        4,     "timestamp",    ft_TIMESTAMP,   NULL},
 	{	 8,	"change",	ft_ENUM8,	c_device_change},
-	{	 9,	"device-id",	ft_CARD8,	NULL},
+	{	 9,	"device",	ft_CARD8,	NULL},
 	{	10,	"control",	ft_CARD16,	NULL},
 	EOP
 };

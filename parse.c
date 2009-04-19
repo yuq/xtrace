@@ -997,19 +997,25 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		}
 		assert( p->type <= ft_BITMASK32);
 
-		if( ((ofs+4)&~3) > len )
-			/* this field is missing */
-			continue;
 		switch( p->type % 3) {
 		 case 0:
+			 if( (ofs+1) > len )
+				 /* this field is missing */
+				 continue;
 			 u8 = getCARD8(ofs);
 			 l = u8;
 			 break;
 		 case 1:
+			 if( (ofs+2) > len )
+				 /* this field is missing */
+				 continue;
 			 u16 = getCARD16(ofs);
 			 l = u16;
 			 break;
 		 case 2:
+			 if( (ofs+4) > len )
+				 /* this field is missing */
+				 continue;
 			 u32 = getCARD32(ofs);
 			 l = u32;
 			 break;
@@ -1232,6 +1238,7 @@ static void replyInternAtom(struct connection *c,bool *ignore UNUSED,bool *dontr
 #define ft_COUNT16 ft_STORE16
 #define ft_COUNT32 ft_STORE32
 #define RESET_COUNTER	{ INT_MAX,	"",		ft_SET,		NULL}
+#define SET_COUNTER(cnt)	{ cnt,	"",		ft_SET,		NULL}
 #include "requests.inc"
 
 static inline void free_expectedreplylist(struct expectedreply *r) {
