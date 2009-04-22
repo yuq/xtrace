@@ -91,6 +91,39 @@ static const struct constant c_feedback_class[] = {
 	EOC
 };
 
+static const struct constant c_auto_repeat_mode[] = {
+	{0,	"Off"},
+	{1,	"On"},
+	{2,	"Default"},
+	EOC
+};
+
+static const struct constant c_dv_pointer[] = {
+	{(1L << 0),	"AccelNum"},
+	{(1L << 1),	"AccelDenom"},
+	{(1L << 2),	"Threshold"},
+	EOC
+};
+static const struct constant c_dv_keyboardbellled[] = {
+	{(1L<<0),	"KeyClickPercent"},
+	{(1L<<1),	"Percent"},
+	{(1L<<2),	"Pitch"},
+	{(1L<<3),	"Duration"},
+	{(1L<<4),	"Led"},
+	{(1L<<5),	"LedMode"},
+	{(1L<<6),	"Key"},
+	{(1L<<7),	"AutoRepeatMode"},
+	EOC
+};
+static const struct constant c_dv_string[] = {
+	{(1L << 0),	"String"},
+	EOC
+};
+static const struct constant c_dv_integer[] = {
+	{(1L << 0),	"Integer"},
+	EOC
+};
+
 #undef EOC
 #define EOP {0,NULL,0,NULL}
 #define LC(len) {len,NULL,0,NULL}
@@ -508,6 +541,64 @@ static const struct parameter returnXInputGetFeedbackControl[] = {
 	EOP
 };
 
+static const struct parameter feedbackcontrolKBD[] = {
+	{	 4,	"mask",	ft_BITMASK32,	c_dv_keyboardbellled},
+	{	16,	"key",	ft_CARD8,	NULL},
+	{	17,	"auto-repeat",	ft_ENUM8,	c_auto_repeat_mode},
+	{	18,	"click-percent",	ft_UINT8,	NULL},
+	{	19,	"bell-percent",	ft_UINT8,	NULL},
+	{	20,	"bell-pitch",	ft_UINT16,	NULL},
+	{	22,	"bell-duration",	ft_UINT16,	NULL},
+	{	24,	"led_mask",	ft_CARD32,	NULL},
+	{	28,	"led_values",	ft_CARD32,	NULL},
+	EOP
+};
+static const struct parameter feedbackcontrolPTR[] = {
+	{	 4,	"mask",	ft_BITMASK32,	c_dv_pointer},
+	{	18,	"acceleration",	ft_FRACTION},
+	{	22,	"treshold",	ft_UINT16,	NULL},
+	EOP
+};
+static const struct parameter feedbackcontrolSTRING[] = {
+	{	 4,	"mask",	ft_BITMASK32,	c_dv_string},
+	{	18,	"#keysyms",	ft_COUNT16,	NULL},
+	{	20,	"keysyms",	ft_LISTofCARD32,	NULL},
+	EOP
+};
+static const struct parameter feedbackcontrolINTEGER[] = {
+	{	 4,	"mask",	ft_BITMASK32,	c_dv_integer},
+	{	16,	"integer",	ft_INT32,	NULL},
+	EOP
+};
+static const struct parameter feedbackcontrolLED[] = {
+	{	 4,	"mask",	ft_BITMASK32,	c_dv_keyboardbellled},
+	{	16,	"led_mask",	ft_CARD32,	NULL},
+	{	20,	"led_values",	ft_CARD32,	NULL},
+	EOP
+};
+static const struct parameter feedbackcontrolBELL[] = {
+	{	 4,	"mask",	ft_BITMASK32,	c_dv_keyboardbellled},
+	{	16,	"percent",	ft_UINT8,	NULL},
+	{	20,	"pitch",	ft_INT16,	NULL},
+	{	22,	"duration",	ft_INT16,	NULL},
+	EOP
+};
+static const struct parameter parameterXInputChangeFeedbackControl[] = {
+	{	 8,	"device",	ft_CARD8,	NULL},
+	{	 9,	"feedback id",	ft_CARD8,	NULL},
+	{	12,	"feedback class",	ft_ENUM8, c_feedback_class},
+	{	13,	"feedback id",	ft_CARD8,	NULL},
+	{	12,	"\0",	ft_IF8,	(void*)feedbackcontrolKBD},
+	{	12,	"\1",	ft_IF8,	(void*)feedbackcontrolPTR},
+	{	12,	"\2",	ft_IF8,	(void*)feedbackcontrolSTRING},
+	{	12,	"\3",	ft_IF8,	(void*)feedbackcontrolINTEGER},
+	{	12,	"\4",	ft_IF8,	(void*)feedbackcontrolLED},
+	{	12,	"\5",	ft_IF8,	(void*)feedbackcontrolBELL},
+	{	14,	"length",	ft_COUNT16,	NULL},
+	{	12,	"unsupported",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+
 #define  parameterXInputGetDeviceButtonMapping parameterXInputDevice
 #define  parameterXInputQueryDeviceState parameterXInputDevice
 
@@ -539,7 +630,7 @@ static const struct request extensionXInput[] = {
 	rb(GetDeviceFocus), /* 20 */
 	ra(SetDeviceFocus), /* 21 */
 	rb(GetFeedbackControl), /* 22 */
-	re(ChangeFeedbackControl), /* 23 */
+	ra(ChangeFeedbackControl), /* 23 */
 	rf(GetDeviceKeyMapping), /* 24 */
 	re(ChangeDeviceKeyMapping), /* 25 */
 	rf(GetDeviceModifierMapping), /* 26 */
