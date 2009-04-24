@@ -599,8 +599,96 @@ static const struct parameter parameterXInputChangeFeedbackControl[] = {
 	EOP
 };
 
+static const struct parameter parameterXInputGetDeviceKeyMapping[] = {
+	{	 4,	"device",	ft_CARD8,	NULL},
+	{	 5,	"firstKeyCode",	ft_CARD8,	NULL},
+	{	 6,	"count",	ft_UINT8,	NULL},
+	EOP
+};
+static const struct parameter returnXInputGetDeviceKeyMapping[] = {
+	{	 8,	"keysSyms/keyCode",	ft_UINT8,	NULL},
+	{	32,	"keysyms",	ft_LISTofCARD32,	NULL},
+	EOP
+};
+
+static const struct parameter parameterXInputChangeDeviceKeyMapping[] = {
+	{	 4,	"device",	ft_CARD8,	NULL},
+	{	 5,	"firstKeyCode",	ft_CARD8,	NULL},
+	{	 6,	"#keycodes",	ft_UINT8,	NULL},
+	{	 7,	"#keySyms/keyCode",	ft_UINT8,	NULL},
+	{	 8,	"keysyms",	ft_LISTofCARD32,	NULL},
+	EOP
+};
+
+#define  parameterXInputGetDeviceModifierMapping parameterXInputDevice
+static const struct parameter returnXInputGetDeviceModifierMapping[] = {
+	{	 8,	"keycodes/modifier",	ft_UINT8,	NULL},
+	{	32,	"keycodes",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+
+static const struct parameter parameterXInputSetDeviceModifierMapping[] = {
+	{	 4,	"device",	ft_CARD8,	NULL},
+	{	 5,	"keycodes/modifier",	ft_UINT8,	NULL},
+	{	 8,	"keycodes",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+#define returnXInputSetDeviceModifierMapping returnXInputStatus
+
 #define  parameterXInputGetDeviceButtonMapping parameterXInputDevice
+static const struct parameter returnXInputGetDeviceButtonMapping[] = {
+	{	 8,	"l(map)",	ft_COUNT8,	NULL},
+	{	32,	"map",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+
+static const struct parameter parameterXInputSetDeviceButtonMapping[] = {
+	{	 4,	"device",	ft_CARD8,	NULL},
+	{	 5,	"l(map)",	ft_COUNT8,	NULL},
+	{	 8,	"map",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+#define returnXInputSetDeviceButtonMapping returnXInputStatus
+
+/*
 #define  parameterXInputQueryDeviceState parameterXInputDevice
+static const struct parameter returnXInputQueryDeviceState[] = {
+	EOP
+};
+
+static const struct parameter parameterXInputSendExtensionEvent[] = {
+	EOP
+};
+*/
+
+static const struct parameter parameterXInputDeviceBell[] = {
+	{	 4,	"device",	ft_CARD8,	NULL},
+	{	 5,	"feedback id",	ft_CARD8,	NULL},
+	{	 6,	"feedback class",	ft_ENUM8, c_feedback_class},
+	{	 7,	"percent",	ft_INT8,	NULL},
+	EOP
+};
+
+/*
+static const struct parameter parameterXInputSetDeviceValuators[] = {
+	EOP
+};
+static const struct parameter returnXInputSetDeviceValuators[] = {
+	EOP
+};
+
+static const struct parameter parameterXInputGetDeviceControl[] = {
+	EOP
+};
+static const struct parameter returnXInputGetDeviceControl[] = {
+	EOP
+};
+
+static const struct parameter parameterXInputChangeDeviceControl[] = {
+	EOP
+};
+#define returnXInputChangeDeviceControl returnXInputStatus
+*/
 
 #define ra(a) { #a , parameterXInput ## a , NULL,NULL,NULL}
 #define rb(a) { #a , parameterXInput ## a , returnXInput ## a ,NULL,NULL}
@@ -631,15 +719,15 @@ static const struct request extensionXInput[] = {
 	ra(SetDeviceFocus), /* 21 */
 	rb(GetFeedbackControl), /* 22 */
 	ra(ChangeFeedbackControl), /* 23 */
-	rf(GetDeviceKeyMapping), /* 24 */
-	re(ChangeDeviceKeyMapping), /* 25 */
-	rf(GetDeviceModifierMapping), /* 26 */
-	rf(SetDeviceModifierMapping), /* 27 */
-	rf(GetDeviceButtonMapping), /* 28 */
-	rf(SetDeviceButtonMapping), /* 29 */
+	rb(GetDeviceKeyMapping), /* 24 */
+	ra(ChangeDeviceKeyMapping), /* 25 */
+	rb(GetDeviceModifierMapping), /* 26 */
+	rb(SetDeviceModifierMapping), /* 27 */
+	rb(GetDeviceButtonMapping), /* 28 */
+	rb(SetDeviceButtonMapping), /* 29 */
 	rf(QueryDeviceState), /* 30 */
 	re(SendExtensionEvent), /* 31 */
-	re(DeviceBell), /* 32 */
+	ra(DeviceBell), /* 32 */
 	rf(SetDeviceValuators), /* 33 */
 	rf(GetDeviceControl), /* 34 */
 	rf(ChangeDeviceControl) /* 35 */
