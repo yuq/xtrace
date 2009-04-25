@@ -1613,6 +1613,7 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 #include "fixes.inc"
 #include "damage.inc"
 #include "xinput.inc"
+#include "xkb.inc"
 
 #define EXT(a,b) { a , sizeof(a)-1, \
 	extension ## b, NUM(extension ## b), \
@@ -1623,6 +1624,7 @@ struct extension extensions[] = {
 	EXT("RANDR",RANDR),
 	EXT("XINERAMA",XINERAMA),
 	EXT("XInputExtension",XInput),
+	EXT("XKEYBOARD",Xkb),
 	EXT("RENDER",RENDER),
 	EXT("SHAPE",SHAPE),
 	EXT("BIG-REQUESTS",BIGREQUEST),
