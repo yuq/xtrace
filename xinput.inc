@@ -72,6 +72,14 @@ static const struct constant c_device_mode[] = {
 	EOC
 };
 
+static const struct constant c_device_mode_and_prox[] = {
+	{0,	"relative, in proximity"},
+	{1,	"absolute, in proximity"},
+	{2,	"relative, out of proximity"},
+	{3,	"absolute, out of proximity"},
+	EOC
+};
+
 static const struct constant c_classes_reported[] = {
 	{0x01,	"reporting keys"},
 	{0x02,	"reporting buttons"},
@@ -650,12 +658,44 @@ static const struct parameter parameterXInputSetDeviceButtonMapping[] = {
 };
 #define returnXInputSetDeviceButtonMapping returnXInputStatus
 
-/*
-#define  parameterXInputQueryDeviceState parameterXInputDevice
+
+static const struct parameter structpartKEYSTATE[] = {
+	{	 2,	"#keys",	ft_UINT8,	NULL},
+	SET_COUNTER(32),
+	{	 4,	"key states",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+static const struct parameter structpartBUTTONSTATE[] = {
+	{	 2,	"#buttons",	ft_UINT8,	NULL},
+	SET_COUNTER(32),
+	{	 4,	"button states",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+static const struct parameter structpartVALUATORSTATE[] = {
+	{	 2,	"#valuators",	ft_COUNT8,	NULL},
+	{	 3,	"mode",	ft_ENUM8,	c_device_mode_and_prox},
+	{	 4,	"valuator states",	ft_LISTofCARD32,	NULL},
+	EOP
+};
+static const struct parameter structINPUTSTATE[] = {
+	LC(2),
+	{	 0,	"class",	ft_ENUM8,	c_input_class_id},
+	{	 0,	"\0",	ft_IF8,	(void*)structpartKEYSTATE},
+	{	 0,	"\1",	ft_IF8,	(void*)structpartBUTTONSTATE},
+	{	 0,	"\2",	ft_IF8,	(void*)structpartVALUATORSTATE},
+	{	 1,	"length",	ft_COUNT8,	NULL},
+	{	 0,	"unsupported",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+#define ft_LISTofINPUTSTATE ft_LISTofVarStruct,(void*)structINPUTSTATE
+#define parameterXInputQueryDeviceState parameterXInputDevice
 static const struct parameter returnXInputQueryDeviceState[] = {
+	{	 8,	"#classes",	ft_COUNT8,	NULL},
+	{	32,	"classes",	ft_LISTofINPUTSTATE},
 	EOP
 };
 
+/*
 static const struct parameter parameterXInputSendExtensionEvent[] = {
 	EOP
 };
@@ -725,7 +765,7 @@ static const struct request extensionXInput[] = {
 	rb(SetDeviceModifierMapping), /* 27 */
 	rb(GetDeviceButtonMapping), /* 28 */
 	rb(SetDeviceButtonMapping), /* 29 */
-	rf(QueryDeviceState), /* 30 */
+	rb(QueryDeviceState), /* 30 */
 	re(SendExtensionEvent), /* 31 */
 	ra(DeviceBell), /* 32 */
 	rf(SetDeviceValuators), /* 33 */
