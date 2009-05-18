@@ -132,6 +132,16 @@ static const struct constant c_dv_integer[] = {
 	EOC
 };
 
+static const struct constant c_devicecontroltype[] = {
+	{0,	"Resolution?"},
+	{1,	"RESOLUTION"},
+	{2,	"ABS_CALIB"},
+	{3,	"CORE"},
+	{4,	"ENABLE"},
+	{5,	"ABS_AREA"},
+	EOC
+};
+
 #undef EOC
 #define EOP {0,NULL,0,NULL}
 #define LC(len) {len,NULL,0,NULL}
@@ -709,21 +719,85 @@ static const struct parameter parameterXInputDeviceBell[] = {
 	EOP
 };
 
-/*
 static const struct parameter parameterXInputSetDeviceValuators[] = {
+	{	 4,	"device",	ft_CARD8,	NULL},
+	{	 5,	"first valuator",	ft_UINT8,	NULL},
+	{	 6,	"#valuators",	ft_COUNT8,	NULL},
+	{	 8,	"valuators",	ft_LISTofUINT32,	NULL},
 	EOP
 };
-static const struct parameter returnXInputSetDeviceValuators[] = {
-	EOP
-};
+#define returnXInputSetDeviceValuators returnXInputStatus
 
+static const struct parameter structpartDEVICERESOLUTIONSTATE[] = {
+	{	 4,	"#valuators",	ft_COUNT32,	NULL},
+	{	 8,	"values",	ft_LISTofUINT32,	NULL},
+	{	 4,	"#valuators",	ft_COUNT32,	NULL},
+	{OFS_LATER,	"min_values",	ft_LISTofUINT32,	NULL},
+	{	 4,	"#valuators",	ft_COUNT32,	NULL},
+	{OFS_LATER,	"max_values",	ft_LISTofUINT32,	NULL},
+	EOP
+};
+static const struct parameter structpartDEVICEABSCALIBSTATE[] = {
+	{	 4,	"min_x",	ft_UINT32,	NULL},
+	{	 8,	"max_x",	ft_UINT32,	NULL},
+	{	12,	"min_y",	ft_UINT32,	NULL},
+	{	16,	"max_y",	ft_UINT32,	NULL},
+	{	20,	"flip_x",	ft_UINT32,	NULL},
+	{	24,	"flip_y",	ft_UINT32,	NULL},
+	{	28,	"rotation",	ft_UINT32,	NULL},
+	{	32,	"button_threshold",	ft_UINT32,	NULL},
+	{ 	36,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter structpartDEVICEABSAREASTATE[] = {
+	{	 4,	"offset_x",	ft_UINT32,	NULL},
+	{	 8,	"offset_y",	ft_UINT32,	NULL},
+	{	12,	"width",	ft_UINT32,	NULL},
+	{	16,	"height",	ft_UINT32,	NULL},
+	{	20,	"screen",	ft_CARD32,	NULL},
+	{	24,	"following",	ft_CARD32,	NULL},
+	{ 	28,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter structpartDEVICECORESTATE[] = {
+	{	 4,	"status",	ft_CARD8,	NULL},
+	{	 5,	"iscore",	ft_BOOL},
+	{ 	 8,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter structpartDEVICEENABLESTATE[] = {
+	{	 4,	"enable",	ft_CARD8,	NULL},
+	{ 	 8,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter structDEVICESTATE[] = {
+	LC(4),
+	{	 2,	"length",	ft_UINT16,	NULL},
+	/* Xspecs says 0, DEVICE_RESOLUTION is 1... */
+	{	 0,	"\0\0",	ft_IF16,	(void*)structpartDEVICERESOLUTIONSTATE},
+	{	 0,	"\0\1",	ft_IF16,	(void*)structpartDEVICERESOLUTIONSTATE},
+	{	 0,	"\0\2",	ft_IF16,	(void*)structpartDEVICEABSCALIBSTATE},
+	{	 0,	"\0\3",	ft_IF16,	(void*)structpartDEVICECORESTATE},
+	{	 0,	"\0\4",	ft_IF16,	(void*)structpartDEVICEENABLESTATE},
+	{	 0,	"\0\5",	ft_IF16,	(void*)structpartDEVICEABSAREASTATE},
+	/* TODO: there are more types, needs IF16 */
+	{	 2,	"length",	ft_COUNT16,	NULL},
+	{	 0,	"unsupported",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+#define ft_LISTofDEVICESTATE ft_LISTofVarStruct,(void*)structDEVICESTATE
 static const struct parameter parameterXInputGetDeviceControl[] = {
+	{	 6,	"device",	ft_CARD8,	NULL},
+	{	 4,	"device control type",	ft_ENUM16,	c_devicecontroltype},
 	EOP
 };
 static const struct parameter returnXInputGetDeviceControl[] = {
+	{	 8,	"status",	ft_CARD8,	c_device_status},
+	{	32,	"states",	ft_LISTofDEVICESTATE},
 	EOP
 };
 
+/*
 static const struct parameter parameterXInputChangeDeviceControl[] = {
 	EOP
 };
@@ -735,7 +809,7 @@ static const struct parameter parameterXInputChangeDeviceControl[] = {
 #define re(a) { #a , parameterXInputFake , NULL, NULL,NULL}
 #define rf(a) { #a , parameterXInputFake , returnXInputFake, NULL,NULL}
 static const struct request extensionXInput[] = {
-	re(Nothing), /* 0 */
+	re(Zero), /* 0 */
 	rb(GetExtensionVersion), /* 1 */
 	rb(ListInputDevices), /* 2 */
 	rb(OpenDevice), /* 3 */
@@ -768,8 +842,8 @@ static const struct request extensionXInput[] = {
 	rb(QueryDeviceState), /* 30 */
 	re(SendExtensionEvent), /* 31 */
 	ra(DeviceBell), /* 32 */
-	rf(SetDeviceValuators), /* 33 */
-	rf(GetDeviceControl), /* 34 */
+	rb(SetDeviceValuators), /* 33 */
+	rb(GetDeviceControl), /* 34 */
 	rf(ChangeDeviceControl) /* 35 */
 };
 #undef ra

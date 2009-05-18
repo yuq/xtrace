@@ -279,6 +279,7 @@ struct parameter {
 		ft_EVENT,
 		/* jump to other parameter list if matches */
 		ft_IF8,
+		ft_IF16,
 		/* jump to other parameter list if matches atom name */
 		ft_IFATOM,
 		/* set end of last list manually, (for LISTofVarStruct) */
@@ -872,6 +873,12 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			  getCARD8(ofs) == (unsigned char)(p->name[0]) )
 				p = ((struct parameter *)p->constants)-1;
 			continue;
+		} else if( p->type == ft_IF16 ) {
+			if( ofs+1 < len &&
+			  getCARD16(ofs) == (unsigned char)(p->name[1]) 
+			  + (unsigned char)0x100*(unsigned char)(p->name[0]))
+				p = ((struct parameter *)p->constants)-1;
+			continue;
 		} else if( p->type == ft_IFATOM ) {
 			const char *atomname;
 			if( ofs+4 >= len )
@@ -1108,6 +1115,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LISTofStruct:
 		 case ft_LISTofVarStruct:
 		 case ft_IF8:
+		 case ft_IF16:
 		 case ft_IFATOM:
 		 case ft_BE32:
 		 case ft_ATOM:
