@@ -1192,7 +1192,7 @@ static void replyListFontsWithInfo(struct connection *c,bool *ignore,bool *dontr
 	unsigned int seq = serverCARD16(2);
 	if( serverCARD8(1) == 0 ) {
 
-		startline(c, TO_CLIENT, "0x%04x:%u: Reply to ListFontsWithInfo: end of list\n", seq, c->serverignore);
+		startline(c, TO_CLIENT, "%04x:%u: Reply to ListFontsWithInfo: end of list\n", seq, c->serverignore);
 		*ignore = true;
 	} else
 		*dontremove = true;
@@ -1378,7 +1378,7 @@ static inline void print_server_reply(struct connection *c) {
 				replyto->from->reply_func(c,&ignore,&dontremove,replyto->datatype,replyto->data);
 
 			if( !ignore ) {
-				startline(c, TO_CLIENT, "0x%04x:%u: Reply to %s: ", seq, (unsigned int)c->serverignore,replyto->from->name);
+				startline(c, TO_CLIENT, "%04x:%u: Reply to %s: ", seq, (unsigned int)c->serverignore,replyto->from->name);
 				print_parameters(c,
 					c->serverbuffer,len,replyto->from->answers,false,&stack);
 				putc('\n',out);

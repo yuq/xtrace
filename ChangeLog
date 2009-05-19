@@ -1,3 +1,6 @@
+2009-05-19
+	* omit "0x" when printing the sequence number for replies, to
+	make the output more consistent with requests and events.
 2009-04-18
 	* start with XInputExtension support (only some opcodes yet)
 
