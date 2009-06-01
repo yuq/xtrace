@@ -1,9 +1,11 @@
+2009-06-01
+	* complete XInputExtension support (if there is a price for worst
+	documented extension, this would be my current candidate)
 2009-05-19
 	* omit "0x" when printing the sequence number for replies, to
 	make the output more consistent with requests and events.
 2009-04-18
 	* start with XInputExtension support (only some opcodes yet)
-
 2009-04-16
 	* add --timestamps and --relative-timestamps options to print
 	timestamps before each line.

@@ -705,11 +705,22 @@ static const struct parameter returnXInputQueryDeviceState[] = {
 	EOP
 };
 
-/*
-static const struct parameter parameterXInputSendExtensionEvent[] = {
+static const struct parameter structXiEVENT[] = {
+	LC(32),
+	{	 0,	"event",	ft_EVENT,	NULL},
 	EOP
 };
-*/
+#define ft_LISTofXiEVENT ft_LISTofStruct,(void*)structXiEVENT
+static const struct parameter parameterXInputSendExtensionEvent[] = {
+	{	 4,	"destinatione",	ft_WINDOW,	NULL},
+	{	 8,	"device",	ft_CARD8,	NULL},
+	{	 9,	"propagate",	ft_BOOL},
+	{	12,	"#events",	ft_COUNT8,	NULL},
+	{	16,	"events",	ft_LISTofXiEVENT},
+	{	10,	"#event classes",	ft_COUNT16,	NULL},
+	{OFS_LATER,	"desired events",	ft_LISTofEVENTCLASS},
+	EOP
+};
 
 static const struct parameter parameterXInputDeviceBell[] = {
 	{	 4,	"device",	ft_CARD8,	NULL},
@@ -772,7 +783,9 @@ static const struct parameter structpartDEVICEENABLESTATE[] = {
 };
 static const struct parameter structDEVICESTATE[] = {
 	LC(4),
-	{	 2,	"length",	ft_UINT16,	NULL},
+	/* this is supposed to be the length, but at least in
+	   lenny the xserver is still buggy and returns bogus values */
+	{	 2,	"length (often faulty)",	ft_UINT16,	NULL},
 	/* Xspecs says 0, DEVICE_RESOLUTION is 1... */
 	{	 0,	"\0\0",	ft_IF16,	(void*)structpartDEVICERESOLUTIONSTATE},
 	{	 0,	"\0\1",	ft_IF16,	(void*)structpartDEVICERESOLUTIONSTATE},
@@ -780,7 +793,6 @@ static const struct parameter structDEVICESTATE[] = {
 	{	 0,	"\0\3",	ft_IF16,	(void*)structpartDEVICECORESTATE},
 	{	 0,	"\0\4",	ft_IF16,	(void*)structpartDEVICEENABLESTATE},
 	{	 0,	"\0\5",	ft_IF16,	(void*)structpartDEVICEABSAREASTATE},
-	/* TODO: there are more types, needs IF16 */
 	{	 2,	"length",	ft_COUNT16,	NULL},
 	{	 0,	"unsupported",	ft_LISTofCARD8,	NULL},
 	EOP
@@ -797,17 +809,70 @@ static const struct parameter returnXInputGetDeviceControl[] = {
 	EOP
 };
 
-/*
+static const struct parameter structpartDEVICERESOLUTIONCONTOL[] = {
+	{	 4,	"first valuator",	ft_UINT8,	NULL},
+	{	 5,	"#valuators",	ft_COUNT8,	NULL},
+	{	 8,	"values",	ft_LISTofUINT32,	NULL},
+	EOP
+};
+static const struct parameter structpartDEVICEABSCALIBCONTOL[] = {
+	{	 4,	"min_x",	ft_UINT32,	NULL},
+	{	 8,	"max_x",	ft_UINT32,	NULL},
+	{	12,	"min_y",	ft_UINT32,	NULL},
+	{	16,	"max_y",	ft_UINT32,	NULL},
+	{	20,	"flip_x",	ft_UINT32,	NULL},
+	{	24,	"flip_y",	ft_UINT32,	NULL},
+	{	28,	"rotation",	ft_UINT32,	NULL},
+	{	32,	"button_threshold",	ft_UINT32,	NULL},
+	{ 	36,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter structpartDEVICEABSAREACONTOL[] = {
+	{	 4,	"offset_x",	ft_UINT32,	NULL},
+	{	 8,	"offset_y",	ft_UINT32,	NULL},
+	{	12,	"width",	ft_UINT32,	NULL},
+	{	16,	"height",	ft_UINT32,	NULL},
+	{	20,	"screen",	ft_CARD32,	NULL},
+	{	24,	"following",	ft_CARD32,	NULL},
+	{ 	28,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter structpartDEVICECORECONTOL[] = {
+	{	 4,	"status",	ft_CARD8,	NULL},
+	{ 	 8,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter structpartDEVICEENABLECONTOL[] = {
+	{	 4,	"enable",	ft_CARD8,	NULL},
+	{ 	 8,	"",	ft_LASTMARKER,	NULL},
+	EOP
+};
+static const struct parameter structDEVICECONTOL[] = {
+	LC(4),
+	{	 2,	"length",	ft_UINT16,	NULL},
+	/* Xspecs says 0, DEVICE_RESOLUTION is 1... */
+	{	 0,	"\0\0",	ft_IF16,	(void*)structpartDEVICERESOLUTIONCONTOL},
+	{	 0,	"\0\1",	ft_IF16,	(void*)structpartDEVICERESOLUTIONCONTOL},
+	{	 0,	"\0\2",	ft_IF16,	(void*)structpartDEVICEABSCALIBCONTOL},
+	{	 0,	"\0\3",	ft_IF16,	(void*)structpartDEVICECORECONTOL},
+	{	 0,	"\0\4",	ft_IF16,	(void*)structpartDEVICEENABLECONTOL},
+	{	 0,	"\0\5",	ft_IF16,	(void*)structpartDEVICEABSAREACONTOL},
+	{	 2,	"length",	ft_COUNT16,	NULL},
+	{	 0,	"unsupported",	ft_LISTofCARD8,	NULL},
+	EOP
+};
+#define ft_LISTofDEVICECONTROL ft_LISTofVarStruct,(void*)structDEVICECONTOL
 static const struct parameter parameterXInputChangeDeviceControl[] = {
+	{	 6,	"device",	ft_CARD8,	NULL},
+	{	 4,	"device control type",	ft_ENUM16,	c_devicecontroltype},
+	{	 8,	"data",	ft_LISTofDEVICECONTROL},
 	EOP
 };
 #define returnXInputChangeDeviceControl returnXInputStatus
-*/
 
 #define ra(a) { #a , parameterXInput ## a , NULL,NULL,NULL}
 #define rb(a) { #a , parameterXInput ## a , returnXInput ## a ,NULL,NULL}
 #define re(a) { #a , parameterXInputFake , NULL, NULL,NULL}
-#define rf(a) { #a , parameterXInputFake , returnXInputFake, NULL,NULL}
 static const struct request extensionXInput[] = {
 	re(Zero), /* 0 */
 	rb(GetExtensionVersion), /* 1 */
@@ -840,16 +905,15 @@ static const struct request extensionXInput[] = {
 	rb(GetDeviceButtonMapping), /* 28 */
 	rb(SetDeviceButtonMapping), /* 29 */
 	rb(QueryDeviceState), /* 30 */
-	re(SendExtensionEvent), /* 31 */
+	ra(SendExtensionEvent), /* 31 */
 	ra(DeviceBell), /* 32 */
 	rb(SetDeviceValuators), /* 33 */
 	rb(GetDeviceControl), /* 34 */
-	rf(ChangeDeviceControl) /* 35 */
+	rb(ChangeDeviceControl) /* 35 */
 };
 #undef ra
 #undef rb
 #undef re
-#undef rf
 
 /* Events */
 
