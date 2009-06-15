@@ -2047,4 +2047,9 @@ static const struct request requests[] = {
 };
 
 #undef ra
+#undef ra2
 #undef rb
+#undef rb2
+#undef rb3
+#undef rw
+#undef ro

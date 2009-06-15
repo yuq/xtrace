@@ -1622,6 +1622,7 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 #include "damage.inc"
 #include "xinput.inc"
 #include "xkb.inc"
+#include "glx.inc"
 
 #define EXT(a,b) { a , sizeof(a)-1, \
 	extension ## b, NUM(extension ## b), \
@@ -1641,7 +1642,8 @@ struct extension extensions[] = {
 	EXT("DPMS",DPMS),
 	EXT("XFIXES",FIXES),
 	EXT("DAMAGE",DAMAGE),
-	EXT("MIT-SCREEN-SAVER",Saver)
+	EXT("MIT-SCREEN-SAVER",Saver),
+	EXT("GLX",GLX)
 };
 #undef EXT
 
