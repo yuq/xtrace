@@ -1,6 +1,7 @@
 /* -*- mode: c; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2; coding: utf-8-unix -*- */
 /*  This file is part of "xtrace"
  *  Copyright (C) 2008,2009 RALOVICH, Kristóf
+ *  modifications Copyright (C) 2009 Bernhard R. Link
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
  *  published by the Free Software Foundation.
@@ -38,6 +39,7 @@ static const struct parameter returnUnknown[] = {
 static const struct parameter parameterglXRender[] = {
   {  4, "context_tag",  ft_CARD32, NULL},
   /* {  8, "render_commands", ft_LISTofGLXRenderCommand}, */
+  {  8, "render commands (cannot yet parse)", ft_LISTofCARD8, NULL},
   EOP
 };
 
