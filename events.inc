@@ -385,7 +385,7 @@ static const struct parameter eparamColormapNotify[] = {
 	{	4,	"window",	ft_WINDOW,	NULL},
 	{	8,	"colormap",	ft_COLORMAP,	c_none},
 	{	12,	"new",		ft_BOOL},
-	{	13,	"state",	ft_ENUM8,	NULL},
+	{	13,	"state",	ft_ENUM8,	c_uninstalledinstalled},
 	EOP
 };
 
