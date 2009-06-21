@@ -634,18 +634,6 @@ static const struct parameter eparamRandrScreenChangeNotify[] = {
 	EOP
 };
 
-static const struct parameter eparamRandrChangeNotifyWindow[] = {
-	{	 8,	"request window",	ft_WINDOW,	NULL},
-	{	12,	"crtc affected",	ft_CRTC},
-	{	16,	"mode in use",		ft_MODE},
-	{	20,	"new rr",		ft_RANDR_RR},
-	{	24,	"x",			ft_INT16,	NULL},
-	{	26,	"y",			ft_INT16,	NULL},
-	{	28,	"width",		ft_UINT16,	NULL},
-	{	30,	"height",		ft_UINT16,	NULL},
-	EOP
-};
-
 static const struct parameter eparamRandrChangeNotify0[] = {
 	{	 4,	"timestamp",		ft_TIMESTAMP,	NULL},
 	{	 8,	"request window",	ft_WINDOW,	NULL},
