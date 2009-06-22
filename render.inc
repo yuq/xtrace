@@ -305,7 +305,7 @@ static const struct parameter parameterRenderCreatePicture[] = {
 
 static const struct parameter parameterRenderChangePicture[] = {
 	{	 4,	"picture",	ft_PICTURE,	NULL},
-	{	 8,	"mask",		ft_CARD32,	NULL},
+	{	 8,	"mask",		ft_STORE32,	NULL},
 	{	12,	"values",	ft_LISTofVALUE, (void*)valuesRenderCP},
 	EOP
 };
