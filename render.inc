@@ -550,10 +550,10 @@ static const struct parameter parameterRenderQueryFilters[] = {
 };
 
 static const struct parameter returnRenderQueryFilters[] = {
-	{	 8,	"numAliases",	ft_CARD32,	NULL},
+	{	 8,	"numAliases",	ft_COUNT32,	NULL},
 	{	32,	"Aliases",	ft_LISTofCARD16,NULL},
 	ROUND,
-	{	12,	"numFilters",	ft_CARD32,	NULL},
+	{	12,	"numFilters",	ft_COUNT32,	NULL},
 	{	OFS_LATER, "Filters",	ft_LISTofSTRING8},
 	EOP
 };
