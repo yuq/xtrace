@@ -1,5 +1,5 @@
-		XTRACE 0.10
-		-----------
+		XTRACE 1.0
+		----------
 
 What strace is for system calls, xtrace is for X11 connections:
 you hook it between one or more X11 clients and an X server and
@@ -21,10 +21,7 @@ Things still to do (any volunteers?):
 	   some errors).
 	- implement the common extensions.
 	   (currently only implemented are the base protocol and
-	    the following extensions:
-	    BIG-REQUESTS, DAMAGE, DPMS, MIT-SCREEN-SAVER, MIT-SHM,
-	    RANDR, RENDER, SHAPE, XFIXES, XFree86-VidModeExtension,
-	    XFree86-Bigfont and XINERAMA)
+	    a limted number of extensions)
 	- make it less verbose or even better allow to control
 	  verbosity.
 	- implement some filtering
@@ -32,3 +29,11 @@ Things still to do (any volunteers?):
 	  by changing the source, look for requestButtonGrab in
 	  parse.c for an example. Being able to do this via
 	  command line would be nice.)
+	- more checking of protocol specifications, there are many
+	  easy to make errors that are still not tested for.
+	- script to translate xorg's protocol xml files to .proto language
+	  (they miss many information and have the field name in comments,
+	   but might still be good to be faster in supporting extensions)
+	- allow generic dictionaries (generalizing the hard-coded atom
+	  support) and giving symbolic names to things (like GC1, GC2,...,
+	  that would make some logs much easier to compare).
