@@ -111,7 +111,6 @@ struct value {
 	const struct constant *constants;
 };
 
-#ifndef OLDSTYLE
 extern const struct request *requests;
 extern size_t num_requests;
 extern const struct event *events;
@@ -120,7 +119,6 @@ extern const const char * const *errors;
 extern size_t num_errors;
 extern const struct extension *extensions;
 extern size_t num_extensions;
-#endif
 
 bool requestQueryExtension(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply);
 bool requestInternAtom(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply);

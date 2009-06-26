@@ -13,8 +13,6 @@ AC_GNU_SOURCE
 
 AC_PROG_CC
 AC_PROG_INSTALL
-dnl remove again once xtraceng becomes xtrace:
-AM_PROG_CC_C_O
 
 AC_CHECK_FUNCS([strndup])
 AC_CHECK_FUNCS([asprintf])

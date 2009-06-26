@@ -84,10 +84,6 @@ static void startline(struct connection *c, enum package_direction d, const char
 
 #define getBE32(ofs) (((buffer[ofs]*256+buffer[ofs+1])*256+buffer[ofs+2])*256+buffer[ofs+4])
 
-#ifdef OLDSTYLE
-#define NUM(array) (sizeof(array)/sizeof(array[0]))
-#endif
-
 struct usedextension {
 	struct usedextension *next;
 	const struct extension *extension;
@@ -1141,13 +1137,8 @@ void replyInternAtom(struct connection *c,bool *ignore UNUSED,bool *dontremove U
 #define RESET_COUNTER	{ INT_MAX,	"",		ft_SET,		NULL}
 #define SET_COUNTER(cnt)	{ cnt,	"",		ft_SET,		NULL}
 
-#ifdef OLDSTYLE
-#include "requests.inc"
-#define num_requests NUM(requests)
-#else
 const struct request *requests;
 size_t num_requests;
-#endif
 
 static inline void free_expectedreplylist(struct expectedreply *r) {
 
@@ -1297,19 +1288,8 @@ static inline void print_server_reply(struct connection *c) {
 			seq, c->serverignore);
 }
 
-#ifdef OLDSTYLE
-const char *errors[] = {
-	"no error","Request","Value","Window",
-	"Pixmap","Atom","Cursor","Font",
-	"Match","Drawable","Access","Alloc",
-	"Colormap","GContext","IDChoice","Name",
-	"Length","Implementation"
-};
-#define num_errors NUM(errors)
-#else
 const char * const *errors;
 size_t num_errors;
-#endif
 
 static inline void print_server_error(struct connection *c) {
 	unsigned int cmd = serverCARD8(1);
@@ -1478,13 +1458,8 @@ void parse_server(struct connection *c) {
 	assert(false);
 }
 
-#ifdef OLDSTYLE
-#include "events.inc"
-#define num_events NUM(events)
-#else
 const struct event *events;
 size_t num_events;
-#endif
 
 static void print_event(struct connection *c,const unsigned char *buffer) {
 	const struct event *event;
@@ -1522,50 +1497,8 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 	print_parameters(c,buffer,32,event->parameters,false,&stack);
 }
 
-#ifdef OLDSTYLE
-#include "shape.inc"
-#include "bigrequest.inc"
-#include "render.inc"
-#include "randr.inc"
-#include "xinerama.inc"
-#include "mitshm.inc"
-#include "xf86vidmode.inc"
-#include "xf86bigfont.inc"
-#include "dpms.inc"
-#include "saver.inc"
-#include "fixes.inc"
-#include "damage.inc"
-#include "xinput.inc"
-#include "xkb.inc"
-#include "glx.inc"
-
-#define EXT(a,b) { a , sizeof(a)-1, \
-	extension ## b, NUM(extension ## b), \
-	events ## b, NUM(events ## b), \
-	errors ## b, NUM(errors ## b)}
-struct extension extensions[] = {
-	EXT("MIT-SHM",MITSHM),
-	EXT("RANDR",RANDR),
-	EXT("XINERAMA",XINERAMA),
-	EXT("XInputExtension",XInput),
-	EXT("XKEYBOARD",Xkb),
-	EXT("RENDER",RENDER),
-	EXT("SHAPE",SHAPE),
-	EXT("BIG-REQUESTS",BIGREQUEST),
-	EXT("XFree86-VidModeExtension",XF86VidMode),
-	EXT("XFree86-Bigfont",XF86Bigfont),
-	EXT("DPMS",DPMS),
-	EXT("XFIXES",FIXES),
-	EXT("DAMAGE",DAMAGE),
-	EXT("MIT-SCREEN-SAVER",Saver),
-	EXT("GLX",GLX)
-};
-#define num_extensions NUM(extensions)
-#undef EXT
-#else
 const struct extension *extensions;
 size_t num_extensions;
-#endif
 
 const struct extension *find_extension(const uint8_t *name,size_t len) {
 	unsigned int i;
