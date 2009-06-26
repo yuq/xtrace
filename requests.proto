@@ -1346,6 +1346,7 @@ ELSEIF 0 CARD8 0
 # prevent a empty string fitting in the last 3 pad bytes
 # showing up. (as this 3 pad bytes could contain a
 # string of length 1 I think)
+NEXT 2
 ELSE
 1	delta  	INT8
 0	length 	COUNT8
