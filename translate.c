@@ -839,7 +839,7 @@ static struct unfinished_parameter *new_parameter_special(struct parser *parser,
    if nothing is accessed past the length in a struct,
    if things overlap, ...
 */
-static bool parse_parameters(struct parser *parser, struct variable *variable) {
+static bool parse_parameters(struct parser *parser, struct variable *variable, bool needsnextmarker) {
 	long first_line = parser->current->lineno;
 	struct parameter_state {
 		struct parameter_state *parent;
@@ -876,7 +876,8 @@ static bool parse_parameters(struct parser *parser, struct variable *variable) {
 			no_more_arguments(parser);
 			if( state->parent != NULL )
 				error(parser, "missing ELSE");
-			// todo: check nextmarker where needed
+			if( needsnextmarker && !state->nextmarker_set )
+				error(parser, "Missing NEXT (or LISTof...)!");
 			free(state);
 			variable->parameter = parameters;
 			return true;
@@ -891,6 +892,8 @@ static bool parse_parameters(struct parser *parser, struct variable *variable) {
 			if( state->parent == NULL )
 				error(parser, "ELSE without IF");
 			no_more_arguments(parser);
+			if( needsnextmarker && !state->nextmarker_set )
+				error(parser, "Missing NEXT (or LISTof...)!");
 			last = &state->junction->next;
 			s = state->parent;
 			free(state);
@@ -905,6 +908,8 @@ static bool parse_parameters(struct parser *parser, struct variable *variable) {
 
 			if( state->parent == NULL )
 				error(parser, "ELSEIF without IF");
+			if( needsnextmarker && !state->nextmarker_set )
+				error(parser, "Missing NEXT (or LISTof...)!");
 			v = get_const_token(parser, false);
 			number = parse_number(parser, v);
 			v = get_const_token(parser, false);
@@ -1185,7 +1190,7 @@ static void parse_request(struct parser *parser, bool template) {
 		v->refcount ++;
 	}
 	if( !complete )
-		parse_parameters(parser, v);
+		parse_parameters(parser, v, false);
 }
 
 static void parse_response(struct parser *parser, bool template) {
@@ -1235,7 +1240,7 @@ static void parse_response(struct parser *parser, bool template) {
 		v->refcount ++;
 	}
 	if( !complete )
-		parse_parameters(parser, v);
+		parse_parameters(parser, v, false);
 }
 
 static struct event_data *find_event(struct parser *parser, const char *name) {
@@ -1383,8 +1388,8 @@ static void parse_event(struct parser *parser, bool template) {
 		event->event = v;
 		v->refcount ++;
 	}
-	if( !complete)
-		parse_parameters(parser, v);
+	if( !complete )
+		parse_parameters(parser, v, false);
 }
 
 static void add_namespace(struct parser *parser, const char *namespace, const char *extension ) {
@@ -1500,8 +1505,7 @@ static void parse_struct(struct parser *parser, bool list) {
 		if( !list )
 			vt->t.base_type = &base_type_struct;
 	}
-	// TODO: check if lastmarker is set in variable structs
-	parse_parameters(parser, v);
+	parse_parameters(parser, v, isvariable);
 	/* add (min-)length information: */
 	p = calloc(1, sizeof(*p));
 	if( p == NULL ) {
