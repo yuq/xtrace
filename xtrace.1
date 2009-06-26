@@ -1,4 +1,4 @@
-.TH XTRACE 1 "16 April 2009" "xtrace" XTRACE
+.TH XTRACE 1 "26 June 2009" "xtrace" XTRACE
 .SH NAME
 xtrace \- trace communication between X11 client and server
 .SH SYNOPSIS
@@ -18,6 +18,10 @@ exits immediately unless
 .B \-W
 is specified.
 .SH OPTIONS
+.TP
+.B \-I \fIdirectory\fP
+Look into \fIdirectory\fP for protocol description files.
+(i.e. the directory where the \fB.proto\fP files can be found).
 .TP
 .B \-s \fR|\fP \-\-stopwhendone \fR(default)\fP
 Terminate when all forwarded clients have disconnected.

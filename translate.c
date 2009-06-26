@@ -259,6 +259,11 @@ struct parser {
 		long lineno;
 		struct namespace *namespace;
 	} *current;
+	struct searchpath_entry {
+		struct searchpath_entry *next;
+		const char *dir;
+		size_t len;
+	} *searchpath;
 	bool error;
 };
 
@@ -480,17 +485,61 @@ static void no_more_arguments(struct parser *parser) {
 	}
 }
 
+void add_searchpath(struct parser *parser, const char *dir) {
+	struct searchpath_entry **last;
+
+	last = &parser->searchpath;
+	while( *last != NULL )
+		last = &(*last)->next;
+	*last = malloc(sizeof(struct searchpath_entry));
+	if( *last == NULL ) {
+		oom(parser);
+		return;
+	}
+	(*last)->next = NULL;
+	(*last)->dir = dir;
+	(*last)->len = strlen(dir);
+}
+
+static FILE *find_file(struct parser *parser, const char *name, char **filename_p) {
+	size_t l = strlen(name);
+	struct searchpath_entry *r;
+
+	assert( parser->searchpath != NULL );
+
+	for( r = parser->searchpath ; r != NULL ; r = r->next ) {
+		char *filename = NULL;
+		FILE *f;
+
+		filename = malloc(l + r->len + 2);
+		if( filename == NULL ) {
+			oom(parser);
+			return NULL;
+		}
+		memcpy(filename, r->dir, r->len);
+		filename[r->len] = '/';
+		memcpy(filename + r->len + 1, name, l + 1);
+
+		 f = fopen(filename, "r");
+		 if( f != NULL ) {
+			 *filename_p = filename;
+			 return f;
+		 }
+		 free(filename);
+	}
+	fprintf(stderr, "Unable to find '%s' in search path!\n", name);
+	parser->error = true;
+	*filename_p = NULL;
+	return NULL;
+}
+
 static void open_next_file(struct parser *parser, char *name) {
 	struct source_file *current;
 
+	if( name == NULL )
+		oom(parser);
 	if( parser->error ) {
 		free(name);
-		return;
-	}
-	/* only check after checking for parser->error! */
-	if( name == NULL ) {
-		fputs("Out of memory!", stderr);
-		parser->error = true;
 		return;
 	}
 
@@ -500,7 +549,7 @@ static void open_next_file(struct parser *parser, char *name) {
 	if( current != NULL ) {
 		if( current->file != NULL )
 			error(parser,
-"Circuar dependency! '%s' requested while parsing it!", name);
+"Circular dependency! '%s' requested while parsing it!", name);
 		free(name);
 		return;
 	}
@@ -511,15 +560,7 @@ static void open_next_file(struct parser *parser, char *name) {
 		return;
 	}
 	current->name = name;
-	/* TODO: search file in search path */
-	current->filename = strdup(name);
-	if( current->filename == NULL ) {
-		fputs("Out of memory!", stderr);
-		file_free(current);
-		parser->error = true;
-		return;
-	}
-	current->file = fopen(current->filename, "r");
+	current->file = find_file(parser, name, &current->filename);
 	if( current->file == NULL ) {
 		int e = errno;
 		error(parser, "Error %d opening '%s': %s",
@@ -1918,6 +1959,11 @@ bool parser_free(struct parser *parser) {
 		free(ns->errors);
 		free(ns->used);
 		free(ns);
+	}
+	while( parser->searchpath != NULL ) {
+		struct searchpath_entry *e = parser->searchpath;
+		parser->searchpath = e->next;
+		free(e);
 	}
 	parser->current = NULL;
 	free(parser);

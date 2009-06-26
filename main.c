@@ -439,8 +439,13 @@ int main(int argc, char *argv[]) {
 #endif
 
 	out = stdout;
-	while( (c=getopt_long(argc,argv,"+d:D:f:F:cnWskiewm:o:b",longoptions,NULL)) != -1 ) {
+	while( (c=getopt_long(argc,argv,"+I:d:D:f:F:cnWskiewm:o:b",longoptions,NULL)) != -1 ) {
 		switch( c ) {
+#ifndef OLDSTYLE
+		 case 'I':
+			 add_searchpath(parser, optarg);
+			 break;
+#endif
 		 case 'd':
 			 out_displayname = optarg;
 			 break;
@@ -539,6 +544,7 @@ argv[0]);
 
 	}
 #ifndef OLDSTYLE
+	add_searchpath(parser, PKGDATADIR);
 	translate(parser, "all.proto");
 	finalize_everything(parser);
 	if( !parser_free(parser) ) {

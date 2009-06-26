@@ -1,7 +1,7 @@
 bin_PROGRAMS = xtrace xtraceng
 
 CFLAGS ?= -g -O2
-AM_CPPFLAGS = @CPPFLAGS@ -Wall
+AM_CPPFLAGS = @CPPFLAGS@ -Wall -DPKGDATADIR='"$(pkgdatadir)"'
 # for authdata.c: -I/usr/X11R6/include -DNeedFunctionPrototypes
 
 xtrace_CPPFLAGS = $(AM_CPPFLAGS) -DOLDSTYLE=1
