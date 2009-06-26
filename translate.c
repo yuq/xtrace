@@ -135,6 +135,7 @@ struct variable {
 					enum fieldtype type;
 					size_t offse;
 					const char *condition;
+					bool isjunction;
 					struct unfinished_parameter *iftrue;
 					const void *finalized;
 				} special;
@@ -942,8 +943,10 @@ static bool parse_parameters(struct parser *parser, struct variable *variable) {
 			*state = *s;
 			state->parent = s;
 			state->junction = i;
-			if( i != NULL )
+			if( i != NULL ) {
 				last = &i->special.iftrue;
+				i->special.isjunction = true;
+			}
 			continue;
 		}
 		if( strcmp(position, "IF") == 0 ) {
@@ -994,8 +997,10 @@ static bool parse_parameters(struct parser *parser, struct variable *variable) {
 			s->parent = state;
 			s->junction = i;
 			state = s;
-			if( i != NULL )
+			if( i != NULL ) {
 				last = &i->special.iftrue;
+				i->special.isjunction = true;
+			}
 			continue;
 		}
 		if( strcmp(position, "ROUND") == 0 ) {
@@ -1977,10 +1982,17 @@ static const void *parameter_finalize(struct parser *parser, struct unfinished_p
 	size_t count = 0;
 	struct parameter *prepared, *f;
 	const void *finalized;
+	/* no need to do add empty ones all the time,
+	   just take the last one... */
+	static const struct parameter *empty = NULL;
+
+	if( parameter == NULL && empty != NULL ) {
+		return empty;
+	}
 
 	for( p = parameter ; p != NULL ; p = p->next ) {
 		count++;
-		assert( !p->isspecial || p->special.iftrue == NULL ||
+		assert( !p->isspecial || !p->special.isjunction ||
 				p->special.finalized != NULL );
 	}
 	prepared = calloc(count + 1, sizeof(struct parameter));
@@ -2008,6 +2020,9 @@ static const void *parameter_finalize(struct parser *parser, struct unfinished_p
 			(count + 1)*sizeof(struct parameter),
 			__alignof__(struct parameter));
 	free(prepared);
+	/* remember last terminator as next empty jump target */
+	empty = finalized;
+	empty += count;
 	return finalized;
 }
 
@@ -2070,7 +2085,18 @@ static const void *variable_finalize(struct parser *parser, struct variable *v) 
 					p = p->next;
 					continue;
 				}
+				if( !p->special.isjunction ) {
+					p = p->next;
+					continue;
+				}
 				if( p->special.iftrue == NULL ) {
+					/* empty branch still needs
+					   an end command, but no recursion
+					   for that */
+					p->special.finalized =
+							parameter_finalize(
+								parser,
+								NULL);
 					p = p->next;
 					continue;
 				}
