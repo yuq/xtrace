@@ -1,0 +1,437 @@
+#  This file is part of "xtrace"
+#  Copyright (C) 2005 Bernhard R. Link
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2 as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# This file is based on the
+# 		  X Window System Protocol
+# 		   X Consortium Standard
+# 		 X Version 11, Release 6.4
+#
+# 		    Robert W. Scheifler
+# 		     X Consortium, Inc.
+#
+# with the following trademark and copyright notices and acknowlegdgments:
+##
+## X Window System is a trademark of X Consortium, Inc.
+##
+## Copyright (C) 1986, 1987, 1988, 1994 X Consortium
+##
+## Permission is hereby granted, free of charge, to any person
+## obtaining a copy of this software and associated documenta-
+## tion files (the ``Software''), to deal in the Software with-
+## out restriction, including without limitation the rights to
+## use, copy, modify, merge, publish, distribute, sublicense,
+## and/or sell copies of the Software, and to permit persons to
+## whom the Software is furnished to do so, subject to the fol-
+## lowing conditions:
+##
+## The above copyright notice and this permission notice shall
+## be included in all copies or substantial portions of the
+## Software.
+##
+## THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY
+## KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+## WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PUR-
+## POSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE X CONSOR-
+## TIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+## WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+## OR OTHER DEALINGS IN THE SOFTWARE.
+##
+## Except as contained in this notice, the name of the X Con-
+## sortium shall not be used in advertising or otherwise to
+## promote the sale, use or other dealings in this Software
+## without prior written authorization from the X Consortium.
+##
+## 		      Acknowledgments
+##
+## The primary contributers to the X11 protocol are:
+##
+##      Dave Carver (Digital HPW)
+##      Branko Gerovac (Digital HPW)
+##      Jim Gettys (MIT/Project Athena, Digital)
+##      Phil Karlton (Digital WSL)
+##      Scott McGregor (Digital SSG)
+##      Ram Rao (Digital UEG)
+##      David Rosenthal (Sun)
+##      Dave Winchell (Digital UEG)
+##
+## The implementors of initial server who provided useful input
+## are:
+##
+##      Susan Angebranndt (Digital)
+##      Raymond Drewry (Digital)
+##      Todd Newman (Digital)
+##
+## The invited reviewers who provided useful input are:
+##
+##      Andrew Cherenson (Berkeley)
+##      Burns Fisher (Digital)
+##      Dan Garfinkel (HP)
+##      Leo Hourvitz (Next)
+##      Brock Krizan (HP)
+##      David Laidlaw (Stellar)
+##      Dave Mellinger (Interleaf)
+##      Ron Newman (MIT)
+##      John Ousterhout (Berkeley)
+##      Andrew Palay (ITC CMU)
+##      Ralph Swick (MIT)
+##      Craig Taylor (Sun)
+##      Jeffery Vroom (Stellar)
+##
+
+NEEDS "requests.proto"
+NAMESPACE core
+
+EVENTS
+UNKNOWN
+UNKNOWN
+KeyPress
+KeyRelease
+ButtonPress
+ButtonRelease
+MotionNotify
+EnterNotify
+LeaveNotify
+FocusIn
+FocusOut
+KeymapNotify
+Expose
+GraphicsExposure
+NoExposure
+VisibilityNotify
+CreateNotify
+DestroyNotify
+UnmapNotify
+MapNotify
+MapRequest
+ReparentNotify
+ConfigureNotify
+ConfigureRequest
+GravityNotify
+ResizeRequest
+CirculateNotify
+CirculateRequest
+PropertyNotify
+SelectionClear
+SelectionRequest
+SelectionNotify
+ColormapNotify
+ClientMessage
+MappingNotify
+END
+
+templateEVENT Key
+1	keycode	KEYCODE
+4	time	TIMESTAMP
+8	root	WINDOW
+12	event	WINDOW
+16	child	WINDOW constants none
+20	root-x	INT16
+22	root-y	INT16
+24	event-x	INT16
+26	event-y	INT16
+28	state	SETofKEYBUTMASK
+30	same-screen	BOOL
+END
+
+EVENT KeyPress ALIASES Key
+EVENT KeyRelease ALIASES Key
+
+templateEVENT Button
+1	button	BUTTON
+4	time	TIMESTAMP
+8	root	WINDOW
+12	event	WINDOW
+16	child	WINDOW constants none
+20	root-x	INT16
+22	root-y	INT16
+24	event-x	INT16
+26	event-y	INT16
+28	state	SETofKEYBUTMASK
+30	same-screen	BOOL
+END
+
+EVENT ButtonPress ALIASES Button
+EVENT ButtonRelease ALIASES Button
+
+CONSTANTS normalhint
+0	Normal
+1	Hint
+END
+
+EVENT MotionNotify
+1	detail	ENUM8 normalhint
+4	time	TIMESTAMP
+8	root	WINDOW
+12	event	WINDOW
+16	child	WINDOW constants none
+20	root-x	INT16
+22	root-y	INT16
+24	event-x	INT16
+26	event-y	INT16
+28	state	SETofKEYBUTMASK
+30	same-screen	BOOL
+END
+
+CONSTANTS enterdetail
+0	Ancestor
+1	Virtual
+2	Inferior
+3	Nonlinear
+4	NonlinearVirtual
+5	Pointer
+6	PointerRoot
+7	None
+END
+CONSTANTS grabmode
+0	Normal
+1	Grab
+2	Ungrab
+3	WhileGrabbed
+END
+BITMASK focusscreen
+0x01	focus
+0x02	same-screen
+0xFC	unused
+END
+
+EVENT EnterNotify
+1	detail	ENUM8 enterdetail
+30	mode	ENUM8 grabmode
+31	flags	BITMASK8 focusscreen
+4	time	TIMESTAMP
+8	root	WINDOW
+12	event	WINDOW
+16	child	WINDOW constants none
+20	root-x	INT16
+22	root-y	INT16
+24	event-x	INT16
+26	event-y	INT16
+28	state	SETofKEYBUTMASK
+END
+EVENT LeaveNotify ALIASES EnterNotify
+
+EVENT FocusIn
+1	detail	ENUM8 enterdetail
+4	event	WINDOW
+8	mode	ENUM8 grabmode
+END
+EVENT FocusOut ALIASES FocusIn
+
+EVENT KeymapNotify
+1	"keys(0-7 omitted)"	LISTofCARD8
+END
+
+EVENT Expose
+4	window	WINDOW
+8	x	UINT16
+10	y	UINT16
+12	width	UINT16
+14	height	UINT16
+16	count	CARD16
+END
+
+EVENT GraphicsExposure
+4	drawable	DRAWABLE
+8	x	UINT16
+10	y	UINT16
+12	width	UINT16
+13	height	UINT16
+14	minor-opcode	CARD16
+18	count	CARD16
+20	major-opcode	CARD8
+END
+
+EVENT NoExposure
+4	drawable	DRAWABLE
+8	minor-opcode	CARD16
+10	major-opcode	CARD8
+END
+
+CONSTANTS obscure
+0	Unobscured
+1	PartiallyObscured
+2	FullyObscured
+END
+
+EVENT VisibilityNotify
+4	window	WINDOW
+8	state	ENUM8 obscure
+END
+
+EVENT CreateNotify
+4	parent	WINDOW
+8	window	WINDOW
+12	x	INT16
+14	y	INT16
+16	width	UINT16
+18	height	UINT16
+20	border-width	UINT16
+22	override-redirect	BOOL
+END
+
+EVENT DestroyNotify
+4	event	WINDOW
+8	window	WINDOW
+END
+
+EVENT UnmapNotify
+4	event	WINDOW
+8	window	WINDOW
+12	from-configure	BOOL
+END
+
+EVENT MapNotify
+4	event	WINDOW
+8	window	WINDOW
+12	override-redirect	BOOL
+END
+
+EVENT MapRequest
+4	parent	WINDOW
+8	window	WINDOW
+END
+
+EVENT ReparentNotify
+4	event	WINDOW
+8	window	WINDOW
+12	parent	WINDOW
+16	x	INT16
+18	y	INT16
+20	override-redirect	BOOL
+END
+
+EVENT ConfigureNotify
+4	event	WINDOW
+8	window	WINDOW
+12	above-sibling	WINDOW constants none
+16	x	INT16
+18	y	INT16
+20	width	UINT16
+22	height	UINT16
+24	border-width	UINT16
+26	override-redirect	BOOL
+END
+
+BITMASK configure_mask
+0x0001	x
+0x0002	y
+0x0004	width
+0x0008	height
+0x0010	border-width
+0x0020	sibling
+0x0040	stack-mode
+END
+
+EVENT ConfigureRequest
+4	parent	WINDOW
+8	window	WINDOW
+26	value-mask	BITMASK16 configure_mask
+1	stack-mode	ENUM8 stack_mode
+12	sibling	WINDOW constants none
+16	x	INT16
+18	y	INT16
+20	width	UINT16
+22	height	UINT16
+24	border-width	UINT16
+END
+
+EVENT GravityNotify
+4	event	WINDOW
+8	window	WINDOW
+12	x	INT16
+14	y	INT16
+END
+
+EVENT ResizeRequest
+4	window	WINDOW
+8	width	UINT16
+10	height	UINT16
+END
+
+CONSTANTS topbottom
+0	Top
+1	Bottom
+END
+
+EVENT CirculateNotify
+4	event	WINDOW
+8	window	WINDOW
+16	place	ENUM8 topbottom
+END
+EVENT CirculateRequest ALIASES CirculateNotify
+
+CONSTANTS newdeleted
+0	NewValue
+1	Deleted
+END
+
+EVENT PropertyNotify
+4	window	WINDOW
+8	atom	ATOM
+12	time	TIMESTAMP
+16	state	ENUM8 newdeleted
+END
+
+EVENT SelectionClear
+4	time	TIMESTAMP
+8	owner	WINDOW
+12	selection	ATOM
+END
+
+
+EVENT SelectionRequest
+4	time	TIMESTAMP constants curtime
+8	owner	WINDOW
+12	requestor	WINDOW
+16	selection	ATOM
+20	target	ATOM
+24	property	ATOM constants none
+END
+
+EVENT SelectionNotify ALIASES SelectionRequest
+
+CONSTANTS uninstalledinstalled
+0	Uninstalled
+1	Installed
+END
+
+EVENT ColormapNotify
+4	window	WINDOW
+8	colormap	COLORMAP constants none
+12	new	BOOL
+13	state	ENUM8 uninstalledinstalled
+END
+
+EVENT ClientMessage
+1	format	CARD8
+4	window	WINDOW
+8	type	ATOM
+12	data	LISTofCARD8
+END
+
+CONSTANTS modkeypoi
+0	Modifier
+1	Keyboard
+2	Pointer
+END
+
+EVENT MappingNotify
+4	request	ENUM8 modkeypoi
+5	first-keycode	KEYCODE
+6	count	CARD8
+END
+
+EOF

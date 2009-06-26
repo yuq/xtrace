@@ -32,6 +32,10 @@
 #include <getopt.h>
 
 #include "xtrace.h"
+#ifndef OLDSTYLE
+#include "stringlist.h"
+#include "translate.h"
+#endif
 
 FILE *out;
 
@@ -423,6 +427,16 @@ int main(int argc, char *argv[]) {
 	const char *msg;
 	int c;
 	const char *out_authfile=NULL, *in_authfile = NULL;
+#ifndef OLDSTYLE
+	struct parser *parser;
+#endif
+
+#ifndef OLDSTYLE
+	stringlist_init();
+	parser = parser_init();
+	if( parser == NULL )
+		return EXIT_FAILURE;
+#endif
 
 	out = stdout;
 	while( (c=getopt_long(argc,argv,"+d:D:f:F:cnWskiewm:o:b",longoptions,NULL)) != -1 ) {
@@ -524,6 +538,13 @@ argv[0]);
 		}
 
 	}
+#ifndef OLDSTYLE
+	translate(parser, "all.proto");
+	finalize_everything(parser);
+	if( !parser_free(parser) ) {
+		return EXIT_FAILURE;
+	}
+#endif
 
 	signal(SIGPIPE,SIG_IGN);
 	if( out_displayname == NULL ) {
@@ -574,5 +595,8 @@ argv[0]);
 			return EXIT_FAILURE;
 		}
 	}
+#ifndef OLDSTYLE
+	stringlist_done();
+#endif
 	return r;
 }

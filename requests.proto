@@ -1,0 +1,1798 @@
+#  This file is part of xtrace
+#  Copyright (C) 2005 Bernhard R. Link
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2 as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not write to the Free Software
+#  Foundation Inc. 51 Franklin St Fifth Floor Boston MA  02110-1301  USA
+
+# This file is based on the
+# 		  X Window System Protocol
+# 		   X Consortium Standard
+# 		 X Version 11 Release 6.4
+#
+# 		    Robert W. Scheifler
+# 		     X Consortium Inc.
+#
+# with the following trademark and copyright notices and acknowlegdgments:
+#
+# X Window System is a trademark of X Consortium Inc.
+#
+# Copyright (C) 1986 1987 1988 1994 X Consortium
+#
+# Permission is hereby granted free of charge to any person
+# obtaining a copy of this software and associated documenta-
+# tion files (the ``Software'') to deal in the Software with-
+# out restriction including without limitation the rights to
+# use copy modify merge publish distribute sublicense
+# and/or sell copies of the Software and to permit persons to
+# whom the Software is furnished to do so subject to the fol-
+# lowing conditions:
+#
+# The above copyright notice and this permission notice shall
+# be included in all copies or substantial portions of the
+# Software.
+#
+# THE SOFTWARE IS PROVIDED ``AS IS'' WITHOUT WARRANTY OF ANY
+# KIND EXPRESS OR IMPLIED INCLUDING BUT NOT LIMITED TO THE
+# WARRANTIES OF MERCHANTABILITY FITNESS FOR A PARTICULAR PUR-
+# POSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE X CONSOR-
+# TIUM BE LIABLE FOR ANY CLAIM DAMAGES OR OTHER LIABILITY
+# WHETHER IN AN ACTION OF CONTRACT TORT OR OTHERWISE ARISING
+# FROM OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+# OR OTHER DEALINGS IN THE SOFTWARE.
+#
+# Except as contained in this notice the name of the X Con-
+# sortium shall not be used in advertising or otherwise to
+# promote the sale use or other dealings in this Software
+# without prior written authorization from the X Consortium.
+#
+# 		      Acknowledgments
+#
+# The primary contributers to the X11 protocol are:
+#
+#      Dave Carver (Digital HPW)
+#      Branko Gerovac (Digital HPW)
+#      Jim Gettys (MIT/Project Athena Digital)
+#      Phil Karlton (Digital WSL)
+#      Scott McGregor (Digital SSG)
+#      Ram Rao (Digital UEG)
+#      David Rosenthal (Sun)
+#      Dave Winchell (Digital UEG)
+#
+# The implementors of initial server who provided useful input
+# are:
+#
+#      Susan Angebranndt (Digital)
+#      Raymond Drewry (Digital)
+#      Todd Newman (Digital)
+#
+# The invited reviewers who provided useful input are:
+#
+#      Andrew Cherenson (Berkeley)
+#      Burns Fisher (Digital)
+#      Dan Garfinkel (HP)
+#      Leo Hourvitz (Next)
+#      Brock Krizan (HP)
+#      David Laidlaw (Stellar)
+#      Dave Mellinger (Interleaf)
+#      Ron Newman (MIT)
+#      John Ousterhout (Berkeley)
+#      Andrew Palay (ITC CMU)
+#      Ralph Swick (MIT)
+#      Craig Taylor (Sun)
+#      Jeffery Vroom (Stellar)
+
+
+NAMESPACE core
+
+REQUESTS
+UNKNOWN
+CreateWindow
+ChangeWindowAttributes
+GetWindowAttributes RESPONDS
+DestroyWindow
+DestroySubwindows
+ChangeSaveSet
+ReparentWindow
+MapWindow /*8*/
+MapSubwindows
+UnmapWindow
+UnmapSubwindows
+ConfigureWindow
+CirculateWindow
+GetGeometry RESPONDS
+QueryTree RESPONDS
+InternAtom RESPONDS SPECIAL
+GetAtomName RESPONDS
+ChangeProperty
+DeleteProperty
+GetProperty RESPONDS /* 20*/
+ListProperties RESPONDS
+SetSelectionOwner
+GetSelectionOwner RESPONDS
+ConvertSelection
+SendEvent
+GrabPointer RESPONDS
+UngrabPointer
+GrabButton
+UngrabButton
+ChangeActivePointerGrab /* 30 */
+GrabKeyboard RESPONDS
+UngrabKeyboard
+GrabKey
+UngrabKey
+AllowEvents
+GrabServer
+UngrabServer
+QueryPointer RESPONDS
+GetMotionEvents RESPONDS
+TranslateCoordinates RESPONDS /*40*/
+WarpPointer
+SetInputFocus
+GetInputFocus RESPONDS
+QueryKeymap RESPONDS
+OpenFont
+CloseFont
+QueryFont RESPONDS
+QueryTextExtents RESPONDS
+ListFonts RESPONDS
+ListFontsWithInfo RESPONDS SPECIAL
+SetFontPath
+GetFontPath RESPONDS
+CreatePixmap
+FreePixmap
+CreateGC
+ChangeGC
+CopyGC
+SetDashes
+SetClipRectangles
+FreeGC /*60*/
+ClearArea
+CopyArea
+CopyPlane
+PolyPoint
+PolyLine
+PolySegment
+PolyRectangle
+PolyArc
+FillPoly
+PolyFillRectangle
+PolyFillArc
+PutImage
+GetImage RESPONDS
+PolyText8
+PolyText16
+ImageText8
+ImageText16
+CreateColormap
+FreeColormap
+CopyColormapAndFree
+InstallColormap
+UninstallColormap
+ListInstalledColormaps RESPONDS
+AllocColor RESPONDS
+AllocNamedColor RESPONDS
+AllocColorCells RESPONDS
+AllocColorPlanes RESPONDS
+FreeColors
+StoreColors
+StoreNamedColor
+QueryColors RESPONDS
+LookupColor RESPONDS
+CreateCursor
+CreateGlyphCursor
+FreeCursor
+RecolorCursor
+QueryBestSize RESPONDS
+QueryExtension RESPONDS SPECIAL
+ListExtensions RESPONDS
+ChangeKeyboardMapping /*100*/
+GetKeyboardMapping RESPONDS
+ChangeKeyboardControl
+GetKeyboardControl RESPONDS
+Bell
+ChangePointerControl
+GetPointerControl RESPONDS
+SetScreenSaver
+GetScreenSaver RESPONDS
+ChangeHosts
+ListHosts RESPONDS
+SetAccessControl
+SetCloseDownMode
+KillClient
+RotateProperties
+ForceScreenSaver /*115*/
+SetPointerMapping RESPONDS
+GetPointerMapping RESPONDS
+SetModifierMapping RESPONDS
+GetModifierMapping RESPONDS
+END
+
+CONSTANTS function
+0	Clear
+1	And
+2	AndReverse
+3	Copy
+4	AndInverted
+5	NoOp
+6	Xor
+7	Or
+8	Nor
+9	Equiv
+10	Invert
+11	OrReverse
+12	CopyInverted
+13	OrInverted
+14	Nand
+15	Set
+END
+
+CONSTANTS line_style
+0	Solid
+1	OnOffDash
+2	DoubleDash
+END
+
+CONSTANTS cap_style
+0	NotLast
+1	Butt
+2	Round
+3	Projecting
+END
+
+CONSTANTS join_style
+0	Miter
+1	Round
+2	Bevel
+END
+
+CONSTANTS fill_style
+0	Solid
+1	Tiled
+2	Stippled
+3	OpaqueStippled
+END
+
+CONSTANTS fill_rule
+0	EvenOdd
+1	Winding
+END
+
+CONSTANTS subwindow_mode
+0	ClipByChildren
+1	IncludeInferiors
+END
+TYPE SubwindowMode	ENUM8 subwindow_mode
+
+CONSTANTS arc_mode
+0	Chord
+1	PieSlice
+END
+
+CONSTANTS insert_delete
+0	Insert
+1	Delete
+END
+
+CONSTANTS windowclass
+0	CopyFromParent
+1	InputOutput
+2	InputOnly
+END
+
+CONSTANTS copyfromparent
+0	CopyFromParent
+END
+
+CONSTANTS store
+0	NotUseful
+1	WhenMapped
+2	Always
+END
+
+CONSTANTS bitgravity
+0	Forget
+1	NorthWest
+2	North
+3	NorthEast
+4	West
+5	Center
+6	East
+7	SouthWest
+8	South
+9	SouthEast
+10	Static
+END
+
+CONSTANTS wingravity
+0	Unmap
+1	NorthWest
+2	North
+3	NorthEast
+4	West
+5	Center
+6	East
+7	SouthWest
+8	South
+9	SouthEast
+10	Static
+END
+
+TYPE WINGRAVITY	ENUM8	wingravity
+TYPE BITGRAVITY	ENUM8	bitgravity
+
+CONSTANTS mapstate
+0		Unmapped
+1		Unviewable
+2		Viewable
+END
+
+CONSTANTS none
+0		None
+END
+
+CONSTANTS nonerelative
+0		None
+1		ParentRelative
+END
+
+CONSTANTS any
+0		any
+END
+
+BITMASK setofevent
+0x00000001	KeyPress
+0x00000002	KeyRelease
+0x00000004	ButtonPress
+0x00000008	ButtonRelease
+0x00000010	EnterWindow
+0x00000020	LeaveWindow
+0x00000040	PointerMotion
+0x00000080	PointerMotionHint
+0x00000100	Button1Motion
+0x00000200	Button2Motion
+0x00000400	Button3Motion
+0x00000800	Button4Motion
+0x00001000	Button5Motion
+0x00002000	ButtonMotion
+0x00004000	KeymapState
+0x00008000	Exposure
+0x00010000	VisibilityChange
+0x00020000	StructureNotify
+0x00040000	ResizeRedirect
+0x00080000	SubstructureNotify
+0x00100000	SubstructureRedirect
+0x00200000	FocusChange
+0x00400000	PropertyChange
+0x00800000	ColormapChange
+0x01000000	OwnerGrabButton
+END
+
+TYPE SETofEVENT BITMASK32 setofevent
+TYPE SETofDEVICEEVENT SETofEVENT
+TYPE SETofPOINTEREVENT SETofEVENT
+
+BITMASK setofkeybutmask
+0x0001	Shift
+0x0002	Lock
+0x0004	Control
+0x0008	Mod1
+0x0010	Mod2
+0x0020	Mod3
+0x0040	Mod4
+0x0080	Mod5
+0x0100	Button1
+0x0200	Button2
+0x0400	Button3
+0x0800	Button4
+0x1000	Button5
+0x8000	AnyModifier
+END
+TYPE SETofKEYBUTMASK	BITMASK16	setofkeybutmask
+TYPE SETofKEYMASK	SETofKEYBUTMASK
+
+CONSTANTS bool
+0	false
+1	true
+END
+TYPE BOOL	ENUM8 bool
+
+CONSTANTS circulate
+0	RaiseLowest
+1	LowerHighest
+END
+
+CONSTANTS change_mode
+0	Replace
+1	Prepend
+2	Append
+END
+
+CONSTANTS curtime
+ 0	CurrentTime
+END
+
+CONSTANTS choosewindow
+0	PointerWindow
+1	InputFocus
+END
+
+CONSTANTS synmode
+0	Synchronous
+1	Asynchronous
+END
+
+CONSTANTS grabsuccess
+0	Success
+1	AlreadyGrabbed
+2	InvalidTime
+3	NotViewable
+4	Frozen
+END
+
+CONSTANTS button
+0	"any button"
+1	"left button"
+2	"middle button"
+3	"right button"
+END
+TYPE BUTTON	CARD8 constants button
+
+CONSTANTS allowevents
+0	AsyncPointer
+1	SyncPointer
+2	ReplayPointer
+3	AsyncKeyboard
+4	SyncKeyboard
+5	ReplayKeyboard
+6	AsyncBoth
+7	SyncBoth
+END
+
+CONSTANTS revertto
+0	None
+1	PointerRoot
+2	Parent
+3	FollowKeyboard
+END
+
+CONSTANTS noneroot
+0	None
+1	PointerRoot
+END
+
+BITMASK copygcvalues
+0x00000001	function
+0x00000002	plane-mask
+0x00000004	foreground
+0x00000008	background
+0x00000010	line-width
+0x00000020	line-style
+0x00000040	cap-style
+0x00000080	join-style
+0x00000100	fill-style
+0x00000200	fill-rule
+0x00000400	tile
+0x00000800	stipple
+0x00001000	tile-stipple-x-origin
+0x00002000	tile-stipple-y-origin
+0x00004000	font
+0x00008000	subwindow-mode
+0x00010000	graphics-exposures
+0x00020000	clip-x-origin
+0x00040000	clip-y-origin
+0x00080000	clip-mask
+0x00100000	dash-offset
+0x00200000	dashes
+0x00400000	arc-mode
+END
+
+CONSTANTS direction
+0	LeftToRight
+1	RightToLeft
+END
+
+CONSTANTS rect_ordering
+0	UnSorted
+1	YSorted
+2	YXSorted
+3	YXBanded
+END
+
+CONSTANTS coordinate_mode
+0	Origin
+1	Previous
+END
+
+CONSTANTS shape
+0	Complex
+1	Nonconvex
+2	Convex
+END
+
+CONSTANTS bitmap_format
+0	Bitmap
+1	XYPixmap
+2	ZPixmap
+END
+
+CONSTANTS alloc
+0	None
+1	All
+END
+
+BITMASK doredgreenblue
+0x01	red
+0x02	green
+0x04	blue
+END
+
+CONSTANTS sizeclass
+0	Cursor
+1	Tile
+2	Stipple
+END
+
+BITMASK keyboardvaluemask
+0x0001	key-click-percent
+0x0002	bell-percent
+0x0004	bell-pitch
+0x0008	bell-duration
+0x0010	led
+0x0020	led-mode
+0x0040	key
+0x0080	auto-repeat-mode
+END
+
+CONSTANTS nyd
+0	No
+1	Yes
+2	Default
+END
+
+CONSTANTS insertdelete
+0	Insert
+1	Delete
+END
+
+CONSTANTS family
+0	Internet
+1	DECnet
+2	Chaos
+END
+
+CONSTANTS disabledenabled
+0	Disabled
+1	Enabled
+END
+
+CONSTANTS disableenable
+0	Disable
+1	Enable
+END
+
+CONSTANTS closemode
+0	Destroy
+1	RetainPermanent
+2	RetainTemporary
+END
+
+CONSTANTS alltemporary
+0	AllTemporary
+END
+
+CONSTANTS resetactivate
+0	Reset
+1	Activate
+END
+
+CONSTANTS successbusyfailed
+0	Success
+1	Busy
+2	Failed
+END
+
+CONSTANTS stack_mode
+0	Above
+1	Below
+2	TopIf
+3	BottomIf
+4	Opposite
+END
+
+TYPE WINDOW	CARD32
+TYPE VISUALID	CARD32
+TYPE COLORMAP	CARD32
+TYPE PIXMAP	CARD32
+TYPE CURSOR	CARD32
+TYPE COUNT8	STORE8
+TYPE COUNT16	STORE16
+TYPE COUNT32	STORE32
+
+templateREQUEST Empty
+END
+
+VALUES WindowAttributes
+0x00000001	background-pixmap	PIXMAP constants nonerelative
+0x00000002	background-pixel	CARD32
+0x00000004	border-pixmap		PIXMAP constants copyfromparent
+0x00000008	border-pixel		CARD32
+0x00000010	bit-gravity		ENUM8 bitgravity
+0x00000020	win-gravity		ENUM8 wingravity
+0x00000040	backing-store		ENUM8 store
+0x00000080	backing-planes		CARD32
+0x00000100	backing-pixel		CARD32
+0x00000200	override-redirect	BOOL
+0x00000400	save-under		BOOL
+0x00000800	event-mask		SETofEVENT
+0x00001000	do-not-propagate-mask	SETofDEVICEEVENT
+0x00002000	colormap		COLORMAP constants copyfromparent
+0x00004000	cursor			CURSOR constants none
+END
+
+REQUEST CreateWindow
+ 1	depth	CARD8
+ 4	window	WINDOW
+ 8 	parent	WINDOW
+12	x 	INT16
+14 	y 	INT16
+16  	width 	UINT16
+18 	height	UINT16
+20 	border-width UINT16
+22 	class	ENUM16 windowclass
+24 	visual	VISUALID constants copyfromparent
+28 	value-mask	STORE32
+32 	value-list	LISTofWindowAttributes
+END
+
+REQUEST ChangeWindowAttributes
+4	window 	WINDOW
+8 	value-mask	STORE32
+12 	value-list	LISTofWindowAttributes
+END
+
+templateREQUEST WINDOW
+4	window	WINDOW
+END
+
+REQUEST GetWindowAttributes ALIASES WINDOW
+
+RESPONSE GetWindowAttributes
+1	backing-store	ENUM8 store
+8	visual  	VISUALID
+12	class   	ENUM16 windowclass
+14	bit-gravity	BITGRAVITY
+15	win-gravity	WINGRAVITY
+16	backing-planes	CARD32
+20	backing-pixel	CARD32
+24	save-under	BOOL
+25	map-is-installed	BOOL
+26	map-state	ENUM8 mapstate
+27	override-redirect	BOOL
+28	colormap	COLORMAP constants none
+32	all-event-masks	SETofEVENT
+36	your-event-mask	SETofEVENT
+38	do-not-propagate-mask	SETofDEVICEEVENT
+40	unused		CARD16
+END
+
+REQUEST ChangeSaveSet
+1	mode	ENUM8 insert_delete
+4	window	WINDOW
+END
+
+REQUEST ReparentWindow
+4	window	WINDOW
+8	parent	WINDOW
+12	x	INT16
+14	y	INT16
+END
+
+VALUES ConfigureWindow
+0x0001 x	INT16
+0x0002 y	INT16
+0x0004 width	UINT16
+0x0008 height	UINT16
+0x0010 border-width	UINT16
+0x0020 sibling  	WINDOW
+0x0040 stack-mode 	ENUM8 stack_mode
+END
+
+REQUEST ConfigureWindow
+4	window  	WINDOW
+8	value-mask	STORE16
+12	values  	LISTofConfigureWindow
+END
+
+
+REQUEST CirculateWindow
+1	direction	ENUM8 circulate
+4	window  	WINDOW
+END
+
+TYPE DRAWABLE CARD32
+
+REQUEST GetGeometry
+4	drawable	DRAWABLE
+END
+
+RESPONSE GetGeometry
+1	depth	CARD8
+8	root	WINDOW
+12	x	INT16
+14	y	INT16
+16	width	UINT16
+18	height	UINT16
+20	border-width	UINT16
+END
+
+REQUEST QueryTree ALIASES WINDOW
+
+TYPE LISTofWINDOW LISTofCARD32
+
+RESPONSE QueryTree
+8	root		WINDOW
+12	parent  	WINDOW constants none
+16	count		COUNT16
+32	children	LISTofWINDOW
+END
+
+REQUEST InternAtom
+1	only-if-exists	BOOL
+4	length  	COUNT16
+8	name    	STRING8
+END
+
+RESPONSE InternAtom
+8	atom	ATOM constants none
+END
+
+templateREQUEST Atom
+4	atom	ATOM
+END
+
+REQUEST GetAtomName ALIASES Atom
+
+RESPONSE GetAtomName
+8	length	COUNT16
+32	name	STRING8
+END
+
+REQUEST ChangeProperty
+1	mode		ENUM8 change_mode
+4	window  	WINDOW
+8	property	ATOM
+12	type		ATOM
+16	format  	FORMAT8
+20	length  	COUNT32
+IF 12 ATOM "STRING"
+24	data		STRING8
+ELSEIF 12 ATOM "ATOM"
+24	data		LISTofATOM
+ELSE
+24	data		LISTofFormat
+END
+
+REQUEST DeleteProperty
+4	window  	WINDOW
+8	property	ATOM
+END
+
+REQUEST GetProperty
+1	delete  	BOOL
+4	window  	WINDOW
+8	property	ATOM
+12	type		ATOM constants any
+16	long-offset	CARD32
+20	long-length	CARD32
+END
+
+RESPONSE GetProperty
+1	format  	FORMAT8
+8	type		ATOM constants none
+12	bytes-after	CARD32
+16	length  	COUNT32
+IF 8 ATOM "STRING"
+32	data		STRING8
+ELSEIF 8 ATOM "ATOM"
+32	data		LISTofATOM
+ELSE
+32	data		LISTofFormat
+END
+
+REQUEST ListProperties ALIASES WINDOW
+RESPONSE ListProperties
+8	count  	COUNT16
+32	atoms  	LISTofATOM
+END
+
+TYPE TIMESTAMP CARD32
+REQUEST SetSelectionOwner
+4	owner 		WINDOW constants none
+8	selection	ATOM
+12	time		TIMESTAMP constants curtime
+END
+
+REQUEST GetSelectionOwner ALIASES Atom
+
+RESPONSE GetSelectionOwner
+8	owner	WINDOW constants none
+END
+
+REQUEST ConvertSelection
+4	requestor	WINDOW
+8	selection	ATOM
+12	target 	ATOM
+16	property	ATOM constants none
+20	time		TIMESTAMP constants curtime
+END
+
+REQUEST SendEvent
+1	propagate	BOOL
+4	destination	WINDOW constants choosewindow
+8	event-mask	SETofEVENT
+12	event 		EVENT
+END
+
+REQUEST GrabPointer
+1	owner-events	BOOL
+4	grab-window	WINDOW
+8	event-mask	SETofPOINTEREVENT
+10	pointer-mode	ENUM8 synmode
+11	keyboard-mode	ENUM8 synmode
+12	confine-to	WINDOW constants none
+16	cursor  	CURSOR constants none
+20	time    	TIMESTAMP constants curtime
+END
+
+RESPONSE GrabPointer
+1	status	ENUM8 grabsuccess
+END
+
+templateREQUEST Timestamp
+4	time	TIMESTAMP constants curtime
+END
+REQUEST UngrabPointer ALIASES Timestamp
+
+REQUEST GrabButton
+1	owner-events	BOOL
+4	grab-window	WINDOW
+8	event-mask	SETofPOINTEREVENT
+10	pointer-mode	ENUM8 synmode
+11	keyboard-mode	ENUM8 synmode
+12	confine-to	WINDOW constants none
+16	cursor  	CURSOR constants none
+20	button  	BUTTON
+22	modifiers	SETofKEYMASK
+END
+
+REQUEST UngrabButton
+1	button  	BUTTON
+4	grab-window	WINDOW
+8	modifiers	SETofKEYMASK
+END
+
+REQUEST ChangeActivePointerGrab
+4	cursor  	CURSOR constants none
+8	time		TIMESTAMP constants curtime
+12	event-mask	SETofPOINTEREVENT
+END
+
+TYPE SYNMODE	CARD8 constants synmode
+
+REQUEST GrabKeyboard
+4	grab-window	WINDOW
+8	time		TIMESTAMP constants curtime
+12	pointer-mode	SYNMODE
+13	keyboard-mode	SYNMODE
+END
+
+RESPONSE GrabKeyboard ALIASES GrabPointer
+
+REQUEST UngrabKeyboard ALIASES Timestamp
+
+TYPE KEYCODE	CARD8
+
+REQUEST GrabKey
+1	owner-events	BOOL
+4	grab-window	WINDOW
+8	modifiers	SETofKEYMASK
+10	key		KEYCODE constants any
+11	pointer-mode	SYNMODE
+12	keyboard-mode	SYNMODE
+END
+
+REQUEST UngrabKey
+1	key		KEYCODE constants any
+4	grab-window	WINDOW
+8	modifiers	SETofKEYMASK
+END
+
+REQUEST AllowEvents
+1	mode	ENUM8 allowevents
+5	time	TIMESTAMP constants curtime
+END
+
+REQUEST QueryPointer ALIASES WINDOW
+
+RESPONSE QueryPointer
+1	same-screen	BOOL
+8	root		WINDOW
+12	child   	WINDOW constants none
+16	root-x  	INT16
+18	root-y  	INT16
+20	win-x   	INT16
+22	win-y   	INT16
+24	mask		SETofKEYBUTMASK
+END
+
+REQUEST GetMotionEvents
+4	window	WINDOW
+8	start	TIMESTAMP constants curtime
+12	stop	TIMESTAMP constants curtime
+END
+
+LIST TIMECOORD length 8
+0	time	TIMESTAMP
+4	x	INT16
+6	y	INT16
+END
+
+RESPONSE GetMotionEvents
+8	count	COUNT32
+32	events	LISTofTIMECOORD
+END
+
+REQUEST TranslateCoordinates
+4	src-window	WINDOW
+8	dst-window	WINDOW
+12	src-x 	 	INT16
+14	src-y   	INT16
+END
+
+RESPONSE TranslateCoordinates
+1	same-screen	BOOL
+8	child   	WINDOW constants none
+12	dst-x   	INT16
+14	dst-y   	INT16
+END
+
+REQUEST WarpPointer
+4	src-window	WINDOW constants none
+8	dst-window	WINDOW constants none
+12	src-x   	INT16
+14	src-y   	INT16
+16	src-width	UINT16
+18	src-height	UINT16
+20	dst-x   	INT16
+22	dst-y   	INT16
+END
+
+REQUEST SetInputFocus
+1	revert-to	ENUM8 revertto
+4	focus   	WINDOW constants noneroot
+8	time    	TIMESTAMP constants curtime
+END
+
+REQUEST GetInputFocus ALIASES Empty
+
+RESPONSE GetInputFocus
+1	revert-to	ENUM8 revertto
+8	focus   	WINDOW constants noneroot
+END
+
+REQUEST QueryKeymap ALIASES Empty
+
+RESPONSE QueryKeymap
+8	keys		LISTofCARD8
+END
+
+TYPE FONT CARD32
+REQUEST OpenFont
+4	fid    	FONT
+8	length	COUNT16
+12	name   	STRING8
+END
+
+templateREQUEST FONT
+4	font	FONT
+END
+REQUEST CloseFont ALIASES FONT
+REQUEST QueryFont ALIASES FONT
+
+#// What is that really?
+TYPE 32bits CARD32
+
+LIST FONTPROP length 8
+0	name	ATOM
+4	value	32bits
+END
+
+STRUCT CHARINFO length 12
+0	left-side-bearing	INT16
+2	right-side-bearing	INT16
+4	character-width 	INT16
+6	ascent        		INT16
+8	descent         	INT16
+10	attributes      	CARD16
+END
+
+RESPONSE QueryFont
+8	min-bounds		CHARINFO
+24	max-bounds		CHARINFO
+40	min-char-or-byte2	CARD16
+42	max-char-or-byte2	CARD16
+44	default-char		CARD16
+46	"#FONTPROPs"		COUNT16
+48	draw-direction  	ENUM8 direction
+49	min-byte1		CARD8
+50	max-byte1		CARD8
+51	all-chars-exist 	BOOL
+52	font-ascent		INT16
+54	font-descent		INT16
+60	properties		LISTofFONTPROP
+56	"#CHARINFOs"		COUNT32
+LATER	char-infos      	LISTofCHARINFO
+END
+
+TYPE FONTABLE CARD32
+TYPE STRING16 LISTofCARD16
+
+REQUEST QueryTextExtents
+1	lastunused	BOOL
+4	font   	FONTABLE
+8	string 	STRING16
+END
+
+RESPONSE QueryTextExtents
+1	draw-direction	ENUM8 direction
+8	font-ascent	INT16
+10	font-descent	INT16
+12	overall-ascent	INT16
+14	overall-descent	INT16
+16	overall-width	INT32
+20	overall-left	INT32
+24	overall-right	INT32
+END
+
+REQUEST ListFonts
+4	max-names	CARD16
+6	length  	COUNT16
+8	pattern 	STRING8
+END
+
+LIST STRING8 variable min-length 1
+0	c	COUNT8
+1	s	STRING8
+END
+
+RESPONSE ListFonts
+ 8	count	COUNT16
+32	names	LISTofSTRING8
+END
+
+REQUEST ListFontsWithInfo ALIASES ListFonts
+
+RESPONSE ListFontsWithInfo
+8	min-bounds		CHARINFO
+24	max-bounds		CHARINFO
+40	min-char-or-byte2	CARD16
+42	max-char-or-byte2	CARD16
+44	default-char		CARD16
+48	draw-direction  	ENUM8 direction
+49	min-byte1		CARD8
+50	max-byte1		CARD8
+51	all-chars-exist 	BOOL
+52	font-ascent		INT16
+54	font-descent		INT16
+56	replies-hint		CARD32
+46	count   		COUNT16
+60	properties		LISTofFONTPROP
+1	length          	COUNT8
+LATER	name            	STRING8
+END
+
+REQUEST SetFontPath
+4	count	CARD16
+8	path	LISTofSTRING8
+END
+
+REQUEST GetFontPath ALIASES Empty
+
+RESPONSE GetFontPath
+8	count	CARD16
+32	path	LISTofSTRING8
+END
+
+REQUEST CreatePixmap
+1	depth  	CARD8
+4	pid    	PIXMAP
+8	drawable	DRAWABLE
+12	width  	UINT16
+14	height 	UINT16
+END
+
+REQUEST FreePixmap
+4	drawable	DRAWABLE
+END
+
+TYPE GCONTEXT CARD32
+
+VALUES GCattributes
+0x00000001 function   	ENUM8 function
+0x00000002 plane-mask 	CARD32
+0x00000004 foreground 	CARD32
+0x00000008 background 	CARD32
+0x00000010 line-width 	UINT16
+0x00000020 line-style 	ENUM8 line_style
+0x00000040 cap-style  	ENUM8 cap_style
+0x00000080 join-style 	ENUM8 join_style
+0x00000100 fill-style 	ENUM8 fill_style
+0x00000200 fill-rule  	ENUM8 fill_rule
+0x00000400 tile       	PIXMAP
+0x00000800 stipple    	PIXMAP
+0x00001000 tile-stipple-x-origin INT16
+0x00002000 tile-stipple-y-origin INT16
+0x00004000 font         	FONT
+0x00008000 subwindow-mode	SubwindowMode
+0x00010000 graphics-exposures	BOOL
+0x00020000 clip-x-origin	INT16
+0x00040000 clip-y-origin	INT16
+0x00080000 clip-mask  	PIXMAP constants none
+0x00100000 dash-offset	UINT16
+0x00200000 dashes     	UINT8
+0x00400000 arc-mode   	ENUM8 arc_mode
+0x00800000 unknown22  	CARD32
+0x01000000 unknown23  	CARD32
+0x02000000 unknown24  	CARD32
+0x04000000 unknown25  	CARD32
+0x08000000 unknown26  	CARD32
+0x10000000 unknown28  	CARD32
+0x20000000 unknown29  	CARD32
+0x40000000 unknown30  	CARD32
+0x80000000 unknown31  	CARD32
+END
+
+REQUEST CreateGC
+4	cid		GCONTEXT
+8	drawable	DRAWABLE
+12	value-mask	STORE32
+16	values		LISTofGCattributes
+END
+
+REQUEST ChangeGC
+4	gc		GCONTEXT
+8	value-mask	STORE32
+12	values		LISTofGCattributes
+END
+
+REQUEST CopyGC
+4	src-gc  	GCONTEXT
+8	dst-gc  	GCONTEXT
+12	value-mask	BITMASK32 copygcvalues
+END
+
+REQUEST SetDashes
+4	gc		GCONTEXT
+8	dash-offset	CARD16
+10	count		COUNT16
+12	dashes  	LISTofCARD8
+END
+
+STRUCT RECTANGLE length 8
+0	x		INT16
+2	y		INT16
+4	w		UINT16
+6	h		UINT16
+END
+
+
+REQUEST SetClipRectangles
+1	ordering	ENUM8 rect_ordering
+4	gc		GCONTEXT
+8	clip-x-origin	INT16
+10	clip-y-origin	INT16
+12	rectangles	LISTofRECTANGLE
+END
+
+templateREQUEST GC
+4	gc	GCONTEXT
+END
+REQUEST FreeGC ALIASES GC
+
+REQUEST ClearArea
+1	exposures	BOOL
+4	window	WINDOW
+8	x	INT16
+10	y	INT16
+12	width	UINT16
+14	height	UINT16
+END
+
+REQUEST CopyArea
+4	src-drawable	DRAWABLE
+8	dst-drawable	DRAWABLE
+12	gc      	GCONTEXT
+16	src-x   	INT16
+18	src-y   	INT16
+20	dst-x   	INT16
+22	dst-y   	INT16
+24	width   	UINT16
+26	height  	UINT16
+END
+
+REQUEST CopyPlane
+4	src-drawable	DRAWABLE
+8	dst-drawable	DRAWABLE
+12	gc      	GCONTEXT
+16	src-x   	INT16
+18	src-y   	INT16
+20	dst-x   	INT16
+22	dst-y   	INT16
+24	width   	UINT16
+26	height  	UINT16
+28	bit-plane	CARD32
+END
+
+LIST POINT length 4
+0	x		INT16
+2	y		INT16
+END
+
+REQUEST PolyPoint
+1	coordinate-mode	ENUM8 coordinate_mode
+4	drawable	DRAWABLE
+8	gc		GCONTEXT
+12	points 	LISTofPOINT
+END
+
+REQUEST PolyLine
+1	coordinate-mode	ENUM8 coordinate_mode
+4	drawable	DRAWABLE
+8	gc		GCONTEXT
+12	points 	LISTofPOINT
+END
+
+LIST SEGMENT length 8
+0	x1		INT16
+2	y1		INT16
+4	x2		INT16
+6	y2		INT16
+END
+
+REQUEST PolySegment
+4	drawable	DRAWABLE
+8	gc		GCONTEXT
+12	segments	LISTofSEGMENT
+END
+
+REQUEST PolyRectangle
+4	drawable	DRAWABLE
+8	gc		GCONTEXT
+12	rectangles	LISTofRECTANGLE
+END
+
+LIST ARC length 12
+0	x	INT16
+2	y	INT16
+4	w	UINT16
+6	h	UINT16
+8	angle1	INT16
+10	angle2	INT16
+END
+
+REQUEST PolyArc
+4	drawable	DRAWABLE
+8	gc		GCONTEXT
+12	arcs		LISTofARC
+END
+
+REQUEST FillPoly
+4	drawable	DRAWABLE
+8	gc		GCONTEXT
+12	shape		ENUM8 shape
+13	coordinate-mode ENUM8 coordinate_mode
+16	points		LISTofPOINT
+END
+
+REQUEST PolyFillRectangle
+4	drawable	DRAWABLE
+8	gc		GCONTEXT
+12	rectangles	LISTofRECTANGLE
+END
+
+REQUEST PolyFillArc ALIASES PolyArc
+
+REQUEST PutImage
+1	format 	ENUM8 bitmap_format
+4	drawable	DRAWABLE
+8	gc     	GCONTEXT
+12	width  	UINT16
+14	height 	UINT16
+16	dst-x  	INT16
+18	dst-y  	INT16
+20	left-pad	CARD8
+21	depth  	CARD8
+END
+
+REQUEST GetImage
+1	format		ENUM8 bitmap_format
+4	drawable	DRAWABLE
+8	x		INT16
+10	y		INT16
+12	width   	UINT16
+14	height  	UINT16
+16	plane-mask	CARD32
+END
+RESPONSE GetImage
+1	depth 	CARD8
+4	"32-bit values got"	UINT32
+8	visual	VISUALID constants none
+END
+
+LIST PolyText8 variable min-length 3
+IF 0 CARD8 255
+1	font		BE32
+NEXT	5
+ELSEIF 0 CARD8 0
+# prevent a empty string fitting in the last 3 pad bytes
+# showing up. (as this 3 pad bytes could contain a
+# string of length 1 I think)
+ELSE
+1	delta  	INT8
+0	length 	COUNT8
+2	s      	STRING8
+END
+
+REQUEST PolyText8
+4	drawable	DRAWABLE
+8	gc		GCONTEXT
+12	x		INT16
+14	y		INT16
+16	texts  	LISTofPolyText8
+END
+
+LIST PolyText16 variable min-length 4
+IF 0 CARD8 255
+1	font		BE32
+NEXT	5
+ELSE
+1	delta  	INT8
+0	length 	COUNT8
+2	s      	STRING16
+END
+
+REQUEST PolyText16
+4	drawable	DRAWABLE
+8	gc		GCONTEXT
+12	x		INT16
+14	y		INT16
+16	texts   	LISTofPolyText16
+END
+
+REQUEST ImageText8
+4	drawable  	DRAWABLE
+8	gc      	GCONTEXT
+12	x       	INT16
+14	y       	INT16
+1	length  	COUNT8
+16	string  	STRING8
+END
+
+REQUEST ImageText16
+4	drawable	DRAWABLE
+8	gc 	GCONTEXT
+12	x 	INT16
+14	y	INT16
+1	length	COUNT8
+16	string	STRING16
+END
+
+REQUEST CreateColormap
+1	alloc	ENUM8 alloc
+4	mid	COLORMAP
+8	window	WINDOW
+12	visual	VISUALID
+END
+
+templateREQUEST COLORMAP
+4	cmap	COLORMAP
+END
+REQUEST FreeColormap ALIASES COLORMAP
+
+REQUEST CopyColormapAndFree
+4	mid    	COLORMAP
+8	src-cmap	COLORMAP
+END
+
+REQUEST InstallColormap ALIASES COLORMAP
+REQUEST UninstallColormap ALIASES COLORMAP
+REQUEST ListInstalledColormaps ALIASES WINDOW
+
+TYPE LISTofCOLORMAP LISTofCARD32
+
+RESPONSE ListInstalledColormaps
+8	count	COUNT16
+32	cmaps	LISTofCOLORMAP
+END
+
+REQUEST AllocColor
+4	cmap	COLORMAP
+8	red	CARD16
+10	green	CARD16
+12	blue	CARD16
+END
+
+RESPONSE AllocColor
+8	red	CARD16
+10	green	CARD16
+12	blue	CARD16
+16	pixel	CARD32
+END
+
+REQUEST AllocNamedColor
+4	cmap	COLORMAP
+8	count	COUNT16
+12	name	STRING8
+END
+
+RESPONSE AllocNamedColor
+8	pixel  	CARD32
+12	exact-red	CARD16
+14	exact-green	CARD16
+16	exact-blue	CARD16
+18	visual-red	CARD16
+20	visual-green	CARD16
+22	visual-blue	CARD16
+END
+
+REQUEST AllocColorCells
+1	contiguous	BOOL
+4	cmap		COLORMAP
+8	colors  	CARD16
+10	planes  	CARD16
+END
+
+RESPONSE AllocColorCells
+#// TODO: ?
+#/*
+#8	number of CARD32s in pixels	COUNT16
+#10	number of CARD32s in masks	COUNT16
+#32	pixels	LISTofCARD32
+#4n
+#32+	masks	LISTofCARD32
+#4m
+#*/
+32	"pixels and masks"	LISTofCARD32
+END
+
+REQUEST AllocColorPlanes
+1	contiguous	BOOL
+4	cmap		COLORMAP
+8	colors		CARD16
+10	reds		CARD16
+12	greens		CARD16
+14	blues		CARD16
+END
+
+RESPONSE AllocColorPlanes
+8	count		COUNT16
+12	red-mask	CARD32
+16	green-mask	CARD32
+20	blue-mask	CARD32
+32	pixels		LISTofCARD32
+END
+
+REQUEST FreeColors
+4	cmap		COLORMAP
+8	plane-mask	CARD32
+12	pixels		LISTofCARD32
+END
+
+LIST COLORITEM length 12
+0	pixel	CARD32
+4	red	CARD16
+6	green	CARD16
+8	blue	CARD16
+10	do	BITMASK8 doredgreenblue
+END
+
+REQUEST StoreColors
+4	cmap	COLORMAP
+8	items	LISTofCOLORITEM
+END
+
+REQUEST StoreNamedColor
+1	do	ENUM8 doredgreenblue
+4	cmap	COLORMAP
+8	pixel	CARD32
+12	"#"	COUNT16
+16	name	STRING8
+END
+
+REQUEST QueryColors
+4	cmap	COLORMAP
+12	pixels	LISTofCARD32
+END
+
+LIST RGB length 8
+0	r	CARD16
+2	g	CARD16
+4	b	CARD16
+END
+
+RESPONSE QueryColors
+8	"#"	COUNT16
+32	colors	LISTofRGB
+END
+
+REQUEST LookupColor
+4	cmap	COLORMAP
+8	"#"	COUNT16
+12	name	STRING8
+END
+
+RESPONSE LookupColor
+8	exact-red	CARD16
+10	exact-green	CARD16
+12	exact-blue	CARD16
+14	visual-red	CARD16
+16	visual-green	CARD16
+18	visual-blue	CARD16
+END
+
+REQUEST CreateCursor
+4	cid		CURSOR
+8	source		PIXMAP
+12	mask		PIXMAP constants none
+16	fore-red	CARD16
+18	fore-green	CARD16
+20	fore-blue	CARD16
+22	back-red	CARD16
+24	back-green	CARD16
+26	back-blue	CARD16
+28	x		UINT16
+30	y		UINT16
+END
+
+REQUEST CreateGlyphCursor
+4	cid		CURSOR
+8	source-font	FONT
+12	mask-font	FONT constants none
+16	source-char	CARD16
+18	mask-char	CARD16
+20	fore-red	CARD16
+22	fore-green	CARD16
+24	fore-blue	CARD16
+26	back-red	CARD16
+28	back-green	CARD16
+30	back-blue	CARD16
+END
+
+templateREQUEST CURSOR
+4	cursor 	CURSOR
+END
+REQUEST FreeCursor ALIASES CURSOR
+
+REQUEST RecolorCursor
+4	cursor		CURSOR
+8	fore-red	CARD16
+10	fore-green	CARD16
+12	fore-blue	CARD16
+14	back-red	CARD16
+16	back-green	CARD16
+18	back-blue	CARD16
+END
+
+REQUEST QueryBestSize
+1	class		ENUM8 sizeclass
+4	drawable	DRAWABLE
+8	width		UINT16
+10	height		UINT16
+END
+
+RESPONSE QueryBestSize
+8	width	UINT16
+10	height	UINT16
+END
+
+REQUEST QueryExtension
+4	"#"	COUNT16
+8	name	STRING8
+END
+
+RESPONSE QueryExtension
+8	present	BOOL
+9	major-opcode	UINT8
+10	first-event	UINT8
+11	first-error	UINT8
+END
+
+REQUEST ListExtensions ALIASES Empty
+
+RESPONSE ListExtensions
+1	"number of STRs in names"	COUNT8
+32	names			LISTofSTRING8
+END
+
+TYPE LISTofKEYSYM LISTofCARD32
+
+REQUEST ChangeKeyboardMapping
+2	keycode-count		CARD8
+4	first-keycode		KEYCODE
+5	keysyms-per-keycode	CARD8
+## it's CARD8(2)*CARD8(5) many just list until end of package:
+8	keysyms		LISTofKEYSYM
+END
+
+
+REQUEST GetKeyboardMapping
+4	first-keycode	KEYCODE
+5	count		CARD8
+END
+
+
+RESPONSE GetKeyboardMapping
+1	keysyms-per-keycode	CARD8
+32	keysyms		LISTofKEYSYM
+END
+
+REQUEST ChangeKeyboardControl
+4	value-mask	BITMASK16 keyboardvaluemask
+#// TODO
+#  4n LISTofVALUE	 value-list
+#
+#
+#  VALUEs
+#  1  INT8		 key-click-percent
+#  1  INT8		 bell-percent
+#  2  INT16		 bell-pitch
+#  2  INT16		 bell-duration
+#  1  CARD8		 led
+#  1			 led-mode
+#     0	       Off
+#     1	       On
+#  1  KEYCODE		 key
+#  1			 auto-repeat-mode
+#     0	       Off
+#     1	       On
+#     2	       Default
+END
+
+REQUEST GetKeyboardControl ALIASES Empty
+RESPONSE GetKeyboardControl
+1	global-auto-repeat	BOOL
+8	led-mask		CARD32
+12	key-click-percent	CARD8
+13	bell-percent		CARD8
+14	bell-pitch		CARD16
+16	bell-duration		CARD16
+20	auto-repeats		LISTofCARD8
+END
+
+REQUEST Bell
+1	percent	INT8
+END
+
+REQUEST ChangePointerControl
+4	acceleration-numerator		INT16
+6	acceleration-denominator	INT16
+8	threshold			INT16
+10	do-acceleration 		BOOL
+11	do-threshold			BOOL
+END
+
+REQUEST GetPointerControl ALIASES Empty
+
+RESPONSE GetPointerControl
+8	acceleration-numerator		CARD16
+10	acceleration-denominator	CARD16
+12	threshold			CARD16
+END
+
+REQUEST SetScreenSaver
+4	timeout		INT16
+6	interval	INT16
+8	prefer-blanking	ENUM8 nyd
+9	allow-exposures	ENUM8 nyd
+END
+
+REQUEST GetScreenSaver ALIASES Empty
+RESPONSE GetScreenSaver
+8	timeout		UINT16
+10	interval	UINT16
+12	prefer-blanking	ENUM8 nyd
+13	allow-exposures	ENUM8 nyd
+END
+
+REQUEST ChangeHosts
+1	mode		ENUM8 insertdelete
+4	family		ENUM8 family
+6	"#"		COUNT16
+8	address 	LISTofCARD8
+END
+
+REQUEST ListHosts ALIASES Empty
+
+TYPE LISTofHOST LISTofCARD32
+
+RESPONSE ListHosts
+1	mode	ENUM8 disabledenabled
+8	"#"	COUNT16
+32	hosts	LISTofHOST
+END
+
+REQUEST SetAccessControl
+1	mode	ENUM8 disableenable
+END
+
+REQUEST SetCloseDownMode
+1	mode	ENUM8 closemode
+END
+
+REQUEST KillClient
+4	resource	CARD32 constants alltemporary
+END
+
+REQUEST RotateProperties
+4	window		WINDOW
+8	"#"		COUNT16
+10	delta		INT16
+12	properties	LISTofATOM
+END
+
+REQUEST ForceScreenSaver
+1	mode	ENUM8 resetactivate
+END
+
+REQUEST SetPointerMapping
+1	"#"	COUNT8
+4	map	LISTofCARD8
+END
+
+templateRESPONSE SuccessBusyFailed
+1	status	ENUM8 successbusyfailed
+END
+RESPONSE SetPointerMapping ALIASES SuccessBusyFailed
+
+REQUEST GetPointerMapping ALIASES Empty
+
+RESPONSE GetPointerMapping
+1	length	COUNT8
+32	map	LISTofCARD8
+END
+
+TYPE LISTofKEYCODE LISTofCARD8
+
+REQUEST SetModifierMapping
+1	keycodes-per-modifier	CARD8
+4	keycodes		LISTofKEYCODE
+END
+
+RESPONSE SetModifierMapping ALIASES SuccessBusyFailed
+
+REQUEST GetModifierMapping ALIASES Empty
+
+RESPONSE GetModifierMapping
+1	keycodes-per-modifier	CARD8
+32	keycodes		LISTofKEYCODE
+END
+
+REQUEST DestroyWindow ALIASES WINDOW
+REQUEST DestroySubwindows ALIASES WINDOW
+REQUEST MapWindow ALIASES WINDOW
+REQUEST MapSubwindows ALIASES WINDOW
+REQUEST UnmapWindow ALIASES WINDOW
+REQUEST UnmapSubwindows ALIASES WINDOW
+REQUEST GrabServer ALIASES Empty
+REQUEST UngrabServer ALIASES Empty
+
+EOF

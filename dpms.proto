@@ -1,0 +1,84 @@
+# This file is part of "xtrace"
+# Copyright (C) 2008 Bernhard R. Link
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+EXTENSION "DPMS" Dpms
+USE core
+
+REQUESTS
+GetVersion RESPONDS
+Capable RESPONDS
+GetTimeouts RESPONDS
+SetTimeouts
+Enable
+Disable
+ForceLevel
+Info RESPONDS
+END
+
+EVENTS
+END
+ERRORS
+END
+
+CONSTANTS dpms_level
+0	on
+1	standby
+2	suspend
+3	off
+END
+TYPE DPMS_LEVEL	ENUM16	dpms_level
+
+REQUEST GetVersion
+4	"major version"	UINT16
+6	"minor version"	UINT16
+END
+RESPONSE GetVersion
+8	"major version"	UINT16
+10	"minor version"	UINT16
+END
+
+REQUEST Capable ALIASES Empty
+RESPONSE Capable
+ 8	capable	BOOL
+END
+
+REQUEST GetTimeouts ALIASES Empty
+RESPONSE GetTimeouts
+ 8	standby	UINT16
+10	suspend	UINT16
+12	off	UINT16
+END
+
+REQUEST SetTimeouts
+ 4	standby	UINT16
+ 6	suspend	UINT16
+ 8	off	UINT16
+END
+
+REQUEST Enable ALIASES Empty
+
+REQUEST Disable ALIASES Empty
+
+REQUEST ForceLevel
+ 4	level	DPMS_LEVEL
+END
+
+REQUEST Info ALIASES Empty
+RESPONSE Info
+ 8	power_level	DPMS_LEVEL
+10	state	BOOL
+END
+
+EOF

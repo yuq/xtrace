@@ -1,0 +1,119 @@
+#  This file is part of "xtrace"
+#  Copyright (C) 2008 Bernhard R. Link
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2 as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+EXTENSION "MIT-SCREEN-SAVER" Saver
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+QueryInfo RESPONDS
+SelectInput
+SetAttributes
+UnsetAttributes
+Suspend
+END
+
+EVENTS
+SaverNotify
+END
+
+ERRORS
+END
+
+CONSTANTS saver_level
+0	on
+1	standby
+2	suspend
+3	off
+END
+TYPE Saver_LEVEL	ENUM16	saver_level
+
+CONSTANTS saver_state
+0	off
+1	on
+2	cycle
+3	disable
+END
+TYPE Saver_STATE	ENUM8	saver_state
+CONSTANTS saver_kind
+0	blanked
+1	internal
+2	external
+END
+TYPE Saver_KIND	ENUM8	saver_kind
+
+BITMASK saver_mask
+0x00000001	notify
+0x00000002	cycle
+END
+TYPE Saver_MASK	BITMASK32	saver_mask
+
+REQUEST QueryVersion
+4	"major version"	UINT8
+5	"minor version"	UINT8
+END
+RESPONSE QueryVersion
+8	"major version"	UINT16
+10	"minor version"	UINT16
+END
+
+templateREQUEST DRAWABLE
+4	drawable	DRAWABLE
+END
+REQUEST QueryInfo ALIASES DRAWABLE
+
+#define parameterSaverQueryInfo parameterDRAWABLE
+
+RESPONSE QueryInfo
+ 1	state   	Saver_STATE
+ 8	window  	WINDOW
+12	"til or since"	UINT32
+16	idle    	UINT32
+20	"event mask"	Saver_MASK
+24	kind    	Saver_KIND
+END
+
+REQUEST SelectInput
+ 4	drawable	DRAWABLE
+ 8	mask	Saver_MASK
+END
+
+REQUEST SetAttributes
+  4	drawable	DRAWABLE
+  8	x	INT16
+ 10	y	INT16
+ 12	width	UINT16
+ 14	height	UINT16
+ 16	border-height	UINT16
+ 18	c_class	CARD8
+ 19	depth	UINT8
+ 20	visual-id	CARD32
+ 24	mask	Saver_MASK
+END
+REQUEST UnsetAttributes ALIASES DRAWABLE
+
+REQUEST Suspend
+ 4	suspend	BOOL
+END
+
+EVENT SaverNotify
+ 1	state	Saver_STATE
+ 8	root	WINDOW
+12	window	WINDOW
+16	kind	Saver_KIND
+17	forced	BOOL
+END
+
+EOF

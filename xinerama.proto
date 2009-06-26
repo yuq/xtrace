@@ -1,0 +1,75 @@
+EXTENSION "XINERAMA" Xinerama
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+GetState RESPONDS
+GetScreenCount RESPONDS
+GetScreenSize RESPONDS
+IsActive RESPONDS
+QueryScreens RESPONDS
+END
+
+EVENTS
+END
+
+ERRORS
+END
+
+LIST ScreenInfo length 8
+ 0	x	INT16
+ 2	y	INT16
+ 4	width	UINT16
+ 6	height	UINT16
+END
+
+REQUEST QueryVersion
+ 4	major-version	UINT8
+ 5	minor-version	UINT8
+END
+RESPONSE QueryVersion
+ 8	major-version	UINT16
+10	minor-version	UINT16
+END
+
+REQUEST GetState
+ 4	window	WINDOW
+END
+RESPONSE GetState
+ 1	state	CARD8 constants bool
+ 8	window	WINDOW
+END
+
+REQUEST GetScreenCount
+ 4	window	WINDOW
+END
+RESPONSE GetScreenCount
+ 1	ScreenCount	INT8
+ 8	window	WINDOW
+END
+
+REQUEST GetScreenSize
+ 4	window	WINDOW
+ 8	screen	UINT32
+END
+RESPONSE GetScreenSize
+ 8	width	UINT32
+12	height	UINT32
+16	window	WINDOW
+20	screen	UINT32
+END
+
+REQUEST IsActive
+END
+RESPONSE IsActive
+ 8	state	CARD32 constants bool
+END
+
+REQUEST QueryScreens
+END
+RESPONSE QueryScreens
+ 8	number	COUNT32
+32	screens	LISTofScreenInfo
+END
+
+EOF

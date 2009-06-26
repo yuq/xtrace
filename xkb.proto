@@ -1,0 +1,62 @@
+EXTENSION "XKEYBOARD" Xkb
+USE core
+
+REQUESTS
+UseExtension RESPONDS /* 0 */
+# TODO:
+SelectEvents UNSUPPORTED /* 1 */
+Unknown UNSUPPORTED
+Bell UNSUPPORTED /* 3 */
+GetState RESPONDS UNSUPPORTED /* 4 */
+LatchLockState UNSUPPORTED /* 5 */
+GetControls RESPONDS UNSUPPORTED /* 6 */
+SetControls UNSUPPORTED /* 7 */
+GetMap RESPONDS UNSUPPORTED /* 8 */
+SetMap UNSUPPORTED /* 9 */
+GetCompatMap RESPONDS UNSUPPORTED /* 10 */
+SetCompatMap UNSUPPORTED /* 11 */
+GetIndicatorState RESPONDS UNSUPPORTED /* 12 */
+GetIndicatorMap RESPONDS UNSUPPORTED /* 13 */
+SetIndicatorMap UNSUPPORTED /* 14 */
+GetNamedIndicator RESPONDS UNSUPPORTED /* 15 */
+SetNamedIndicator UNSUPPORTED /* 16 */
+GetNames RESPONDS UNSUPPORTED /* 17 */
+SetNames UNSUPPORTED /* 18 */
+GetGeometry RESPONDS UNSUPPORTED /* 19 */
+SetGeometry UNSUPPORTED /* 20 */
+PerClientFlags UNSUPPORTED /* 21 */
+ListComponents RESPONDS UNSUPPORTED /* 22 */
+GetKbdByName RESPONDS UNSUPPORTED /* 23 */
+GetDeviceInfo RESPONDS UNSUPPORTED /* 24 */
+SetDeviceInfo UNSUPPORTED /* 25 */
+END
+
+EVENTS
+XkbEvent
+END
+
+ERRORS
+# this also packs the type in subvalues,
+# to support this we need support of parsing error packets, too
+"Keyboard"
+END
+
+REQUEST UseExtension
+ 4	major	UINT16
+ 6	minor	UINT16
+END
+RESPONSE UseExtension
+ 8	major	UINT16
+10	minor	UINT16
+END
+
+EVENT XkbEvent
+# all events packaged into one? WTF?
+ 1	type	UINT8
+ 4	time	TIMESTAMP
+ 8	device	CARD8
+# TODO:
+ 9	not-yet-supported	LISTofCARD8
+END
+
+EOF

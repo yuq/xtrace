@@ -1,0 +1,394 @@
+# This file is part of "xtrace"
+# Copyright (C) 2008,2009 RALOVICH, Kristóf
+# modifications/reformating Copyright (C) 2009 Bernhard R. Link
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+EXTENSION "GLX" glx
+USE core
+
+REQUESTS
+UNKNOWN
+glXRender
+glXRenderLarge
+glXCreateContext
+glXDestroyContext
+glXMakeCurrent RESPONDS
+glXIsDirect RESPONDS
+glXQueryVersion RESPONDS
+glXWaitGL UNSUPPORTED
+glXWaitX UNSUPPORTED
+glXCopyContext UNSUPPORTED /* 10 */
+glXSwapBuffers
+glXUseXFont UNSUPPORTED
+glXCreateGLXPixmap UNSUPPORTED
+glXGetVisualConfigs RESPONDS
+glXDestroyGLXPixmap UNSUPPORTED
+glXVendorPrivate UNSUPPORTED
+glXVendorPrivateWithReply RESPONDS
+glXQueryExtensionsString RESPONDS UNSUPPORTED
+glXQueryServerString RESPONDS
+glXClientInfo /* 20 */
+glXGetFBConfigs RESPONDS UNSUPPORTED
+glXCreatePixmap UNSUPPORTED
+glXDestroyPixmap UNSUPPORTED
+glXCreateNewContext UNSUPPORTED
+glXQueryContext RESPONDS UNSUPPORTED
+glXMakeContextCurrent RESPONDS UNSUPPORTED
+glXCreatePbuffer UNSUPPORTED
+glXDestroyPbuffer UNSUPPORTED
+glXGetDrawableAttributes RESPONDS UNSUPPORTED
+glXChangeDrawableAttributes UNSUPPORTED /* 30 */
+glXCreateWindow UNSUPPORTED
+glXDeleteWindow UNSUPPORTED
+glXSetClientInfoARB UNSUPPORTED
+glXCreateContextAttribsARB UNSUPPORTED
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN /* 40 */
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN /* 50 */
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN /* 60 */
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN /* 70 */
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN /* 80 */
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN /* 90 */
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN /* 100 */
+glNewList
+glEndList
+glDeleteLists
+glGenLists RESPONDS
+glFeedbackBuffer UNSUPPORTED
+glSelectBuffer UNSUPPORTED
+glRenderMode RESPONDS UNSUPPORTED
+glFinish RESPONDS UNSUPPORTED
+glPixelStoref UNSUPPORTED
+glPixelStorei UNSUPPORTED /* 110 */
+glReadPixels RESPONDS UNSUPPORTED
+glGetBooleanv RESPONDS UNSUPPORTED
+glGetClipPlane RESPONDS UNSUPPORTED
+glGetDoublev RESPONDS UNSUPPORTED
+glGetError RESPONDS
+glXGetFloatv RESPONDS UNSUPPORTED
+glGetIntegerv RESPONDS
+glGetLightfv RESPONDS UNSUPPORTED
+glGetLightiv RESPONDS UNSUPPORTED
+glGetMapdv RESPONDS UNSUPPORTED /* 120 */
+glGetMapfv RESPONDS UNSUPPORTED
+glGetMapiv RESPONDS UNSUPPORTED
+glGetMaterialfv RESPONDS UNSUPPORTED
+glGetMaterialiv RESPONDS UNSUPPORTED
+glGetPixelMapfv RESPONDS UNSUPPORTED
+glGetPixelMapuiv RESPONDS UNSUPPORTED
+glGetPixelMapusv RESPONDS UNSUPPORTED
+glGetPolygonStipple RESPONDS UNSUPPORTED
+glGetString RESPONDS
+glGetTexEnvfv RESPONDS UNSUPPORTED /* 130 */
+glGetTexEnviv RESPONDS UNSUPPORTED
+glGetTexGendv RESPONDS UNSUPPORTED
+glGetTexGenfv RESPONDS UNSUPPORTED
+glGetTexGeniv RESPONDS UNSUPPORTED
+glGetTexImage RESPONDS UNSUPPORTED
+glGetTexParameterfv RESPONDS UNSUPPORTED
+glGetTexParameteriv RESPONDS UNSUPPORTED
+glGetTexLevelParameterfv RESPONDS UNSUPPORTED
+glGetTexLevelParameteriv RESPONDS UNSUPPORTED
+glIsEnabled RESPONDS UNSUPPORTED /* 140 */
+glIsList RESPONDS UNSUPPORTED
+glFlush UNSUPPORTED
+glAreTexturesResident RESPONDS UNSUPPORTED
+glDeleteTextures UNSUPPORTED
+glGenTextures RESPONDS UNSUPPORTED
+glIsTexture RESPONDS UNSUPPORTED
+glGetColorTable RESPONDS UNSUPPORTED
+glGetColorTableParameterfv RESPONDS UNSUPPORTED
+glGetColorTableParameteriv RESPONDS UNSUPPORTED
+glGetConvolutionFilter RESPONDS UNSUPPORTED /* 150 */
+glGetConvolutionParameterfv RESPONDS UNSUPPORTED
+glGetConvolutionParameteriv RESPONDS UNSUPPORTED
+glGetSeparableFilter RESPONDS UNSUPPORTED
+glGetHistogram RESPONDS UNSUPPORTED
+glGetHistogramParameterfv RESPONDS UNSUPPORTED
+glGetHistogramParameteriv RESPONDS UNSUPPORTED
+glGetMinmax RESPONDS UNSUPPORTED
+glGetMinmaxParameterfv RESPONDS UNSUPPORTED
+glGetMinmaxParameteriv RESPONDS UNSUPPORTED
+glGetCompressedTexImage RESPONDS UNSUPPORTED /* 160 */
+glDeleteQueries UNSUPPORTED
+glGenQueries RESPONDS UNSUPPORTED
+glIsQuery RESPONDS UNSUPPORTED
+glGetQueryiv RESPONDS UNSUPPORTED
+glGetQueryObjectiv RESPONDS UNSUPPORTED
+glGetQueryObjectuiv RESPONDS UNSUPPORTED
+END
+
+EVENTS
+PbufferClobber
+END
+
+ERRORS
+GLXBadContext
+GLXBadContextState
+GLXBadDrawable
+GLXBadPixmap
+GLXBadContextTag
+GLXBadCurrentWindow
+GLXBadRenderRequest
+GLXBadLargeRequest
+GLXUnsupportedPrivateRequest
+GLXBadFBConfig
+GLXBadPbuffer
+GLXBadCurrentDrawable
+GLXBadWindow
+END
+
+# opcode 1
+# static const struct parameter listGLXRenderCommand[] = {
+#   /\* LC(8), *\/
+#   {  0, "rend_len", ft_UINT16, NULL},
+#   {  2, "rend_op", ft_UINT16, NULL},
+# END
+# };
+# #define ft_LISTofGLXRenderCommand ft_LISTofStruct,(void*)listGLXRenderCommand
+
+REQUEST glXRender
+4	context_tag	CARD32
+# 8 "render_commands", LISTofGLXRenderCommand
+8	"render commands (cannot yet parse)"	LISTofCARD8
+END
+
+# opcode 2
+REQUEST glXRenderLarge
+4	context_tag	CARD32
+8	req_num	CARD16
+10	req_tot	CARD16
+12	n	CARD32
+END
+
+# opcode 3
+REQUEST glXCreateContext
+4	context	CARD32
+8	visual_id	UINT32
+12	screen	CARD32
+16	share_list	CARD32
+20	is_direct	UINT8
+END
+
+# opcode 4
+REQUEST glXDestroyContext
+4	context	CARD32
+END
+
+# opcode 5
+REQUEST glXMakeCurrent
+4	drawable	CARD32
+8	context	CARD32
+12	old_context_tag	CARD32
+END
+RESPONSE glXMakeCurrent
+8	new_context_tag	CARD32
+END
+
+# opcode 6
+REQUEST glXIsDirect
+4	context	CARD32
+END
+RESPONSE glXIsDirect
+8	is_direct	UINT8
+END
+
+# opcode 7
+REQUEST glXQueryVersion
+4	client_major_version	UINT32
+8	client_minor_version	UINT32
+END
+RESPONSE glXQueryVersion
+8	server_major_version	UINT32
+12	server_minor_version	UINT32
+END
+
+# opcode 11
+REQUEST glXSwapBuffers
+4	context_tag	CARD32
+8	drawable	CARD32
+END
+
+# opcode 14
+REQUEST glXGetVisualConfigs
+4	screen	CARD32
+END
+RESPONSE glXGetVisualConfigs
+8	num_visuals	UINT32
+12	num_properties	UINT32
+END
+
+# opcode 17
+REQUEST glXVendorPrivateWithReply
+4	vendor_op	CARD32
+8	vendor_data	LISTofCARD8
+# FIXME proper size
+END
+RESPONSE glXVendorPrivateWithReply
+8	data1	LISTofCARD8
+#32	data2	LISTofCARD8
+END
+
+# opcode 19
+REQUEST glXQueryServerString
+4	context_tag	CARD32
+8	name	CARD32
+END
+RESPONSE glXQueryServerString
+8	n	UINT32
+12	num_properties	UINT32
+32	string	LISTofCARD8
+#  FIXME proper size
+END
+
+# opcode 20
+REQUEST glXClientInfo
+4	gl_client_major	UINT32
+8	gl_client_minor	UINT32
+12	n	UINT32
+16	extension_string	LISTofCARD8
+# FIXME proper size
+END
+
+# opcode 117
+REQUEST glGetIntegerv
+4	context_tag	CARD32
+8	pname	CARD32
+END
+RESPONSE glGetIntegerv
+12	n	UINT32
+# FIXME extend
+END
+
+# opcode 101
+REQUEST glNewList
+4	context_tag	CARD32
+8	list	CARD32
+12	mode	CARD32
+END
+
+# opcode 102
+REQUEST glEndList
+4	context_tag	CARD32
+END
+
+# opcode 103
+REQUEST glDeleteLists
+4	context_tag	CARD32
+8	list	CARD32
+12	range	INT32
+END
+
+# opcode 104
+REQUEST glGenLists
+4	context_tag	CARD32
+8	range	INT32
+END
+RESPONSE glGenLists
+8	retval	UINT32
+12	unused	LISTofCARD8
+END
+
+# opcode 115
+REQUEST glGetError
+4	context_tag	CARD32
+END
+RESPONSE glGetError
+8	error	UINT32
+12	unused	LISTofCARD8
+END
+
+# opcode 129
+REQUEST glGetString
+4	context_tag	CARD32
+8	name	CARD32
+END
+RESPONSE glGetString
+12	n	UINT32
+32	string	LISTofCARD8
+# FIXME proper size
+END
+
+EVENT PbufferClobber
+ 4	event_type	CARD16
+ 6	draw_type	CARD16
+ 8	drawable	CARD32
+12	buffer_mask	CARD32
+16	aux_buffer	CARD16
+18	x	CARD16
+20	y	CARD16
+22	width	CARD16
+24	height	CARD16
+26	count	CARD16
+END
+
+EOF

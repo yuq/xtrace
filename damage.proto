@@ -1,0 +1,96 @@
+#  This file is part of "xtrace"
+#  Copyright (C) 2008 Bernhard R. Link
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2 as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+EXTENSION "DAMAGE" Damage
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+Create
+Destroy
+Subtract
+END
+
+EVENTS
+Notify
+END
+
+ERRORS
+BadDamage
+END
+
+CONSTANTS damage_level
+0	"report raw rectangles"
+1	"report delta rectangles"
+2	"report bounding box"
+3	"report non-empty"
+END
+TYPE DAMAGE_LEVEL	ENUM8	damage_level
+
+CONSTANTS damage_state
+0	off
+1	on
+2	cycle
+3	disable
+END
+TYPE DAMAGE_STATE	ENUM8	damage_state
+CONSTANTS damage_kind
+0	blanked
+1	internal
+2	external
+END
+TYPE DAMAGE_KIND	ENUM8	damage_kind
+
+BITMASK damage_mask
+0x00000001	notify
+0x00000002	cycle
+END
+TYPE DAMAGE_MASK	BITMASK32	damage_mask
+
+REQUEST QueryVersion
+4	"major version"	UINT32
+8	"minor version"	UINT32
+END
+RESPONSE QueryVersion
+8	"major version"	UINT32
+12	"minor version"	UINT32
+END
+
+REQUEST Create
+ 4	damage	CARD32
+ 8	drawable	DRAWABLE
+12	level	DAMAGE_LEVEL
+END
+
+REQUEST Destroy
+ 4	damage	CARD32
+END
+
+REQUEST Subtract
+ 4	damage	CARD32
+ 8	repair-region	CARD32
+12	parts-region	CARD32
+END
+
+EVENT Notify
+ 1	level	DAMAGE_LEVEL
+ 4	drawable	DRAWABLE
+ 8	damage	CARD32
+12	timestamp	TIMESTAMP
+16	area	RECTANGLE
+24	geometry	RECTANGLE
+END
+
+EOF

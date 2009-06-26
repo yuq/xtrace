@@ -2,16 +2,20 @@ dnl
 dnl Process this file with autoconf to produce a configure script
 dnl
 
-AC_INIT(main.c)
+AC_INIT(xtrace, 1.0.0~alpha1, brlink@debian.org)
+AC_CONFIG_SRCDIR(main.c)
+AC_CONFIG_AUX_DIR(ac)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(xtrace,0.11.0)
+AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AM_MAINTAINER_MODE
+AC_GNU_SOURCE
 
 AC_PROG_CC
 AC_PROG_INSTALL
+dnl remove again once xtraceng becomes xtrace:
+AM_PROG_CC_C_O
 
-AC_DEFINE([_GNU_SOURCE],[1],[To tell glibc to make strndup visible])
 AC_CHECK_FUNCS([strndup])
 AC_CHECK_FUNCS([asprintf])
 

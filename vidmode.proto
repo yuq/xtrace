@@ -1,0 +1,339 @@
+# This file is part of "xtrace"
+# Copyright (C) 2006 Bernhard R. Link
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# This file is based on /usr/include/X11/extensions/xf86vmstr.h which states:
+## Copyright 1995  Kaleb S. KEITHLEY
+##
+## Permission is hereby granted, free of charge, to any person obtaining
+## a copy of this software and associated documentation files (the
+## "Software"), to deal in the Software without restriction, including
+## without limitation the rights to use, copy, modify, merge, publish,
+## distribute, sublicense, and/or sell copies of the Software, and to
+## permit persons to whom the Software is furnished to do so, subject to
+## the following conditions:
+##
+## The above copyright notice and this permission notice shall be
+## included in all copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+## EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+## MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+## IN NO EVENT SHALL Kaleb S. KEITHLEY BE LIABLE FOR ANY CLAIM, DAMAGES 
+## OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+## ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+## OTHER DEALINGS IN THE SOFTWARE.
+##
+## Except as contained in this notice, the name of Kaleb S. KEITHLEY 
+## shall not be used in advertising or otherwise to promote the sale, use 
+## or other dealings in this Software without prior written authorization
+## from Kaleb S. KEITHLEY
+
+EXTENSION "XFree86-VidModeExtension" VidMode
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+GetModeLine RESPONDS
+ModModeLine
+SwitchMode
+GetMonitor RESPONDS
+LockModeSwitch
+GetAllModeLines RESPONDS
+AddModeLine
+DeleteModeLine
+ValidateModeLine RESPONDS
+SwitchToMode
+GetViewPort RESPONDS
+SetViewPort
+GetDotClocks RESPONDS
+SetClientVersion
+SetGamma
+GetGamma RESPONDS
+GetGammaRamp RESPONDS
+SetGammaRamp
+GetGammaRampSize RESPONDS
+GetPermissions RESPONDS
+END
+
+EVENTS
+END
+
+ERRORS
+BadClock
+BadHTimings
+BadVTimings
+ModeUnsuitable
+ExtensionDisabled
+ClientNotLocal
+ZoomLocked
+END
+
+BITMASK xf86vidmode_perms
+1	read
+2	write
+END
+
+BITMASK xf86vidmode_flags
+# taken from xvidtune:
+1	+hsync
+2	-hsync
+4	+vsync
+8	-vsync
+16	interlace
+32	doublescan
+64	csync
+128	+csync
+256	-csync
+END
+
+REQUEST QueryVersion
+END
+RESPONSE QueryVersion
+ 8	major-version	UINT16
+10	minor-version	UINT16
+END
+
+REQUEST GetModeLine
+ 4	screen	UINT16
+END
+
+REQUEST GetAllModeLines ALIASES GetModeLine
+
+REQUEST GetMonitor ALIASES GetModeLine
+
+REQUEST GetViewPort ALIASES GetModeLine
+
+REQUEST GetDotClocks ALIASES GetModeLine
+
+REQUEST GetPermissions ALIASES GetModeLine
+
+REQUEST GetGamma ALIASES GetModeLine
+
+RESPONSE GetModeLine
+ 8	dotclock	UINT32
+12	hdisplay	UINT16
+14	hsyncstart	UINT16
+16	hsyncend	UINT16
+18	htotal	UINT16
+20	hskew	UINT16
+22	vdisplay	UINT16
+24	vsyncstart	UINT16
+26	vsyncend	UINT16
+28	vtotal	UINT16
+32	flags	BITMASK32 xf86vidmode_flags
+36	reserved1	UINT32
+40	reserved2	UINT32
+44	reserved3	UINT32
+48	privsize	UINT32
+END
+
+LIST Modes length 48
+# This is somehow buggy, xf86vmstr.h values cannot
+# be, this looks a bit better, but I'm still not sure
+ 0	dotclock	UINT32
+ 4	hdisplay	UINT16
+ 6	hsyncstart	UINT16
+ 8	hsyncend	UINT16
+10	htotal	UINT16
+12	hskew	UINT32
+16	vdisplay	UINT16
+18	vsyncstart	UINT16
+20	vsyncend	UINT16
+22	vtotal	UINT16
+28	flags	BITMASK32 xf86vidmode_flags
+32	reserved1	UINT32
+36	reserved2	UINT32
+40	reserved3	UINT32
+44	privsize	UINT32
+END
+
+RESPONSE GetAllModeLines
+ 8	modecount	UINT32
+ 8	modecount	COUNT32
+32	modes	LISTofModes
+END
+
+LIST Sync length 4
+ 0	min		UINT16
+ 2	max		UINT16
+END
+
+RESPONSE GetMonitor
+ 8	vendorLength	COUNT8
+32	vendor	STRING8
+ 9	modelLength	COUNT8
+LATER	model	STRING8
+10	nhsync	COUNT8
+LATER	hsync	LISTofSync
+11	nvsync	COUNT8
+LATER	vsync	LISTofSync
+END
+
+REQUEST AddModeLine
+ 4	screen	CARD32
+ 8	dotclock	UINT32
+12	hdisplay	UINT16
+14	hsyncstart	UINT16
+16	hsyncend	UINT16
+18	htotal	UINT16
+20	hskew	UINT16
+22	vdisplay	UINT16
+24	vsyncstart	UINT16
+26	vsyncend	UINT16
+28	vtotal	UINT16
+32	flags	BITMASK32 xf86vidmode_flags
+36	reserved1	UINT32
+40	reserved2	UINT32
+44	reserved3	UINT32
+48	privsize	UINT32
+52	after_dotclock	UINT32
+56	after_hdisplay	UINT16
+58	after_hsyncstart	UINT16
+60	after_hsyncend	UINT16
+62	after_htotal	UINT16
+64	after_hskew	UINT16
+66	after_vdisplay	UINT16
+68	after_vsyncstart	UINT16
+70	after_vsyncend	UINT16
+72	after_vtotal	UINT16
+76	after_flags	CARD32
+80	reserved4	UINT32
+84	reserved5	UINT32
+88	reserved6	UINT32
+END
+
+REQUEST ModModeLine
+ 4	screen	CARD32
+ 8	hdisplay	UINT16
+10	hsyncstart	UINT16
+12	hsyncend	UINT16
+14	htotal	UINT16
+16	hskew	UINT16
+18	vdisplay	UINT16
+20	vsyncstart	UINT16
+22	vsyncend	UINT16
+24	vtotal	UINT16
+28	flags	BITMASK32 xf86vidmode_flags
+32	reserved1	UINT32
+36	reserved2	UINT32
+40	reserved3	UINT32
+44	privsize	UINT32
+END
+
+REQUEST ValidateModeLine
+ 4	screen	CARD32
+ 8	dotclock	UINT32
+12	hdisplay	UINT16
+14	hsyncstart	UINT16
+16	hsyncend	UINT16
+18	htotal	UINT16
+20	hskew	UINT16
+22	vdisplay	UINT16
+24	vsyncstart	UINT16
+26	vsyncend	UINT16
+28	vtotal	UINT16
+32	flags	BITMASK32 xf86vidmode_flags
+36	reserved1	UINT32
+40	reserved2	UINT32
+44	reserved3	UINT32
+48	privsize	UINT32
+END
+RESPONSE ValidateModeLine
+ 8	status	CARD32
+END
+
+REQUEST DeleteModeLine ALIASES ValidateModeLine
+
+REQUEST SwitchToMode ALIASES ValidateModeLine
+
+REQUEST SwitchMode
+ 4	screen	CARD16
+ 6	zoom	UINT16
+END
+REQUEST LockModeSwitch
+ 4	screen	CARD16
+ 6	lock	CARD16
+END
+
+RESPONSE GetViewPort
+ 8	x	UINT32
+12	y	UINT32
+END
+
+REQUEST SetViewPort
+ 4	screen	CARD16
+ 8	x	UINT32
+12	y	UINT32
+END
+
+RESPONSE GetDotClocks
+ 8	flags	BITMASK32 xf86vidmode_flags
+12	clocks	UINT32
+16	maxclocks	UINT32
+END
+
+REQUEST SetClientVersion
+ 4	major	UINT16
+ 6	minor	UINT16
+END
+
+RESPONSE GetGamma
+ 8	red	UINT32
+12	green	UINT32
+16	blue	UINT32
+END
+
+REQUEST SetGamma
+ 4	screen	CARD16
+ 8	red	UINT32
+12	green	UINT32
+16	blue	UINT32
+END
+
+REQUEST SetGammaRamp
+ 4	screen	CARD16
+ 8	size	COUNT32
+12	red	LISTofUINT16
+ 8	size	COUNT32
+LATER	green	LISTofUINT16
+ 8	size	COUNT32
+LATER	blue	LISTofUINT16
+END
+
+REQUEST GetGammaRamp
+ 4	screen	CARD16
+ 6	size	UINT16
+END
+RESPONSE GetGammaRamp
+ 8	size	COUNT16
+32	red	LISTofUINT16
+ 8	size	COUNT16
+LATER	green	LISTofUINT16
+ 8	size	COUNT16
+LATER	blue	LISTofUINT16
+END
+
+REQUEST GetGammaRampSize
+ 4	screen	CARD16
+END
+
+RESPONSE GetGammaRampSize
+ 8	size	UINT16
+END
+RESPONSE GetPermissions
+ 8	permissions	BITMASK32 xf86vidmode_perms
+END
+
+EOF

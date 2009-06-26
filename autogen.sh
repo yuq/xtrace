@@ -8,10 +8,7 @@ if [ "x$1" = "x--chdir" ] ; then
 	shift
 fi
 
-aclocal
-autoheader
-automake -a -c
-autoconf
+autoreconf -i
 
 curdir="$(pwd)"
 mkdir -p -- "$configindir"

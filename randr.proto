@@ -1,0 +1,636 @@
+# This file is part of "xtrace"
+# Copyright (C) 2006 Bernhard R. Link
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# This file is based on /usr/include/X11/extensions/randr{,proto}.h which state:
+## Copyright © 2000 Compaq Computer Corporation
+## Copyright © 2002 Hewlett-Packard Company
+## and
+## Copyright © 2000, Compaq Computer Corporation,
+## Copyright © 2002, Hewlett Packard, Inc.
+##
+## Permission to use, copy, modify, distribute, and sell this software and its
+## documentation for any purpose is hereby granted without fee, provided that
+## the above copyright notice appear in all copies and that both that
+## copyright notice and this permission notice appear in supporting
+## documentation, and that the name of Compaq or HP not be used in advertising
+## or publicity pertaining to distribution of the software without specific,
+## written prior permission.  Compaq and HP makes no representations about the
+## suitability of this software for any purpose.  It is provided "as is"
+## without express or implied warranty.
+##
+## HP DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL COMPAQ
+## BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+## WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+## OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+## CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+##
+## Author:  Jim Gettys, HP Labs, Hewlett-Packard, Inc.
+##
+# modified for Xrandr1.2 using /usr/share/doc/x11proto-randr-dev/randrproto.txt.gz:
+##                The X Resize, Rotate and Reflect Extension
+##                               Version 1.2
+##                                2006-4-13
+##
+##                               Jim Gettys
+##                            Jim.Gettys@hp.com
+##                      Cambridge Research Laboratory
+##                                 HP Labs
+##                         Hewlett Packard Company
+##
+##                              Keith Packard
+##                         keith.packard@intel.com
+##                      Open Source Technology Center
+##                            Intel Corporation
+##
+# from x11proto-randr-dev which states:
+## Copyright © 2000 Compaq Computer Corporation
+## Copyright © 2002 Hewlett-Packard Company
+## Copyright © 2006 Intel Corporation
+##
+## Permission to use, copy, modify, distribute, and sell this software and its
+## documentation for any purpose is hereby granted without fee, provided that
+## the above copyright notice appear in all copies and that both that copyright
+## notice and this permission notice appear in supporting documentation, and
+## that the name of the copyright holders not be used in advertising or
+## publicity pertaining to distribution of the software without specific,
+## written prior permission.  The copyright holders make no representations
+## about the suitability of this software for any purpose.  It is provided "as
+## is" without express or implied warranty.
+##
+## THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+## INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+## EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+## CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+## DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+## TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+## OF THIS SOFTWARE.
+
+EXTENSION "RANDR" RandR
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+RandrOldGetScreenInfo UNSUPPORTED
+SetScreenConfig RESPONDS
+RandrOldScreenChangeSelectInput UNSUPPORTED
+SelectInput
+GetScreenInfo RESPONDS
+# RandR 1.2:
+GetScreenSizeRange RESPONDS
+SetScreenSize
+GetScreenResources RESPONDS
+GetOutputInfo RESPONDS
+ListOutputProperties RESPONDS
+QueryOutputProperty RESPONDS
+ConfigureOutputProperty
+ChangeOutputProperty
+DeleteOutputProperty
+GetOutputProperty RESPONDS
+CreateMode RESPONDS
+DestroyMode
+AddOutputMode
+DeleteOutputMode
+GetCrtcInfo RESPONDS
+SetCrtcConfig RESPONDS
+GetCrtcGammaSize RESPONDS
+GetCrtcGamma RESPONDS
+SetCrtcGamma
+# RandR 1.3:
+GetScreenResourcesCurrent RESPONDS
+SetCrtcTransform
+GetCrtcTransform RESPONDS
+GetPanning RESPONDS
+SetPanning RESPONDS
+SetOutputPrimary
+GetOutputPrimary RESPONDS
+END
+
+EVENTS
+RRScreenChangeNotify
+RRNotify
+END
+
+ERRORS
+BadOutput
+BadCrtc
+BadMode
+END
+
+CONSTANTS randr_notify
+0	ScreenChangeNotify
+END
+TYPE RANDR_NOTIFY	ENUM8	randr_notify
+
+BITMASK randr_notify_mask
+1<<0	ScreenChangeNotifyMask
+1<<2	OutputChangeNotifyMask
+1<<3	OutputPropertyNotifyMask
+END
+TYPE RANDR_NOTIFY_MASK	BITMASK8	randr_notify_mask
+
+BITMASK randr_rr
+1	Rotate_0
+2	Rotate_90
+4	Rotate_180
+8	Rotate_270
+16	Reflect_X
+32	Reflect_Y
+END
+TYPE RANDR_RR	BITMASK16	randr_rr
+
+CONSTANTS subpixelorder
+0	Unknown
+1	HorizontalRGB
+2	HorizontalBGR
+3	VerticalRGB
+4	VerticalBGR
+5	None
+END
+TYPE SUBPIXELORDER	CARD16	constants subpixelorder
+
+CONSTANTS randr_status
+0	Success
+1	InvalidConfigTime
+2	InvalidTime
+3	Failed
+END
+TYPE RRCONFIGSTATUS	ENUM8	randr_status
+
+CONSTANTS appropriate
+0	appropriate
+END
+
+CONSTANTS randr_connection
+0	Connected
+1	Disconnected
+2	UnknownConnection
+END
+TYPE CONNECTION	CARD8	constants randr_connection
+
+BITMASK randr_modeflags
+0x00000001	HSyncPositive
+0x00000002	HSyncNegative
+0x00000004	VSyncPositive
+0x00000008	VSyncNegative
+0x00000010	Interlace
+0x00000020	DoubleScan
+0x00000040	CSync
+0x00000080	CSyncPositive
+0x00000100	CSyncNegative
+0x00000200	HSkewPresent
+0x00000400	BCast
+0x00000800	PixelMultiplex
+0x00001000	DoubleClock
+0x00002000	ClockDivideBy2
+END
+TYPE SETofMODEFLAG	BITMASK32	randr_modeflags
+
+CONSTANTS randr_changemode
+0	Replace
+1	Prepend
+2	Append
+END
+
+CONSTANTS randr_changenotifystate
+0	NewValue
+1	Deleted
+END
+
+TYPE OUTPUT CARD32
+TYPE LISTofOUTPUT LISTofCARD32
+TYPE CRTC CARD32
+TYPE LISTofCRTC LISTofCARD32
+TYPE MODE CARD32
+TYPE LISTofMODE LISTofCARD32
+
+STRUCT MODEINFO length 32
+ 0	id	CARD32
+ 4	width[pixels]	UINT16
+ 6	height[pixels]	UINT16
+ 8	dot_clock	UINT32
+ 12	h_sync_start	UINT16
+ 14	h_sync_end	UINT16
+ 16	h_total	UINT16
+ 18	h_skew	UINT16
+ 20	v_sync_start	UINT16
+ 22	v_sync_end	UINT16
+ 24	v_total	UINT16
+ 26	name_length	UINT16
+ 28	mode_flags	SETofMODEFLAG
+END
+
+STRUCT TRANSFORM length 36
+0	matrix	LISTofFIXED
+END
+
+REQUEST QueryVersion
+4	major-version	UINT32
+8	minor-version	UINT32
+END
+RESPONSE QueryVersion
+ 8	major-version	UINT32
+12	minor-version	UINT32
+END
+
+REQUEST GetScreenInfo
+4	window	WINDOW
+END
+
+STRUCT ScreenSizes length 8
+ 0	width[pixels]	UINT16
+ 2	height[pixels]	UINT16
+ 4	width[mm]	UINT16
+ 6	height[mm]	UINT16
+END
+
+LIST Rates variable min-length 2
+ 0	count	COUNT16
+ 2	r	LISTofUINT16
+END
+
+RESPONSE GetScreenInfo
+ 1	rotations	RANDR_RR
+ 8	root	WINDOW
+12	timestamp	TIMESTAMP
+16	config-timestamp	TIMESTAMP
+20	nSizes	COUNT16
+22	sizeID	CARD16
+24	rotation	RANDR_RR
+32	sizes	ScreenSizes
+28	nrateEnts	COUNT16
+26	rate	UINT16
+# TODO: ????
+#LATER	rates	LISTofRates
+END
+
+REQUEST SetScreenConfig
+ 4	window	CARD32
+ 8	timestamp	TIMESTAMP constants curtime
+12	config-timestamp	TIMESTAMP
+16	"sizei index"	CARD16
+18	"rotation"	RANDR_RR
+20	rate	UINT16 constants appropriate
+END
+
+RESPONSE SetScreenConfig
+ 1	status	RRCONFIGSTATUS
+ 8	timestamp	TIMESTAMP
+12	config-timestamp	TIMESTAMP
+16	root	WINDOW
+20	subpixelOrder	SUBPIXELORDER
+END
+
+REQUEST SelectInput
+ 4	window	WINDOW
+ 8	enable	RANDR_NOTIFY_MASK
+END
+
+REQUEST GetScreenSizeRange
+ 4	window	WINDOW
+END
+RESPONSE GetScreenSizeRange
+  8	minWidth	UINT16
+ 10	minHeight	UINT16
+ 12	maxWidth	UINT16
+ 14	maxHeight	UINT16
+END
+
+REQUEST SetScreenSize
+  4	window	WINDOW
+  8	width	UINT16
+ 10	height	UINT16
+ 12	width[mm]	UINT32
+ 16	height[mm]	UINT32
+END
+
+REQUEST GetScreenResources
+ 4	window	WINDOW
+END
+RESPONSE GetScreenResources
+  8	timestamp	TIMESTAMP
+ 12	config-timestamp	TIMESTAMP
+ 16	"#CRTCs"	COUNT16
+ 32	crtcs	LISTofCRTC
+ 18	"#outputs"	COUNT16
+LATER	outputs	LISTofOUTPUT
+ 20	"#modeinfos"	COUNT16
+LATER	modeinfos	LISTofMODEINFO
+ 22	"total bytes in mode names"	COUNT16
+# a way to seperate them would be nice:
+LATER	"mode names"	STRING8
+END
+
+REQUEST GetScreenResourcesCurrent ALIASES GetScreenResources
+RESPONSE GetScreenResourcesCurrent ALIASES GetScreenResources
+
+REQUEST GetOutputInfo
+ 4	output	OUTPUT
+ 8	config-timestamp	TIMESTAMP
+END
+RESPONSE GetOutputInfo
+ 8	timestamp	TIMESTAMP
+12	"current connected crtc"	CRTC
+16	width[mm]	UINT32
+20	height[mm]	UINT32
+24	connection	CONNECTION
+25	subpixel-order	SUBPIXELORDER
+26	"#CRTCs"	COUNT16
+36	crtcs	LISTofCRTC
+28	"#modes"	COUNT16
+LATER	modes	LISTofMODE
+30	"preferred modes"	UINT16
+32	clonecount	COUNT16
+LATER	clones	LISTofOUTPUT
+34	"length of name"	COUNT16
+LATER	name	STRING8
+END
+
+REQUEST ListOutputProperties
+ 4	output	OUTPUT
+END
+RESPONSE ListOutputProperties
+ 8	"#atoms"	COUNT16
+32	atoms	LISTofATOM
+END
+
+REQUEST QueryOutputProperty
+ 4	output	OUTPUT
+ 8	property	ATOM
+END
+RESPONSE QueryOutputProperty
+ 8	pending	BOOL
+ 9	range	BOOL
+10	immutable	BOOL
+32	"valid values"	LISTofUINT32
+END
+
+REQUEST ConfigureOutputProperty
+ 4	output	OUTPUT
+ 8	property	ATOM
+12	pending	BOOL
+13	range	BOOL
+16	"valid values"	LISTofUINT32
+END
+
+REQUEST ChangeOutputProperty
+ 4	output	OUTPUT
+ 8	property	ATOM
+12	type	ATOM
+16	format	FORMAT8
+17	mode	ENUM8 randr_changemode
+20	length	COUNT32
+24	data	LISTofFormat
+END
+
+REQUEST DeleteOutputProperty
+ 4	output	OUTPUT
+ 8	property	ATOM
+END
+
+REQUEST GetOutputProperty
+ 4	output	OUTPUT
+ 8	property	ATOM
+12	type	ATOM constants any
+16	offset	CARD32
+20	length	CARD32
+24	delete	BOOL
+25	pending	BOOL
+END
+RESPONSE GetOutputProperty
+ 1	format	FORMAT8
+ 8	type	ATOM constants none
+12	bytes-after	CARD32
+16	length	COUNT32
+32	value	LISTofFormat
+END
+
+REQUEST CreateMode
+ 4	window	WINDOW
+ 8	mode	MODEINFO
+40	"mode name"	STRING8
+END
+RESPONSE CreateMode
+ 8	mode	MODE
+END
+
+REQUEST DestroyMode
+ 4	mode	MODE
+END
+
+REQUEST AddOutputMode
+ 4	output	OUTPUT
+ 8	mode	MODE
+END
+
+REQUEST DeleteOutputMode ALIASES AddOutputMode
+
+REQUEST GetCrtcInfo
+ 4	crtc	CRTC
+ 8	config-timestamp	TIMESTAMP
+END
+RESPONSE GetCrtcInfo
+ 1	status	RRCONFIGSTATUS
+ 8	timestamp	TIMESTAMP
+12	x	INT16
+14	y	INT16
+16	width	UINT16
+18	height	UINT16
+20	mode	MODE
+24	"current rr"	RANDR_RR
+26	"possible rr"	RANDR_RR
+28	"#outputs"	COUNT16
+32	outputs	LISTofOUTPUT
+30	"#possible outputs"	COUNT16
+LATER	"possible outputs"	LISTofOUTPUT
+END
+
+REQUEST SetCrtcConfig
+ 4	crtc	CRTC
+ 8	timestamp	TIMESTAMP
+12	"config timestamp"	TIMESTAMP
+16	x	INT16
+18	y	INT16
+20	mode	MODE
+24	rr	RANDR_RR
+28	outputs	LISTofOUTPUT
+END
+RESPONSE SetCrtcConfig
+ 1	status	RRCONFIGSTATUS
+END
+
+REQUEST GetCrtcGammaSize
+ 4	crtc	CRTC
+END
+RESPONSE GetCrtcGammaSize
+ 8	size	CARD16
+END
+
+REQUEST GetCrtcGamma ALIASES GetCrtcGammaSize
+RESPONSE GetCrtcGamma
+ 8	size	COUNT16
+# is this really 22??
+22	red	LISTofCARD16
+ 8	size	COUNT16
+LATER	green	LISTofCARD16
+ 8	size	COUNT16
+LATER	blue	LISTofCARD16
+END
+
+REQUEST SetCrtcGamma
+ 4	crtc	CRTC
+ 8	size	COUNT16
+12	red	LISTofCARD16
+ 8	size	COUNT16
+LATER	green	LISTofCARD16
+ 8	size	COUNT16
+LATER	blue	LISTofCARD16
+END
+
+REQUEST SetCrtcTransform
+ 4	crtc	CRTC
+ 8	transform	TRANSFORM
+44	"filter length"	COUNT16
+48	"filter name"	STRING8
+ROUND
+# TODO: ???
+# LATER	"filter params"	LISTofFIXED
+END
+
+REQUEST GetCrtcTransform
+ 4	crtc	CRTC
+END
+RESPONSE GetCrtcTransform
+ 8	"pending transform"	TRANSFORM
+44	"has transforms"	BOOL
+48	"current transform"	TRANSFORM
+88	"pending filter name length"	COUNT16
+96	"pending filter name"	STRING8
+ROUND
+90	"pending filter num params"	COUNT16
+LATER	"pending filter params"	LISTofFIXED
+92	"current filter name length"	COUNT16
+LATER	"current filter name"	STRING8
+ROUND
+94	"current filter num params"	COUNT16
+LATER	"current filter params"	LISTofFIXED
+END
+
+REQUEST GetPanning
+4	crtc	CRTC
+END
+RESPONSE GetPanning
+ 1	status	RRCONFIGSTATUS
+ 8	timestamp	TIMESTAMP
+12	left	UINT16
+14	top	UINT16
+16	width	UINT16
+18	height	UINT16
+20	track_left	UINT16
+22	track_top	UINT16
+24	track_width	UINT16
+26	track_height	UINT16
+28	border_left	INT16
+30	border_top	INT16
+32	border_right	INT16
+34	border_bottom	INT16
+END
+
+REQUEST SetPanning
+ 4	crtc	CRTC
+ 8	timestamp	TIMESTAMP
+12	left	UINT16
+14	top	UINT16
+16	width	UINT16
+18	height	UINT16
+20	track_left	UINT16
+22	track_top	UINT16
+24	track_width	UINT16
+26	track_height	UINT16
+28	border_left	INT16
+30	border_top	INT16
+32	border_right	INT16
+34	border_bottom	INT16
+END
+RESPONSE SetPanning
+ 1	status	RRCONFIGSTATUS
+ 8	timestamp	TIMESTAMP
+END
+
+REQUEST SetOutputPrimary
+ 4	window	WINDOW
+ 8	output	OUTPUT
+END
+
+REQUEST GetOutputPrimary
+ 4	window	WINDOW
+END
+RESPONSE GetOutputPrimary
+ 8	output	OUTPUT
+END
+
+EVENT RRScreenChangeNotify
+ 1	rotation	RANDR_RR
+ 4	timestamp	TIMESTAMP
+ 8	configTimestamp	TIMESTAMP
+12	root	WINDOW
+16	window	WINDOW
+20	size-id	CARD16
+22	subpixelOrder	SUBPIXELORDER
+24	width[pixels]	UINT16
+26	height[pixels]	UINT16
+28	width[mm]	UINT16
+30	height[mm]	UINT16
+END
+
+CONSTANTS RRNotify_kind
+0	CrtcChange
+1	OutputChange
+2	OutputProperty
+END
+
+EVENT RRNotify
+ 1	kind	ENUM8 RRNotify_kind
+IF 1 CARD8 0
+ 4	timestamp	TIMESTAMP
+ 8	"request window"	WINDOW
+12	"crtc affected"	CRTC
+16	"mode in use"	MODE
+20	"new rr"	RANDR_RR
+24	x	INT16
+26	y	INT16
+28	width	UINT16
+30	height	UINT16
+ELSEIF 1 CARD8 1
+ 4	timestamp	TIMESTAMP
+ 8	"config timestamp"	TIMESTAMP
+12	"request window"	WINDOW
+16	"output affected"	OUTPUT
+20	"crtc in use"	CRTC
+24	"mode in use"	MODE
+28	rr	RANDR_RR
+30	"connection status"	CONNECTION
+31	"subpixel order"	SUBPIXELORDER
+ELSEIF 1 CARD8 2
+ 4	window	WINDOW
+ 8	output	OUTPUT
+12	atom	ATOM
+16	time	TIMESTAMP
+20	state	ENUM8 randr_changenotifystate
+ELSE
+4	unknown	LISTofCARD8
+END
+
+EOF

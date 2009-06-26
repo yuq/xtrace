@@ -1,0 +1,24 @@
+NAMESPACE core
+
+ERRORS
+"no error"
+Request
+Value
+Window
+Pixmap
+Atom
+Cursor
+Font
+Match
+Drawable
+Access
+Alloc
+Colormap
+GContext
+IDChoice
+Name
+Length
+Implementation
+END
+
+EOF

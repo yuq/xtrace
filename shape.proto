@@ -1,0 +1,185 @@
+#  This file is part of "xtrace"
+#  Copyright (C) 2005 Bernhard R. Link
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2 as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+# This file is based on the
+## 		  X Nonrectangular Window
+## 		  Shape Extension Protocol
+## 			Version 1.0
+## 		   X Consortium Standard
+## 		 X Version 11, Release 6.4
+## 		       Keith Packard
+## 		      MIT X Consortium
+## Copyright (C) 1989 X Consortium
+##
+## Permission is hereby granted, free of charge, to any person
+## obtaining a copy of this software and associated documenta-
+## tion files (the ``Software''), to deal in the Software with-
+## out restriction, including without limitation the rights to
+## use, copy, modify, merge, publish, distribute, sublicense,
+## and/or sell copies of the Software, and to permit persons to
+## whom the Software is furnished to do so, subject to the fol-
+## lowing conditions:
+##
+## The above copyright notice and this permission notice shall
+## be included in all copies or substantial portions of the
+## Software.
+##
+## THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY
+## KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+## WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PUR-
+## POSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE X
+## CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABIL-
+## ITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+## ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+## THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+##
+## Except as contained in this notice, the name of the X Con-
+## sortium shall not be used in advertising or otherwise to
+## promote the sale, use or other dealings in this Software
+## without prior written authorization from the X Consortium.
+
+EXTENSION "SHAPE" Shape
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+Rectangles
+Mask
+Combine
+Offset
+QueryExtents RESPONDS
+SelectInput
+InputSelected RESPONDS
+GetRectangles RESPONDS
+END
+
+EVENTS
+ShapeNotify
+END
+
+ERRORS
+END
+
+CONSTANTS shape_kind
+0	Bounding
+1	Clip
+END
+TYPE SHAPE_KIND	ENUM8	shape_kind
+CONSTANTS shape_op
+0	Set
+1	Union
+2	Intersect
+3	Subtract
+4	Invert
+END
+TYPE SHAPE_OP	ENUM8	shape_op
+CONSTANTS shape_sort
+0	UnSorted
+1	YSorted
+2	YXSorted
+3	YXBanded
+END
+
+REQUEST QueryVersion ALIASES Empty
+
+RESPONSE QueryVersion
+8	"major version"	UINT16
+10	"minor version"	UINT16
+END
+
+REQUEST Rectangles
+4	operation	SHAPE_OP
+5	"destination kind"	SHAPE_KIND
+6	ordering	ENUM8 shape_sort
+8	"destination window"	WINDOW
+12	x-offset	INT16
+14	y-offset	INT16
+16	rectangles	LISTofRECTANGLE
+END
+
+REQUEST Mask
+4	operation	SHAPE_OP
+5	destination-kind	SHAPE_KIND
+8	destination-window	WINDOW
+12	x-offset	INT16
+14	y-offset	INT16
+16	source-bitmap	PIXMAP constants none
+END
+
+REQUEST Combine
+4	operation	SHAPE_OP
+5	destination-kind	SHAPE_KIND
+6	source-kind	SHAPE_KIND
+8	"destination window"	WINDOW
+12	"x offset"	INT16
+14	"y offset"	INT16
+16	source-window	WINDOW
+END
+
+REQUEST Offset
+4	"destination kind"	SHAPE_KIND
+8	"destination window"	WINDOW
+12	"x offset"	INT16
+14	"y offset"	INT16
+END
+
+REQUEST QueryExtents ALIASES WINDOW
+
+RESPONSE QueryExtents
+8	"bounding shaped"	BOOL
+9	"clip shaped"	BOOL
+12	"bounding shape extents x"	INT16
+14	"bounding shape extents y"	INT16
+16	"bounding shape extents width"	UINT16
+18	"bounding shape extents height"	UINT16
+20	"clip shape extents x"	INT16
+22	"clip shape extents y"	INT16
+24	"clip shape extents width"	UINT16
+26	"clip shape extents height"	UINT16
+END
+
+REQUEST SelectInput
+4	"destination window"	WINDOW
+8	enable	BOOL
+END
+
+REQUEST InputSelected ALIASES WINDOW
+
+RESPONSE InputSelected
+1	enabled	BOOL
+END
+
+REQUEST GetRectangles
+4	window	WINDOW
+8	source-kind	SHAPE_KIND
+END
+
+RESPONSE GetRectangles
+1	ordering	ENUM8 shape_sort
+8	nrects	COUNT32
+32	rectangles	LISTofRECTANGLE
+END
+
+EVENT ShapeNotify
+1	"shape kind"	SHAPE_KIND
+4	"affected window"	WINDOW
+8	"x value of extents"	INT16
+10	"y value of extents"	INT16
+12	"width of extents"	UINT16
+14	"height of extents"	UINT16
+16	"server time"	TIMESTAMP
+22	shaped	BOOL
+END
+
+EOF

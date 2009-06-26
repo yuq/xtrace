@@ -1,0 +1,104 @@
+# This file is part of "xtrace"
+# Copyright (C) 2007 Bernhard R. Link
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# This file is based on /usr/include/X11/extensions/xf86bigf{ont,str}.h, which is:
+## Copyright (c) 1999-2000  Bruno Haible
+## Copyright (c) 1999-2000  The XFree86 Project, Inc.
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy
+## of this software and associated documentation files (the "Software"), to deal
+## in the Software without restriction, including without limitation the rights
+## to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+## copies of the Software, and to permit persons to whom the Software is
+## furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all
+## copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+## IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+## XFREE86 PROJECT BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+## IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+## CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+##
+## Except as contained in this notice, the name of the XFree86 Project shall not
+## be used in advertising or otherwise to promote the sale, use or other dealings
+## in this Software without prior written authorization from the XFree86 Project.
+
+EXTENSION "XFree86-Bigfont" bigfont
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+QueryFont RESPONDS
+END
+
+EVENTS
+END
+
+ERRORS
+END
+
+BITMASK xf86bigfont_capabilities
+1	LocalShm
+END
+TYPE xf86bigfont_capabilities	BITMASK32	xf86bigfont_capabilities
+
+BITMASK xf86bigfont_flags
+1	Shm
+END
+TYPE xf86bigfont_flags	BITMASK32	xf86bigfont_flags
+
+REQUEST QueryVersion
+END
+RESPONSE QueryVersion
+ 8	major-version	UINT16
+10	minor-version	UINT16
+ 1	capabilities	xf86bigfont_capabilities
+12	uid	UINT32
+16	gid	UINT32
+20	signature	UINT32
+END
+
+REQUEST QueryFont
+ 4	id	UINT32
+ 8	flags	xf86bigfont_flags
+END
+
+RESPONSE QueryFont
+ 8	min-bounds	CHARINFO
+24	max-bounds	CHARINFO
+40	min-char-or-byte2	CARD16
+42	max-char-or-byte2	CARD16
+44	default-char	CARD16
+48	draw-direction	ENUM8 direction
+49	min-byte1	CARD8
+50	max-byte1	CARD8
+51	all-chars-exists	BOOL
+52	font-ascent	INT16
+54	font-descent	INT16
+64	shmid	COUNT32
+68	shmsegoffset	COUNT32
+
+46	nFontProps	COUNT16
+72	properties	LISTofFONTPROP
+60	nUniqCharInfos	COUNT32
+LATER	uniq-char-infos	LISTofCHARINFO
+56	nCharInfos	COUNT32
+LATER	char-info-offsets	LISTofCARD16
+END
+
+EOF

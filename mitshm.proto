@@ -1,0 +1,139 @@
+#  This file is part of xtrace
+#  Copyright (C) 2006 Bernhard R. Link
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2 as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+# This file is based on /usr/include/X11/extensions/shmstr.h which states:
+#Copyright 1989, 1998  The Open Group
+#
+#Permission to use, copy, modify, distribute, and sell this software and its
+#documentation for any purpose is hereby granted without fee, provided that
+#the above copyright notice appear in all copies and that both that
+#copyright notice and this permission notice appear in supporting
+#documentation.
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+#OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+#AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+#CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+#Except as contained in this notice, the name of The Open Group shall not be
+#used in advertising or otherwise to promote the sale, use or other dealings
+#in this Software without prior written authorization from The Open Group.
+
+NEEDS "requests.proto"
+NEEDS "render.proto"
+
+EXTENSION "MIT-SHM" Shm
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+Attach
+Detach
+PutImage
+GetImage RESPONDS
+CreatePixmap
+END
+
+EVENTS
+Completion
+END
+
+ERRORS
+BadShmSeg
+END
+
+TYPE ShmSeg	CARD32
+TYPE Drawable	CARD32
+TYPE Visualid	CARD32
+TYPE GContext	CARD32
+TYPE Pixmap	CARD32
+TYPE format	CARD8 constants core::bitmap_format
+
+REQUEST QueryVersion ALIASES Empty
+
+RESPONSE QueryVersion
+ 8	major-version	UINT16
+10	minor-version	UINT16
+12	uid		UINT16
+14	gid		UINT16
+16	pixmap-format	format
+END
+
+REQUEST Attach
+ 4	shmseg		ShmSeg
+ 8	shmid		CARD32
+12	readonly	BOOL
+END
+
+REQUEST Detach
+ 4	shmseg		ShmSeg
+END
+
+REQUEST PutImage
+ 4	drawable	Drawable
+ 8	gc		GContext
+12	total-width	UINT16
+14	total-height	UINT16
+16	src-x		UINT16
+18	src-y		UINT16
+20	src-width	UINT16
+22	src-height	UINT16
+24	dst-x		INT16
+26	dst-y		INT16
+28	depth		UINT8
+29	format		format
+30	send-event	BOOL
+32	shmseg		ShmSeg
+36	offset		CARD32
+END
+
+REQUEST GetImage
+ 4	drawable	Drawable
+ 8	x		INT16
+10	y		INT16
+12	width		UINT16
+14	height		UINT16
+16	planeMask	UINT32
+20	format		format
+24	shmseg		ShmSeg
+28	offset		CARD32
+END
+
+RESPONSE GetImage
+ 8	visual		Render::VisualID
+12	size		UINT32
+END
+
+REQUEST CreatePixmap
+ 4	pid		Pixmap
+ 8	drawable	Drawable
+12	width		UINT16
+14	height		UINT16
+16	depth		UINT8
+20	shmseg		ShmSeg
+24	offset		CARD32
+END
+
+EVENT Completion
+ 4	drawable	Drawable
+12	shmseg		ShmSeg
+16	offset		CARD32
+END
+
+EOF

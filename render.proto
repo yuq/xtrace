@@ -1,0 +1,547 @@
+#  This file is part of "xtrace"
+#  Copyright (C) 2005 Bernhard R. Link
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2 as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#/
+# This file is based on the render.h and renderproto.h files
+# from the Xorg server:
+# Copyright © 2000 SuSE, Inc.
+#
+# Permission to use, copy, modify, distribute, and sell this software and its
+# documentation for any purpose is hereby granted without fee, provided that
+# the above copyright notice appear in all copies and that both that
+# copyright notice and this permission notice appear in supporting
+# documentation, and that the name of SuSE not be used in advertising or
+# publicity pertaining to distribution of the software without specific,
+# written prior permission.  SuSE makes no representations about the
+# suitability of this software for any purpose.  It is provided "as is"
+# without express or implied warranty.
+#
+# SuSE DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL SuSE
+# BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+# OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+# CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# Author:  Keith Packard, SuSE, Inc.
+#/
+
+NEEDS "requests.proto"
+
+EXTENSION "RENDER" Render
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+QueryPictFormats RESPONDS
+QueryPictIndexValues RESPONDS
+UNKNOWN
+CreatePicture
+ChangePicture
+SetPictureClipRectangles
+FreePicture
+Composite
+Scale
+Trapezoids
+Triangles
+TriStrip
+TriFan
+UNKNOWN
+UNKNOWN
+UNKNOWN
+CreateGlyphSet
+ReferenceGlyphSet
+FreeGlyphSet
+AddGlyphs
+UNKNOWN
+FreeGlyphs
+CompositeGlyphs8
+CompositeGlyphs16
+CompositeGlyphs32
+FillRectangles
+CreateCursor
+SetPictureTransform
+QueryFilters RESPONDS
+SetPictureFilter
+CreateAnimCursor
+END
+
+EVENTS
+END
+
+ERRORS
+BadPictFormat
+BadPicture
+BadPictOp
+BadGlyphSet
+BadGlyph
+END
+
+CONSTANTS picttype
+0	Indexed
+1	Direct
+END
+TYPE PictType	ENUM8	picttype
+
+CONSTANTS pictop
+0	Minimum/Clear
+1	Src
+2	Dst
+3	Over
+4	OverReverse
+5	In
+6	InReverse
+7	Out
+8	OutReverse
+9	Atop
+10	AtopReverse
+11	Xor
+12	Add
+13	Saturate/Maximum
+0x10	DisjointMinimum
+#0x10	DisjointClear
+0x11	DisjointSrc
+0x12	DisjointDst
+0x13	DisjointOver
+0x14	DisjointOverReverse
+0x15	DisjointIn
+0x16	DisjointInReverse
+0x17	DisjointOut
+0x18	DisjointOutReverse
+0x19	DisjointAtop
+0x1a	DisjointAtopReverse
+#0x1b	DisjointXor
+0x1b	DisjointMaximum
+0x20	ConjointMinimum
+#0x20	ConjointClear
+0x21	ConjointSrc
+0x22	ConjointDst
+0x23	ConjointOver
+0x24	ConjointOverReverse
+0x25	ConjointIn
+0x26	ConjointInReverse
+0x27	ConjointOut
+0x28	ConjointOutReverse
+0x29	ConjointAtop
+0x2a	ConjointAtopReverse
+0x2b	ConjointXor
+#0x2b	ConjointMaximum
+END
+TYPE PictOp	ENUM8	pictop
+
+CONSTANTS polyedge
+0	Sharp
+1	Smooth
+END
+TYPE PolyEdge	ENUM8	polyedge
+
+CONSTANTS polymode
+0	Precise
+1	Imprecise
+END
+TYPE PolyMode	ENUM8	polymode
+
+CONSTANTS subpixel
+0	Unknown
+1	HorizontalRGB
+2	HorizontalBGR
+3	VerticalRGB
+4	VerticalBGR
+5	None
+END
+TYPE SUBPIXEL	ENUM8	subpixel
+TYPE VisualID	CARD32
+TYPE PICTURE	CARD32
+TYPE PICTFORMAT	CARD32
+TYPE GLYPHSET	CARD32
+
+LIST PictFormInfo length 28
+ 0	id	PICTFORMAT
+ 4	type	PictType
+ 5	depth	CARD8
+ 8	red	CARD16
+10	redMask	CARD16
+12	green	CARD16
+14	greenMask	CARD16
+16	blue	CARD16
+18	blueMask	CARD16
+20	alpha	CARD16
+22	alphaMask	CARD16
+24	colormap	COLORMAP
+END
+
+LIST PictFormats variable min-length 28
+GET 0
+ 0	formats	LISTofPictFormInfo
+END
+
+LIST PictVisual length 8
+ 0	visual	VisualID
+ 4	format	PICTFORMAT
+END
+
+LIST PictDepth variable min-length 8
+ 0	depth	CARD8
+ 2	nPictVisuals	COUNT16
+ 8	visuals	LISTofPictVisual
+END
+
+LIST PictScreen variable min-length 8
+ 0	nDepth	COUNT32
+ 4	fallback	PICTFORMAT
+ 8	depths	LISTofPictDepth
+END
+
+REQUEST QueryPictFormats ALIASES Empty
+
+RESPONSE QueryPictFormats
+ 8	numFormats	PUSH32
+ 12	numScreens	COUNT32
+ 32	formats	LISTofPictFormats
+ 12	numScreens	COUNT32
+ LATER	screens	LISTofPictScreen
+ 24	numSubpixel	COUNT32
+ LATER	subpixels	LISTofCARD32 constants subpixel
+END
+
+LIST IndexValue length 12
+ 0	pixel	CARD32
+ 4	red	CARD16
+ 6	green	CARD16
+ 8	blue	CARD16
+ 10	alpha	CARD16
+END
+
+LIST POINTFIXED length 8
+ 0	x	FIXED
+ 4	y	FIXED
+END
+
+STRUCT LineFixed length 16
+ 0	x1	FIXED
+ 4	y1	FIXED
+ 8	x2	FIXED
+12	y2	FIXED
+END
+
+LIST TRIANGLE length 24
+ 0	x1	FIXED
+ 4	y1	FIXED
+ 8	x2	FIXED
+12	y2	FIXED
+16	x3	FIXED
+20	y3	FIXED
+END
+
+LIST TRAPEZOID length 40
+ 0	top	FIXED
+ 4	bottom	FIXED
+ 8	left	LineFixed
+24	right	LineFixed
+END
+
+#/*
+# * requests and replies
+# */
+REQUEST QueryVersion
+ 4	majorVersion	UINT32
+ 8	minorVersion	UINT32
+END
+RESPONSE QueryVersion
+ 8	majorVersion	UINT32
+ 12	minorVersion	UINT32
+END
+
+REQUEST QueryPictIndexValues
+ 4	format	PICTFORMAT
+END
+RESPONSE QueryPictIndexValues
+ 8	numIndexValues	COUNT32
+32	IndexValues	LISTofIndexValue
+END
+
+VALUES RenderCP
+1<<0	repeat  	BOOL
+1<<1	alphaMap	PICTURE constants none
+1<<2	alpha-x-origin	INT16
+1<<3	alpha-y-origin	INT16
+1<<4	clip-x-origin	INT16
+1<<5	clip-y-origin	INT16
+1<<6	clip-mask	PIXMAP constants none
+1<<7	graphics-exposure	BOOL
+1<<8	subwindow-mode	SubwindowMode
+1<<9	poly-edge	PolyEdge
+1<<10	poly-mode	PolyMode
+1<<11	dither  	ATOM constants none
+1<<12	component-alpha	BOOL
+END
+
+REQUEST CreatePicture
+ 4	pid	PICTURE
+ 8	drawable	DRAWABLE
+12	format	PICTFORMAT
+16	mask	STORE32
+20	values	LISTofRenderCP
+END
+
+REQUEST ChangePicture
+ 4	picture	PICTURE
+ 8	mask	STORE32
+12	values	LISTofRenderCP
+END
+
+REQUEST SetPictureClipRectangles
+ 4	picture	PICTURE
+ 8	xOrigin	INT16
+10	yOrigin	INT16
+12	rectangles	LISTofRECTANGLE
+END
+
+REQUEST FreePicture
+ 4	picture	PICTURE
+END
+
+REQUEST Composite
+ 4	op	PictOp
+ 8	src	PICTURE
+12	mask	PICTURE constants none
+16	dst	PICTURE
+20	xSrc	INT16
+22	ySrc	INT16
+24	xMask	INT16
+26	yMask	INT16
+28	xDst	INT16
+30	yDst	INT16
+32	width	UINT16
+34	height	UINT16
+END
+
+REQUEST Scale
+ 4	src	PICTURE
+ 8	dst	PICTURE
+12	colorScale	UINT32
+16	alphaScale	UINT32
+20	xSrc	INT16
+22	ySrc	INT16
+24	xDst	INT16
+26	yDst	INT16
+28	width	UINT16
+30	height	UINT16
+END
+
+REQUEST Trapezoids
+ 4	op	PictOp
+ 8	src	PICTURE
+20	xSrc	INT16
+22	ySrc	INT16
+12	dst	PICTURE
+16	maskFormat	PICTFORMAT constants none
+20	trapezoids	LISTofTRAPEZOID
+END
+
+REQUEST Triangles
+ 4	op	PictOp
+ 8	src	PICTURE
+ 20	xSrc	INT16
+ 22	ySrc	INT16
+ 12	dst	PICTURE
+ 16	maskFormat	PICTFORMAT constants none
+20	triangles	LISTofTRIANGLE
+END
+
+REQUEST TriStrip
+ 4	op	PictOp
+ 8	src	PICTURE
+20	xSrc	INT16
+22	ySrc	INT16
+12	dst	PICTURE
+16	maskFormat	PICTFORMAT constants none
+20	points	LISTofPOINTFIXED
+END
+
+REQUEST TriFan
+ 4	op	PictOp
+ 8	src	PICTURE
+20	xSrc	INT16
+22	ySrc	INT16
+12	dst	PICTURE
+16	maskFormat	PICTFORMAT constants none
+20	points	LISTofPOINTFIXED
+END
+
+REQUEST CreateGlyphSet
+ 4	gsid	GLYPHSET
+ 8	format	PICTFORMAT
+END
+
+REQUEST ReferenceGlyphSet
+ 4	gsid	GLYPHSET
+ 8	existing	GLYPHSET
+END
+
+REQUEST FreeGlyphSet
+ 4	glyphset	GLYPHSET
+END
+
+LIST GLYPHINFO length 12
+ 0	width	UINT16
+ 2	height	UINT16
+ 4	x	INT16
+ 6	y	INT16
+ 8	xOff	INT16
+10 	yOff	INT16
+END
+
+REQUEST AddGlyphs
+ 4	glyphset	GLYPHSET
+ 8	nglyphs	COUNT32
+12	glyphids	LISTofCARD32
+# TODO: ????????
+RESET_COUNTER
+LATER	glyphs	LISTofGLYPHINFO
+#/*	LATER data LISTofCARD8*/
+END
+
+REQUEST FreeGlyphs
+ 4	glyphset	GLYPHSET
+ 8	glyphs	LISTofCARD32
+END
+
+LIST GlyphElt8 variable min-length 8
+ 4	deltax	INT16
+ 6	deltay	INT16
+IF 0 CARD8 255
+ 8	glyphset	GLYPHSET
+NEXT	12
+ELSE
+ 0	len	COUNT8
+ 8	glyphs	LISTofCARD8
+ROUND
+END
+LIST GlyphElt16 variable min-length 8
+ 4	deltax	INT16
+ 6	deltay	INT16
+IF 0 CARD8 255
+ 8	glyphset	GLYPHSET
+NEXT	12
+ELSE
+ 0	len	COUNT8
+ 8	glyphs	LISTofCARD16
+ROUND
+END
+LIST GlyphElt32 variable min-length 8
+ 4	deltax	INT16
+ 6	deltay	INT16
+IF 0 CARD8 255
+ 8	glyphset	GLYPHSET
+NEXT	12
+ELSE
+ 0	len	COUNT8
+ 8	glyphs	LISTofCARD32
+END
+
+REQUEST CompositeGlyphs8
+ 4	op	PictOp
+ 8	src	PICTURE
+12	dst	PICTURE
+16	maskFormat	PICTFORMAT constants none
+20	glyphset	GLYPHSET
+24	xSrc	INT16
+26	ySrc	INT16
+28	glyphcmds	LISTofGlyphElt8
+END
+REQUEST CompositeGlyphs16
+ 4	op	PictOp
+ 8	src	PICTURE
+12	dst	PICTURE
+16	maskFormat	PICTFORMAT constants none
+20	glyphset	GLYPHSET
+24	xSrc	INT16
+26	ySrc	INT16
+28	glyphcmds	LISTofGlyphElt16
+END
+REQUEST CompositeGlyphs32
+ 4	op	PictOp
+ 8	src	PICTURE
+12	dst	PICTURE
+16	maskFormat	PICTFORMAT constants none
+20	glyphset	GLYPHSET
+24	xSrc	INT16
+26	ySrc	INT16
+28	glyphcmds	LISTofGlyphElt32
+END
+
+# 0.1 and higher
+
+REQUEST FillRectangles
+ 4	op	PictOp
+ 8	dst	PICTURE
+12	red	CARD16
+14	green	CARD16
+16	blue	CARD16
+18	alpha	CARD16
+20	rects	LISTofRECTANGLE
+END
+
+# 0.5 and higher
+
+REQUEST CreateCursor
+ 4	cid	CURSOR
+ 8	src	PICTURE
+ 12	x	UINT16
+ 14	y	UINT16
+END
+
+# 0.6 and higher
+
+REQUEST SetPictureTransform
+ 4	picture	PICTURE
+ 8	transform	LISTofCARD32
+END
+
+REQUEST QueryFilters
+ 4	drawable	DRAWABLE
+END
+
+RESPONSE QueryFilters
+ 8	numAliases	COUNT32
+32	Aliases	LISTofCARD16
+ROUND
+12	numFilters	COUNT32
+LATER	Filters	LISTofSTRING8
+END
+
+REQUEST SetPictureFilter
+ 4	picture	PICTURE
+ 8	nbytes	COUNT16
+12	name	STRING8
+#	/* params??
+# ROUND
+# LATER	values	LISTofCARD32
+#	*/
+END
+
+# 0.8 and higher
+
+LIST AnimCursorElt length 8
+ 0	cursor	CURSOR
+ 4	delay	CARD32
+END
+
+REQUEST CreateAnimCursor
+ 4	cid	CURSOR
+ 8	cursors	LISTofAnimCursorElt
+END
+
+EOF

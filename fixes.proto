@@ -1,0 +1,315 @@
+# This file is part of "xtrace"
+# Copyright (C) 2008 Bernhard R. Link
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+NEEDS "render.proto"
+
+EXTENSION "XFIXES" Fixes
+USE core
+
+TYPE PICTURE Render::PICTURE
+
+REQUESTS
+QueryVersion RESPONDS
+ChangeSaveSet
+SelectSelectionInput
+SelectCursorInput
+GetCursorImage RESPONDS
+CreateRegion
+CreateRegionFromBitmap
+CreateRegionFromWindow
+CreateRegionFromGC
+CreateRegionFromPicture
+DestroyRegion
+SetRegion
+CopyRegion
+UnionRegion
+IntersectRegion
+SubtractRegion
+InvertRegion
+TranslateRegion
+RegionExtents
+FetchRegion RESPONDS
+SetGCClipRegion
+SetWindowShapeRegion
+SetPictureClipRegion
+SetCursorName
+GetCursorName RESPONDS
+GetCursorImageAndName RESPONDS
+ChangeCursor
+ChangeCursorByName
+ExpandRegion
+HideCursor
+ShowCursor
+END
+
+EVENTS
+SelectionNotify
+CursorNotify
+END
+
+ERRORS
+BadRegion
+END
+
+CONSTANTS fixes_mode
+0	insert
+1	delete
+END
+TYPE FIXES_MODE	ENUM8	fixes_mode
+CONSTANTS fixes_target
+0	nearest
+1	root
+END
+TYPE FIXES_TARGET	ENUM8	fixes_target
+CONSTANTS fixes_map
+0	set
+1	unset
+END
+TYPE FIXES_MAP	ENUM8	fixes_map
+CONSTANTS fixes_region_kind
+0	bounding
+1	clip
+END
+TYPE FIXES_REGION_KIND	ENUM8	fixes_region_kind
+
+BITMASK fixes_mask
+0x00000001	"owner notify"
+0x00000002	"destroy notify"
+0x00000004	"client close notify"
+END
+TYPE FIXES_MASK	BITMASK32	fixes_mask
+
+CONSTANTS fixes_subtype
+0	"set owner"
+1	destroy
+2	"client close"
+END
+TYPE FIXES_SUBTYPE	ENUM8	fixes_subtype
+
+BITMASK fixes_cursor_mask
+0x00000001	"display cursor notify"
+END
+TYPE FIXES_CURSOR_MASK	BITMASK32	fixes_cursor_mask
+
+CONSTANTS fixes_cursor_subtype
+0	"display cursor"
+END
+TYPE FIXES_CURSOR_SUBTYPE	ENUM8	fixes_cursor_subtype
+
+REQUEST QueryVersion
+4	"major version"	UINT32
+8	"minor version"	UINT32
+END
+RESPONSE QueryVersion
+8	"major version"	UINT32
+12	"minor version"	UINT32
+END
+
+REQUEST ChangeSaveSet
+4	mode	FIXES_MODE
+5	target	FIXES_TARGET
+6	map	FIXES_MAP
+8	window	WINDOW
+END
+
+REQUEST SelectSelectionInput
+4	window	WINDOW
+8	selection	ATOM
+12	eventMask	FIXES_MASK
+END
+
+REQUEST SelectCursorInput
+4	window	WINDOW
+8	eventMask	FIXES_CURSOR_MASK
+END
+
+REQUEST GetCursorImage ALIASES Empty
+RESPONSE GetCursorImage
+8	x	INT16
+10	y	INT16
+12	width	UINT16
+14	height	UINT16
+16	xhot	UINT16
+18	yhot	UINT16
+20	"cursor serial"	CARD32
+END
+
+REQUEST CreateRegion
+4	region	CARD32
+8	rectangles	LISTofRECTANGLE
+END
+
+REQUEST CreateRegionFromBitmap
+4	region	CARD32
+8	bitmap	PIXMAP
+END
+
+REQUEST CreateRegionFromWindow
+4	region	CARD32
+8	window	WINDOW
+12	kind	FIXES_REGION_KIND
+END
+
+REQUEST CreateRegionFromGC
+4	region	CARD32
+8	gc	GCONTEXT
+END
+
+REQUEST CreateRegionFromPicture
+4	region	CARD32
+8	picture	PICTURE
+END
+
+templateREQUEST Region
+4	region	CARD32
+END
+
+REQUEST DestroyRegion ALIASES Region
+
+REQUEST SetRegion ALIASES Region
+
+REQUEST CopyRegion
+4	src-region	CARD32
+8	dst-region	CARD32
+END
+
+templateREQUEST CombineRegion
+4	region1	CARD32
+8	region2	CARD32
+12	dst-region	CARD32
+END
+REQUEST UnionRegion ALIASES CombineRegion
+REQUEST IntersectRegion ALIASES CombineRegion
+REQUEST SubtractRegion ALIASES CombineRegion
+
+REQUEST InvertRegion
+4	src-region	CARD32
+8	x	INT16
+10	y	INT16
+12	width	UINT16
+14	height	UINT16
+16	dst-region	CARD32
+END
+
+REQUEST TranslateRegion
+4	region	CARD32
+8	delta-x	INT16
+10	delta-y	INT16
+END
+
+REQUEST RegionExtents ALIASES CopyRegion
+REQUEST FetchRegion ALIASES Region
+
+RESPONSE FetchRegion
+8	x	INT16
+10	y	INT16
+12	width	UINT16
+14	height	UINT16
+END
+
+REQUEST SetGCClipRegion
+4	gc	GCONTEXT
+8	region	CARD32
+12	"x origin"	INT16
+14	"y origin"	INT16
+END
+
+REQUEST SetWindowShapeRegion
+4	window	WINDOW
+8	kind	FIXES_REGION_KIND
+12	"x offset"	INT16
+14	"y offset"	INT16
+16	region	CARD32
+END
+
+REQUEST SetPictureClipRegion
+4	picture	PICTURE
+8	region	CARD32
+12	"x origin"	INT16
+14	"y origin"	INT16
+END
+
+REQUEST SetCursorName
+4	cursor	CARD32
+8	""	COUNT16
+12	name	STRING8
+END
+
+REQUEST GetCursorName
+4	cursor	CARD32
+END
+
+RESPONSE GetCursorName
+8	atom	ATOM
+12	""	COUNT16
+32	name	STRING8
+END
+
+REQUEST GetCursorImageAndName ALIASES Empty
+RESPONSE GetCursorImageAndName
+ 8	x	INT16
+10	y	INT16
+12	width	UINT16
+14	height	UINT16
+16	xhot	UINT16
+18	yhot	UINT16
+20	"cursor serial"	CARD32
+24	"cursor name"	ATOM
+28	""	COUNT16
+32	name	STRING8
+END
+
+REQUEST ChangeCursor
+4	src-cursor	CARD32
+8	dst-cursor	CARD32
+END
+
+REQUEST ChangeCursorByName
+ 4	src-cursor	CARD32
+ 8	""	COUNT16
+12	name	STRING8
+END
+
+REQUEST ExpandRegion
+ 4	src-region	CARD32
+ 8	dst-region	CARD32
+12	left	UINT16
+14	right	UINT16
+16	top	UINT16
+18	bottom	UINT16
+END
+
+REQUEST HideCursor ALIASES WINDOW
+
+REQUEST ShowCursor ALIASES WINDOW
+
+EVENT SelectionNotify
+ 1	subtype	FIXES_SUBTYPE
+ 4	window	WINDOW
+ 8	owner	WINDOW
+12	selection	ATOM
+16	timestamp	TIMESTAMP
+20	selectionTimestamp	TIMESTAMP
+END
+
+EVENT CursorNotify
+ 1	subtype	FIXES_CURSOR_SUBTYPE
+ 4	window	WINDOW
+ 8	"cursor serial"	CARD32
+12	timestamp	TIMESTAMP
+16	name	ATOM
+END
+
+EOF
