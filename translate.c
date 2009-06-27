@@ -1074,6 +1074,10 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 			number = parse_number(parser, position);
 		name = get_const_token(parser, false);
 		parse_typespec(parser, &type);
+		if( parser->error ) {
+			typespec_done(&type);
+			break;
+		}
 		assert( type.base_type != NULL );
 		if( C(type.base_type, SETS_NEXT) )
 			state->nextmarker_set = true;
