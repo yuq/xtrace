@@ -32,8 +32,6 @@ Things still to do (any volunteers?):
 	- more checking of protocol specifications, there are many
 	  easy to make errors that are still not tested for.
 	- script to translate xorg's protocol xml files to .proto language
-	  (they miss many information and have the field name in comments,
-	   but might still be good to be faster in supporting extensions)
 	- allow generic dictionaries (generalizing the hard-coded atom
 	  support) and giving symbolic names to things (like GC1, GC2,...,
 	  that would make some logs much easier to compare).
