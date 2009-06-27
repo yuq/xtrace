@@ -504,8 +504,8 @@ REQUEST SetCrtcTransform
 44	"filter length"	COUNT16
 48	"filter name"	STRING8
 ROUND
-# TODO: ???
-# LATER	"filter params"	LISTofFIXED
+RESET_COUNTER
+LATER	"filter params"	LISTofFIXED
 END
 
 REQUEST GetCrtcTransform
