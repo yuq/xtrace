@@ -1452,16 +1452,10 @@ REQUEST AllocColorCells
 END
 
 RESPONSE AllocColorCells
-#// TODO: ?
-#/*
-#8	number of CARD32s in pixels	COUNT16
-#10	number of CARD32s in masks	COUNT16
-#32	pixels	LISTofCARD32
-#4n
-#32+	masks	LISTofCARD32
-#4m
-#*/
-32	"pixels and masks"	LISTofCARD32
+8	"#pixels"	COUNT16
+32	pixels  	LISTofCARD32
+10	"#masks"	COUNT16
+LATER	masks   	LISTofCARD32
 END
 
 REQUEST AllocColorPlanes
