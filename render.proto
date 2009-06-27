@@ -74,7 +74,10 @@ CreateCursor
 SetPictureTransform
 QueryFilters RESPONDS
 SetPictureFilter
+# 0.8
 CreateAnimCursor
+# 0.9
+AddTraps	/*32*/
 END
 
 EVENTS
@@ -543,5 +546,26 @@ REQUEST CreateAnimCursor
  4	cid	CURSOR
  8	cursors	LISTofAnimCursorElt
 END
+
+# 0.9 and higher
+
+STRUCT SPANFIX length 12
+0	l	FIXED
+4	r	FIXED
+8	y	FIXED
+END
+
+LIST TRAP length 24
+0	top	SPANFIX
+12	bottom	SPANFIX
+END
+
+REQUEST AddTraps
+ 4	picture	PICTURE
+ 8	x-ofs	INT16
+10	y-ofs	INT16
+12	traps	LISTofTRAP
+END
+
 
 EOF
