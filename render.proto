@@ -1,5 +1,5 @@
 #  This file is part of "xtrace"
-#  Copyright (C) 2005 Bernhard R. Link
+#  Copyright (C) 2005, 2009 Bernhard R. Link
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License version 2 as
 #  published by the Free Software Foundation.
@@ -510,7 +510,7 @@ END
 
 REQUEST SetPictureTransform
  4	picture	PICTURE
- 8	transform	LISTofCARD32
+ 8	transform	LISTofFIXED
 END
 
 REQUEST QueryFilters
@@ -529,10 +529,9 @@ REQUEST SetPictureFilter
  4	picture	PICTURE
  8	nbytes	COUNT16
 12	name	STRING8
-#	/* params??
-# ROUND
-# LATER	values	LISTofCARD32
-#	*/
+ROUND
+RESET_COUNTER
+LATER	values	LISTofFIXED
 END
 
 # 0.8 and higher
@@ -566,6 +565,5 @@ REQUEST AddTraps
 10	y-ofs	INT16
 12	traps	LISTofTRAP
 END
-
 
 EOF
