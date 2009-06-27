@@ -541,17 +541,6 @@ CONSTANTS sizeclass
 2	Stipple
 END
 
-BITMASK keyboardvaluemask
-0x0001	key-click-percent
-0x0002	bell-percent
-0x0004	bell-pitch
-0x0008	bell-duration
-0x0010	led
-0x0020	led-mode
-0x0040	key
-0x0080	auto-repeat-mode
-END
-
 CONSTANTS nyd
 0	No
 1	Yes
@@ -1646,26 +1635,27 @@ RESPONSE GetKeyboardMapping
 32	keysyms		LISTofKEYSYM
 END
 
+
+CONSTANTS OnOffDefault
+0	Off
+1	On
+2	Default
+END
+
+VALUES KeyboardControl
+0x0001	key-click-percent	INT8
+0x0002	bell-percent    	INT8
+0x0004	bell-pitch       	INT16
+0x0008	bell-duration     	INT16
+0x0010	led              	CARD8
+0x0020	led-mode          	ENUM8 OnOffDefault
+0x0040	key              	KEYCODE
+0x0080	auto-repeat-mode        ENUM8 OnOffDefault
+END
+
 REQUEST ChangeKeyboardControl
-4	value-mask	BITMASK16 keyboardvaluemask
-#// TODO
-#  4n LISTofVALUE	 value-list
-#
-#
-#  VALUEs
-#  1  INT8		 key-click-percent
-#  1  INT8		 bell-percent
-#  2  INT16		 bell-pitch
-#  2  INT16		 bell-duration
-#  1  CARD8		 led
-#  1			 led-mode
-#     0	       Off
-#     1	       On
-#  1  KEYCODE		 key
-#  1			 auto-repeat-mode
-#     0	       Off
-#     1	       On
-#     2	       Default
+4	value-mask	STORE16
+8	values		LISTofKeyboardControl
 END
 
 REQUEST GetKeyboardControl ALIASES Empty
