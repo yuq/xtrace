@@ -269,11 +269,10 @@ RESPONSE GetScreenInfo
 20	nSizes	COUNT16
 22	sizeID	CARD16
 24	rotation	RANDR_RR
-32	sizes	ScreenSizes
-28	nrateEnts	COUNT16
+32	sizes	LISTofScreenSizes
 26	rate	UINT16
-# TODO: ????
-#LATER	rates	LISTofRates
+28	nrateEnts	COUNT16
+LATER	rates	LISTofRates
 END
 
 REQUEST SetScreenConfig
