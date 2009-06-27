@@ -1114,7 +1114,6 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 		if( *last == NULL )
 			oom(parser);
 		if( parser->error ) {
-			free(*last);
 			typespec_done(&type);
 			break;
 		}
@@ -1126,6 +1125,7 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 	}
 	error(parser, "missing END!");
 	parameter_free(parameters);
+	free(state);
 	return false;
 }
 
