@@ -407,10 +407,9 @@ REQUEST AddGlyphs
  4	glyphset	GLYPHSET
  8	nglyphs	COUNT32
 12	glyphids	LISTofCARD32
-# TODO: ????????
-RESET_COUNTER
+ 8	nglyphs	COUNT32
 LATER	glyphs	LISTofGLYPHINFO
-#/*	LATER data LISTofCARD8*/
+LATER	data	LISTofCARD8
 END
 
 REQUEST FreeGlyphs
