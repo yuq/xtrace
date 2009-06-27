@@ -89,6 +89,7 @@ static const struct base_type {
 	{ "FORMAT8",		ft_FORMAT8,		SETS_FORMAT,	1},
 	{ "BE32",		ft_BE32,		ALLOWS_CONSTANTS,	4},
 	{ "FIXED",		ft_FIXED,		0,	4},
+	{ "FRACTION16_16",	ft_FRACTION16_16,	0,	4},
 	{ "LISTofFIXED",	ft_LISTofFIXED,		USES_STORE|SETS_NEXT,	0},
 	{ "PUSH8",		ft_PUSH8,		PUSHES,	1},
 	{ "PUSH16",		ft_PUSH16,		PUSHES,	2},

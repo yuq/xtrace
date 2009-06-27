@@ -1684,19 +1684,17 @@ REQUEST Bell
 END
 
 REQUEST ChangePointerControl
-4	acceleration-numerator		INT16
-6	acceleration-denominator	INT16
-8	threshold			INT16
-10	do-acceleration 		BOOL
-11	do-threshold			BOOL
+4	acceleration	FRACTION16_16
+8	threshold	INT16
+10	do-acceleration BOOL
+11	do-threshold	BOOL
 END
 
 REQUEST GetPointerControl ALIASES Empty
 
 RESPONSE GetPointerControl
-8	acceleration-numerator		CARD16
-10	acceleration-denominator	CARD16
-12	threshold			CARD16
+8	acceleration	FRACTION16_16
+12	threshold	CARD16
 END
 
 REQUEST SetScreenSaver

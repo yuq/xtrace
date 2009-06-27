@@ -97,6 +97,8 @@ struct parameter {
 		ft_FIXED,
 		/* a list of those */
 		ft_LISTofFIXED,
+		/* fraction with nominator and denominator 16 bit */
+		ft_FRACTION16_16,
 		/* set stored value to specific value */
 		ft_SET
 		} type;

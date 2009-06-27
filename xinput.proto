@@ -451,12 +451,6 @@ REQUEST SetDeviceFocus
 13	device	CARD8
 END
 
-# TODO: make that a built-in! (it can also be used in core)
-STRUCT FRACTION length 4
- 0	numerator	UINT16
- 2	denominator	UINT16
-END
-
 LIST FEEDBACKSTATE variable min-length 4
 # XIproto.ps has strange values here, XI.h looks more reasonable:
  0	"feedback class"	ENUM8 feedback_class
@@ -474,7 +468,7 @@ SET_COUNTER 32
 20	auto-repeats	LISTofCARD8
 ELSEIF 0 CARD8 1
 # PTR
- 6	acceleration	FRACTION
+ 6	acceleration	FRACTION16_16
 10	treshold	UINT16
 NEXT	12
 ELSEIF 0 CARD8 2
@@ -530,7 +524,7 @@ IF 12 CARD8 0
 ELSEIF 12 CARD8 1
 # PTR
  4	mask	BITMASK32 dv_pointer
-18	acceleration	FRACTION
+18	acceleration	FRACTION16_16
 22	treshold	UINT16
 ELSEIF 12 CARD8 2
 # STRING
