@@ -404,6 +404,111 @@ static size_t printLISTofATOM(struct connection *c,const uint8_t *buffer,size_t 
 	return ofs;
 }
 
+static size_t printLISTofINT8(const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( buflen - ofs <= len )
+		len = buflen - ofs;
+
+	if( print_offsets )
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
+	while( len > 0 ) {
+		const char *value;
+		signed char i8;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...",out);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putc(',',out);
+			notfirst = true;
+			i8 = getCARD8(ofs);
+			value = findConstant(p->constants,i8);
+			if( value )
+				fprintf(out,"%s(%d)",value,(int)i8);
+			else
+				fprintf(out,"%d",(int)i8);
+		}
+		len--;ofs++;nr++;
+	}
+	putc(';',out);
+	return ofs;
+}
+
+static size_t printLISTofINT16(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( (buflen - ofs)/2 <= len )
+		len = (buflen - ofs)/2;
+
+	if( print_offsets )
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
+	while( len > 0 ) {
+		const char *value;
+		int16_t i16;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...",out);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putc(',',out);
+			notfirst = true;
+			i16 = getCARD16(ofs);
+			value = findConstant(p->constants,i16);
+			if( value )
+				fprintf(out,"%s(%d)",value,(int)i16);
+			else
+				fprintf(out,"%d",(int)i16);
+		}
+		len--;ofs+=2;nr++;
+	}
+	putc(';',out);
+	return ofs;
+}
+
+static size_t printLISTofINT32(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( (buflen - ofs)/4 <= len )
+		len = (buflen - ofs)/4;
+
+	if( print_offsets )
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
+	while( len > 0 ) {
+		const char *value;
+		int32_t i32;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...",out);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putc(',',out);
+			notfirst = true;
+			i32 = getCARD32(ofs);
+			value = findConstant(p->constants,i32);
+			if( value )
+				fprintf(out,"%s(%d)",value,(int)i32);
+			else
+				fprintf(out,"%d",(int)i32);
+		}
+		len--;ofs+=4;nr++;
+	}
+	putc(';',out);
+	return ofs;
+}
+
 static size_t printLISTofUINT8(const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
@@ -429,9 +534,9 @@ static size_t printLISTofUINT8(const uint8_t *buffer,size_t buflen,const struct 
 			u8 = getCARD8(ofs);
 			value = findConstant(p->constants,u8);
 			if( value )
-				fprintf(out,"%s(%d)",value,(unsigned int)u8);
+				fprintf(out,"%s(%u)",value,(unsigned int)u8);
 			else
-				fprintf(out,"%d",(unsigned int)u8);
+				fprintf(out,"%u",(unsigned int)u8);
 		}
 		len--;ofs++;nr++;
 	}
@@ -464,9 +569,9 @@ static size_t printLISTofUINT16(struct connection *c,const uint8_t *buffer,size_
 			u16 = getCARD16(ofs);
 			value = findConstant(p->constants,u16);
 			if( value )
-				fprintf(out,"%s(%d)",value,(unsigned int)u16);
+				fprintf(out,"%s(%u)",value,(unsigned int)u16);
 			else
-				fprintf(out,"%d",(unsigned int)u16);
+				fprintf(out,"%u",(unsigned int)u16);
 		}
 		len--;ofs+=2;nr++;
 	}
@@ -499,9 +604,9 @@ static size_t printLISTofUINT32(struct connection *c,const uint8_t *buffer,size_
 			u32 = getCARD32(ofs);
 			value = findConstant(p->constants,u32);
 			if( value )
-				fprintf(out,"%s(%x)",value,(unsigned int)u32);
+				fprintf(out,"%s(%u)",value,(unsigned int)u32);
 			else
-				fprintf(out,"%x",(unsigned int)u32);
+				fprintf(out,"%u",(unsigned int)u32);
 		}
 		len--;ofs+=4;nr++;
 	}
@@ -763,9 +868,17 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 				p = ((struct parameter *)p->constants)-1;
 			continue;
 		} else if( p->type == ft_IF16 ) {
+			if( ofs+3 < len &&
+			  getCARD16(ofs) == (unsigned char)(p->name[1])
+			  + (unsigned int)0x100*(unsigned char)(p->name[0]))
+				p = ((struct parameter *)p->constants)-1;
+			continue;
+		} else if( p->type == ft_IF32 ) {
 			if( ofs+1 < len &&
-			  getCARD16(ofs) == (unsigned char)(p->name[1]) 
-			  + (unsigned char)0x100*(unsigned char)(p->name[0]))
+			  getCARD32(ofs) == (unsigned char)(p->name[3])
+			  + (((unsigned long)((unsigned char)(p->name[2])))>>8)
+			  + (((unsigned long)((unsigned char)(p->name[1])))>>16)
+			  + (((unsigned long)((unsigned char)(p->name[0])))>>24) )
 				p = ((struct parameter *)p->constants)-1;
 			continue;
 		} else if( p->type == ft_IFATOM ) {
@@ -815,6 +928,15 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LISTofUINT32:
 			lastofs = printLISTofUINT32(c,buffer,len,p,stored,ofs);
 			continue;
+		 case ft_LISTofINT8:
+			lastofs = printLISTofINT8(buffer,len,p,stored,ofs);
+			continue;
+		 case ft_LISTofINT16:
+			lastofs = printLISTofINT16(c,buffer,len,p,stored,ofs);
+			continue;
+		 case ft_LISTofINT32:
+			lastofs = printLISTofINT32(c,buffer,len,p,stored,ofs);
+			continue;
 		 case ft_LISTofFormat:
 			switch( format ) {
 			 case 8:
@@ -856,6 +978,19 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LISTofFIXED:
 			lastofs = printLISTofFIXED(c,buffer,len,p,stored,ofs);
 			continue;
+		 case ft_FLOAT32:
+			if( ofs + 4 > len )
+				continue;
+			if( print_offsets )
+				fprintf(out,"[%d]",(int)ofs);
+			fputs(p->name,out);putc('=',out);
+			u32 = getCARD32(ofs);
+			fprintf(out,"float(%x)", u32);
+			continue;
+		 case ft_LISTofFLOAT32:
+			/* TODO: implement */
+			lastofs = printLISTofCARD32(c,buffer,len,p,stored,ofs);
+			continue;
 		 case ft_FRACTION16_16:
 			if( ofs + 4 > len )
 				continue;
@@ -894,6 +1029,12 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			continue;
 		 case ft_GET:
 			stored = getFromStack(&newstack,p->offse);
+			continue;
+		 case ft_DECREMENT_STORED:
+			if( stored < p->offse )
+				stored = 0;
+			else
+				stored -= p->offse;
 			continue;
 		 case ft_SET:
 			stored = p->offse;
@@ -1008,6 +1149,9 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LISTofUINT8:
 		 case ft_LISTofUINT16:
 		 case ft_LISTofUINT32:
+		 case ft_LISTofINT8:
+		 case ft_LISTofINT16:
+		 case ft_LISTofINT32:
 		 case ft_LISTofFormat:
 		 case ft_LISTofVALUE:
 		 case ft_Struct:
@@ -1015,16 +1159,20 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LISTofVarStruct:
 		 case ft_IF8:
 		 case ft_IF16:
+		 case ft_IF32:
 		 case ft_IFATOM:
 		 case ft_BE32:
 		 case ft_ATOM:
 		 case ft_LASTMARKER:
 		 case ft_GET:
+		 case ft_DECREMENT_STORED:
 		 case ft_SET:
 		 case ft_EVENT:
 		 case ft_FRACTION16_16:
 		 case ft_FIXED:
 		 case ft_LISTofFIXED:
+		 case ft_FLOAT32:
+		 case ft_LISTofFLOAT32:
 			 assert(0);
 		}
 		if( value != NULL ) {

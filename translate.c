@@ -82,15 +82,20 @@ static const struct base_type {
 	{ "LISTofUINT8",	ft_LISTofUINT8, ALLOWS_CONSTANTS|USES_STORE|SETS_NEXT,	0},
 	{ "LISTofUINT16",	ft_LISTofUINT16,	ALLOWS_CONSTANTS|USES_STORE|SETS_NEXT,	0},
 	{ "LISTofUINT32",	ft_LISTofUINT32,	ALLOWS_CONSTANTS|USES_STORE|SETS_NEXT,	0},
+	{ "LISTofINT8", 	ft_LISTofINT8, ALLOWS_CONSTANTS|USES_STORE|SETS_NEXT,	0},
+	{ "LISTofINT16",	ft_LISTofINT16,	ALLOWS_CONSTANTS|USES_STORE|SETS_NEXT,	0},
+	{ "LISTofINT32",	ft_LISTofINT32,	ALLOWS_CONSTANTS|USES_STORE|SETS_NEXT,	0},
 	{ "EVENT",		ft_EVENT,	0, 0},
 	{ "ATOM",		ft_ATOM,	ALLOWS_CONSTANTS|ELEMENTARY,	4},
 	{ "LISTofFormat",	ft_LISTofFormat,	USES_FORMAT|USES_STORE|SETS_NEXT,	0},
 	{ "LISTofATOM",		ft_LISTofATOM,		ALLOWS_CONSTANTS|USES_STORE|SETS_NEXT,	0},
 	{ "FORMAT8",		ft_FORMAT8,		SETS_FORMAT,	1},
 	{ "BE32",		ft_BE32,		ALLOWS_CONSTANTS,	4},
-	{ "FIXED",		ft_FIXED,		0,	4},
 	{ "FRACTION16_16",	ft_FRACTION16_16,	0,	4},
+	{ "FIXED",		ft_FIXED,		0,	4},
 	{ "LISTofFIXED",	ft_LISTofFIXED,		USES_STORE|SETS_NEXT,	0},
+	{ "FLOAT32",		ft_FLOAT32,		0,	4},
+	{ "LISTofFLOAT32",    	ft_LISTofFLOAT32,	USES_STORE|SETS_NEXT,	0},
 	{ "PUSH8",		ft_PUSH8,		PUSHES,	1},
 	{ "PUSH16",		ft_PUSH16,		PUSHES,	2},
 	{ "PUSH32",		ft_PUSH16,		PUSHES,	4},
@@ -728,6 +733,10 @@ static unsigned long parse_number(struct parser *parser, const char *value) {
 	char *e;
 	unsigned long number = 0;
 
+	if( parser->error )
+		return 0;
+	assert( value != NULL );
+
 	if( value[0] == '0' && value[1] == '\0' ) {
 		e = (char*)value + 1;
 	} else if( value[0] == '0' && value[1] == 'x' )
@@ -787,6 +796,8 @@ static bool parse_typespec(struct parser *parser, struct typespec *t) {
 		}
 	} else {
 		tv = find_variable(parser, vt_type, type);
+		if( tv == NULL )
+			return false;
 		assert( tv->type == vt_type );
 		typespec_copy(t, &tv->t);
 	}
@@ -937,6 +948,18 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 				c[1] = l & 0xFF;
 				c[0] = l >> 8;
 				condition = string_add_l((const char*)c, 2);
+			} else if( strcmp(v, "CARD32") == 0 ) {
+				unsigned char c[4];
+				unsigned long l;
+
+				ft = ft_IF32;
+				v = get_const_token(parser, false);
+				l = parse_number(parser, v);
+				c[3] = l & 0xFF;
+				c[2] = (l >> 8) & 0xFF;
+				c[1] = (l >> 16) & 0xFF;
+				c[0] = l >> 24;
+				condition = string_add_l((const char*)c, 4);
 			} else {
 				error(parser, "unknown IF type '%s'!", v);
 				break;
@@ -987,6 +1010,18 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 				c[1] = l & 0xFF;
 				c[0] = l >> 8;
 				condition = string_add_l((const char*)c, 2);
+			} else if( strcmp(v, "CARD32") == 0 ) {
+				unsigned char c[4];
+				unsigned long l;
+
+				ft = ft_IF32;
+				v = get_const_token(parser, false);
+				l = parse_number(parser, v);
+				c[3] = l & 0xFF;
+				c[2] = (l >> 8) & 0xFF;
+				c[1] = (l >> 16) & 0xFF;
+				c[0] = l >> 24;
+				condition = string_add_l((const char*)c, 4);
 			} else {
 				error(parser, "unknown IF type '%s'!", v);
 				break;
@@ -1040,6 +1075,21 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 
 			new_parameter_special(parser, &last,
 					ft_SET, number, NULL);
+			continue;
+		}
+		if( strcmp(position, "DECREMENT_STORED") == 0
+			|| strcmp(position, "DECREMENT_COUNT") == 0 ) {
+			const char *v;
+
+			if( !state->store_set ) {
+				error(parser, "store variable must be set before it can be changed!");
+			}
+			v = get_const_token(parser, false);
+			number = parse_number(parser, v);
+			no_more_arguments(parser);
+
+			new_parameter_special(parser, &last,
+					ft_DECREMENT_STORED, number, NULL);
 			continue;
 		}
 		if( strcmp(position, "RESET_COUNTER") == 0 ) {
@@ -1125,7 +1175,11 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 	}
 	error(parser, "missing END!");
 	parameter_free(parameters);
-	free(state);
+	while( state != NULL ) {
+		struct parameter_state *s = state->parent;
+		free(state);
+		state = s;
+	}
 	return false;
 }
 

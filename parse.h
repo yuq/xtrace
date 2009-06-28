@@ -61,6 +61,8 @@ struct parameter {
 		ft_LISTofCARD8, ft_LISTofCARD16,
 		ft_LISTofUINT8, ft_LISTofUINT16,
 		ft_LISTofUINT32,
+		ft_LISTofINT8, ft_LISTofINT16,
+		ft_LISTofINT32,
 		/*	- one of the above depening on last FORMAT */
 		ft_LISTofFormat,
 		/*	- iterate of list description in constants field */
@@ -83,6 +85,7 @@ struct parameter {
 		/* jump to other parameter list if matches */
 		ft_IF8,
 		ft_IF16,
+		ft_IF32,
 		/* jump to other parameter list if matches atom name */
 		ft_IFATOM,
 		/* set end of last list manually, (for LISTofVarStruct) */
@@ -97,9 +100,14 @@ struct parameter {
 		ft_FIXED,
 		/* a list of those */
 		ft_LISTofFIXED,
+		/* a 32 bit floating pointer number */
+		ft_FLOAT32,
+		/* a list of those */
+		ft_LISTofFLOAT32,
 		/* fraction with nominator and denominator 16 bit */
 		ft_FRACTION16_16,
 		/* set stored value to specific value */
+		ft_DECREMENT_STORED,
 		ft_SET
 		} type;
 	const struct constant *constants;
