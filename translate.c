@@ -737,6 +737,37 @@ static unsigned long parse_number(struct parser *parser, const char *value) {
 		return 0;
 	assert( value != NULL );
 
+	if( value[0] == '$' ) {
+		char *v;
+		struct variable *var;
+		const struct constant *c;
+
+		e = strrchr(value, ':');
+		if( e == NULL || ( e > value && *(e-1) == ':' ) ) {
+			error(parser, "Constants name and member must be seperated with a single colon!");
+			return 0;
+		}
+		v = strndup(value + 1, e - (value+1));
+		if( v == NULL ) {
+			oom(parser);
+			return 0;
+		}
+		var = find_variable(parser, vt_constants, v);
+		if( var == NULL ) {
+			free(v);
+			return 0;
+		}
+		for( c = var->c.constants ; c->name != NULL ; c++ ) {
+			if( strcmp(c->name, e+1) == 0 ) {
+				free(v);
+				return c->value;
+			}
+		}
+		error(parser, "Unable to find '%s' in constants %s!", e+1, v);
+		free(v);
+		return 0;
+	}
+
 	if( value[0] == '0' && value[1] == '\0' ) {
 		e = (char*)value + 1;
 	} else if( value[0] == '0' && value[1] == 'x' )
