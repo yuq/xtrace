@@ -876,9 +876,9 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		} else if( p->type == ft_IF32 ) {
 			if( ofs+3 < len &&
 			  getCARD32(ofs) == (unsigned char)(p->name[3])
-			  + (((unsigned long)((unsigned char)(p->name[2])))>>8)
-			  + (((unsigned long)((unsigned char)(p->name[1])))>>16)
-			  + (((unsigned long)((unsigned char)(p->name[0])))>>24) )
+			  + (((unsigned long)((unsigned char)(p->name[2])))<<8)
+			  + (((unsigned long)((unsigned char)(p->name[1])))<<16)
+			  + (((unsigned long)((unsigned char)(p->name[0])))<<24) )
 				p = ((struct parameter *)p->constants)-1;
 			continue;
 		} else if( p->type == ft_IFATOM ) {
