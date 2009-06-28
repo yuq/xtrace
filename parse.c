@@ -367,6 +367,38 @@ static size_t printLISTofFIXED(struct connection *c,const uint8_t *buffer,size_t
 	return ofs;
 }
 
+static size_t printLISTofFLOAT32(struct connection *c, const uint8_t *buffer, size_t buflen, const struct parameter *p, size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( (buflen - ofs)/4 <= len )
+		len = (buflen - ofs)/4;
+
+	if( print_offsets )
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
+	while( len > 0 ) {
+		uint32_t u32;
+		float f;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...",out);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putc(',',out);
+			notfirst = true;
+			u32 = getCARD32(ofs);
+			memcpy(&f, &u32, 4);
+			fprintf(out, "%f", f);
+		}
+		len--;ofs+=4;nr++;
+	}
+	putc(';',out);
+	return ofs;
+}
+
 static size_t printLISTofATOM(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
@@ -848,6 +880,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		const char *value;
 		const char *atom;
 		double d;
+		float f;
 
 		if( p->offse == OFS_LATER )
 			ofs = lastofs;
@@ -984,12 +1017,13 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			if( print_offsets )
 				fprintf(out,"[%d]",(int)ofs);
 			fputs(p->name,out);putc('=',out);
+			/* how exactly is this float transfered? */
 			u32 = getCARD32(ofs);
-			fprintf(out,"float(%x)", u32);
+			memcpy(&f, &u32, 4);
+			fprintf(out,"%f", f);
 			continue;
 		 case ft_LISTofFLOAT32:
-			/* TODO: implement */
-			lastofs = printLISTofCARD32(c,buffer,len,p,stored,ofs);
+			lastofs = printLISTofFLOAT32(c,buffer,len,p,stored,ofs);
 			continue;
 		 case ft_FRACTION16_16:
 			if( ofs + 4 > len )
