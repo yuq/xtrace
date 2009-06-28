@@ -82,7 +82,7 @@ static void startline(struct connection *c, enum package_direction d, const char
 #define getCARD8(ofs) buffer[ofs]
 #define getCARD32(ofs) CARD32(c->bigendian,buffer,ofs)
 
-#define getBE32(ofs) (((buffer[ofs]*256+buffer[ofs+1])*256+buffer[ofs+2])*256+buffer[ofs+4])
+#define getBE32(ofs) (((buffer[ofs]*UL256+buffer[ofs+1])*UL256+buffer[ofs+2])*UL256+buffer[ofs+3])
 
 struct usedextension {
 	struct usedextension *next;
