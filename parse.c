@@ -863,7 +863,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 	const struct parameter *p;
 	unsigned long stored = INT_MAX;
 	unsigned char format = 0;
-	bool notfirst = false;
+	bool printspace = false;
 	size_t lastofs = 0;
 	struct stack newstack = *oldstack;
 
@@ -890,21 +890,23 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		else
 			ofs = p->offse;
 
-		if( notfirst )
+		if( printspace )
 			putc(' ',out);
-		notfirst = true;
+		printspace = true;
 
 		if( p->type == ft_IF8 ) {
 			if( ofs < len &&
 			  /* some more overloading: */
 			  getCARD8(ofs) == (unsigned char)(p->name[0]) )
 				p = ((struct parameter *)p->constants)-1;
+			printspace = false;
 			continue;
 		} else if( p->type == ft_IF16 ) {
 			if( ofs+1 < len &&
 			  getCARD16(ofs) == (unsigned char)(p->name[1])
 			  + (unsigned int)0x100*(unsigned char)(p->name[0]))
 				p = ((struct parameter *)p->constants)-1;
+			printspace = false;
 			continue;
 		} else if( p->type == ft_IF32 ) {
 			if( ofs+3 < len &&
@@ -913,6 +915,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			  + (((unsigned long)((unsigned char)(p->name[1])))<<16)
 			  + (((unsigned long)((unsigned char)(p->name[0])))<<24) )
 				p = ((struct parameter *)p->constants)-1;
+			printspace = false;
 			continue;
 		} else if( p->type == ft_IFATOM ) {
 			const char *atomname;
@@ -923,6 +926,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 				continue;
 			if( strcmp(atomname, p->name) == 0 )
 				p = ((struct parameter *)p->constants)-1;
+			printspace = false;
 			continue;
 		}
 
@@ -932,10 +936,12 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 				 lastofs = (lastofs+3)& ~3;
 			 else
 				 lastofs = ofs;
+			 printspace = false;
 			 continue;
 		 case ft_FORMAT8:
 			 if( ofs < len )
 				 format = getCARD8(ofs);
+			printspace = false;
 			 continue;
 		 case ft_STRING8:
 			lastofs = printSTRING8(buffer,len,p,stored,ofs);
@@ -1063,15 +1069,18 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			continue;
 		 case ft_GET:
 			stored = getFromStack(&newstack,p->offse);
+			printspace = false;
 			continue;
 		 case ft_DECREMENT_STORED:
 			if( stored < p->offse )
 				stored = 0;
 			else
 				stored -= p->offse;
+			printspace = false;
 			continue;
 		 case ft_SET:
 			stored = p->offse;
+			printspace = false;
 			continue;
 		 default:
 			break;
@@ -1109,13 +1118,17 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		if( p->type >= ft_PUSH8 ) {
 			assert(p->type <= ft_PUSH32 );
 			push(&newstack,l);
-			if( !print_counts)
+			if( !print_counts) {
+				printspace = false;
 				continue;
+			}
 		} else if( p->type >= ft_STORE8 ) {
 			assert(p->type <= ft_STORE32);
 			stored = l;
-			if( !print_counts)
+			if( !print_counts) {
+				printspace = false;
 				continue;
+			}
 		}
 		value = findConstant(p->constants,l);
 		if( print_offsets )
