@@ -1,5 +1,17 @@
 2009-06-29
 	* remove unecessary output of spaces for ft_IF,...
+2009-06-28
+	* references to constants allowed in .proto files where
+	numbers are expected.
+	* add FLOAT32, LISTofFLOAT32, IF32, LISTofINT8, LISTofINT16,
+	LISTofIN32, DECREMENT_COUNTER
+	* some bugfixes in BE32 and LISTofUINT32
+2009-06-27
+	* add FRACTION16_16
+2009-06-26
+	* protocol specification is now read at run-time and no longer
+	needs to be compiled in. Translated all the .inc files to the new
+	.proto file format.
 2009-06-15
 	* add start of GLX support contributed by Kristof Ralovich
 2009-06-01

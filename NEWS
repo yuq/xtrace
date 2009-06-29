@@ -1,5 +1,9 @@
 new after 0.11.0:
-- partial support for GLX
+- add parser so that protocol descriptions are no longer compiled in but
+  read from text files in a language for the virtual parsing machine of
+  previous versions.
+- partial support for GLX extension
+- bugfix in BE32 and hex/non-hex fixes in different places
 new after 0.10.1:
 - bugfix: correct field length in GetAtomName, added missing field in
 	  RRGetOutputInfo reply.
