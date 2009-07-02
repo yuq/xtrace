@@ -1,3 +1,6 @@
+2009-07-02
+	* print raw data of unsupported or unknown requests and of
+	unexpected replies.
 2009-06-29
 	* remove unecessary output of spaces for ft_IF,...
 2009-06-28

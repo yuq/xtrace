@@ -1272,7 +1272,12 @@ static void parse_request(struct parser *parser, bool template) {
 			return;
 		}
 		if( request->request != NULL ) {
-			error(parser, "Multiple definition of '%s::request::%s'!",
+			error(parser, "Multiple definition of request '%s::%s'!",
+					parser->current->namespace->name,
+					name);
+		}
+		if( request->unsupported ) {
+			error(parser, "Unexpected definition of unsupported request '%s::%s'!",
 					parser->current->namespace->name,
 					name);
 		}
@@ -1322,7 +1327,12 @@ static void parse_response(struct parser *parser, bool template) {
 					name);
 		}
 		if( request->response != NULL ) {
-			error(parser, "Multiple definition of '%s::response::%s'!",
+			error(parser, "Multiple definition of response '%s::%s'!",
+					parser->current->namespace->name,
+					name);
+		}
+		if( request->unsupported ) {
+			error(parser, "Unexpected definition of unsupported response '%s::%s'!",
 					parser->current->namespace->name,
 					name);
 		}
@@ -2211,7 +2221,7 @@ static const void *variable_finalize(struct parser *parser, struct variable *v) 
 	assert( v->type != v->type );
 }
 
-static const struct request *finalize_requests(struct parser *parser, struct namespace *ns) {
+static const struct request *finalize_requests(struct parser *parser, struct namespace *ns, const struct parameter *unknownrequest, const struct parameter *unknownresponse) {
 	struct request *rs;
 	const struct request *f;
 	int i;
@@ -2223,10 +2233,25 @@ static const struct request *finalize_requests(struct parser *parser, struct nam
 	}
 	for( i = 0 ; i < ns->num_requests ; i++ ) {
 		rs[i].name = ns->requests[i].name;
-		rs[i].parameters = variable_finalize(parser,
-				ns->requests[i].request);
-		rs[i].answers = variable_finalize(parser,
-				ns->requests[i].response);
+		if( ns->requests[i].unsupported ) {
+			assert( ns->requests[i].request == NULL);
+			rs[i].parameters = unknownrequest;
+		} else {
+			assert( ns->requests[i].request != NULL);
+			rs[i].parameters = variable_finalize(parser,
+					ns->requests[i].request);
+		}
+		if( ns->requests[i].has_response ) {
+			if( ns->requests[i].unsupported ) {
+				assert( ns->requests[i].response == NULL);
+				rs[i].answers = unknownresponse;
+			} else {
+				assert( ns->requests[i].response != NULL);
+				rs[i].answers = variable_finalize(parser,
+						ns->requests[i].response);
+			}
+		} else
+			assert( ns->requests[i].response == NULL);
 		if( !ns->requests[i].special )
 			continue;
 		assert( rs[i].name != NULL );
@@ -2284,6 +2309,8 @@ void finalize_everything(struct parser *parser) {
 	struct extension *es, *e;
 	size_t count = 0;
 	struct namespace *ns, *core = NULL;
+	struct variable *v;
+	const struct parameter *unknownrequest, *unknownresponse;
 
 	if( parser->error )
 		return;
@@ -2316,46 +2343,55 @@ void finalize_everything(struct parser *parser) {
 		parser->error = true;
 		return;
 	}
+	v = find_variable(parser, vt_request, "core::unknown");
+	unknownrequest = variable_finalize(parser, v);
+	v = find_variable(parser, vt_response, "core::unknown");
+	unknownresponse = variable_finalize(parser, v);
+	unexpected_reply = unknownresponse;
+	if( parser->error )
+		return;
 	if( count == 0 ) {
 		num_extensions = count;
 		extensions = NULL;
 		return;
+	} else {
+		es = calloc(count, sizeof(struct extension));
+		if( es == NULL ) {
+			oom(parser);
+			return;
+		}
+		e = es;
+		for( ns = parser->namespaces ; ns != NULL ; ns = ns->next ) {
+			if( ns->extension == NULL )
+				continue;
+			e->name = string_add(ns->extension);
+			if( e->name == NULL )
+				parser->error = true;
+			e->namelen = strlen(ns->extension);
+			e->numsubrequests = ns->num_requests;
+			e->subrequests = finalize_requests(parser, ns,
+					unknownrequest, unknownresponse);
+			e->numevents = ns->num_events;
+			e->events = finalize_events(parser, ns);
+			e->numerrors = ns->num_errors;
+			e->errors = finalize_data(ns->errors,
+					ns->num_errors*sizeof(const char*),
+					__alignof__(const char*));
+			if( e->errors == NULL )
+				parser->error = true;
+			e++;
+		}
+		assert( (size_t)(e-es) == count );
+		extensions = finalize_data(es, count*sizeof(struct extension),
+				__alignof__(struct extension));
+		free(es);
+		if( extensions == NULL ) {
+			oom(parser);
+			return;
+		}
+		num_extensions = count;
 	}
-	es = calloc(count, sizeof(struct extension));
-	if( es == NULL ) {
-		oom(parser);
-		return;
-	}
-	e = es;
-	for( ns = parser->namespaces ; ns != NULL ; ns = ns->next ) {
-		if( ns->extension == NULL )
-			continue;
-		e->name = string_add(ns->extension);
-		if( e->name == NULL )
-			parser->error = true;
-		e->namelen = strlen(ns->extension);
-		e->numsubrequests = ns->num_requests;
-		e->subrequests = finalize_requests(parser, ns);
-		e->numevents = ns->num_events;
-		e->events = finalize_events(parser, ns);
-		e->numerrors = ns->num_errors;
-		e->errors = finalize_data(ns->errors,
-				ns->num_errors*sizeof(const char*),
-				__alignof__(const char*));
-		if( e->errors == NULL )
-			parser->error = true;
-		e++;
-	}
-	assert( (size_t)(e-es) == count );
-	extensions = finalize_data(es, count*sizeof(struct extension),
-			__alignof__(struct extension));
-	free(es);
-	if( extensions == NULL ) {
-		oom(parser);
-		return;
-	}
-	num_extensions = count;
-	requests = finalize_requests(parser, core);
+	requests = finalize_requests(parser, core, unknownrequest, unknownresponse);
 	num_requests = core->num_requests;
 	events = finalize_events(parser, core);
 	num_events = core->num_events;

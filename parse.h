@@ -129,6 +129,7 @@ extern const const char * const *errors;
 extern size_t num_errors;
 extern const struct extension *extensions;
 extern size_t num_extensions;
+extern const struct parameter *unexpected_reply;
 
 bool requestQueryExtension(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply);
 bool requestInternAtom(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply);

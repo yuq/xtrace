@@ -1345,6 +1345,7 @@ void replyInternAtom(struct connection *c,bool *ignore UNUSED,bool *dontremove U
 
 const struct request *requests;
 size_t num_requests;
+const struct parameter *unexpected_reply;
 
 static inline void free_expectedreplylist(struct expectedreply *r) {
 
@@ -1407,22 +1408,27 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 	else
 		ignore = r->request_func(c,true,bigrequest,NULL);
 	if( !ignore ) {
+		const char *name;
+
+		name = r->name;
+		if( name == NULL )
+			name = "UNKNOWN";
+		assert( r->parameters != NULL);
 		if( extensionname[0] == '\0' )
 			startline(c, TO_SERVER, "%04x:%3u: Request(%hhu): %s ",
 				(unsigned int)(c->seq),c->clientignore,
-				req, r->name
+				req, name
 		      );
 		else
 			startline(c, TO_SERVER, "%04x:%3u: %s-Request(%hhu,%hhu): %s ",
 				(unsigned int)(c->seq),
 				c->clientignore,
 				extensionname, req, subreq,
-				r->name
+				name
 		      );
 		if( r->parameters != NULL )
-			print_parameters(c,c->clientbuffer,len,r->parameters, bigrequest, &stack);
-		else
-			fputs("obsolete without parameter description\n",out);
+			print_parameters(c, c->clientbuffer, len,
+					r->parameters, bigrequest, &stack);
 		if( r->request_func != NULL )
 			(void)r->request_func(c,false,bigrequest,NULL);
 		putc('\n',out);
@@ -1475,9 +1481,16 @@ static inline void print_server_reply(struct connection *c) {
 				replyto->from->reply_func(c,&ignore,&dontremove,replyto->datatype,replyto->data);
 
 			if( !ignore ) {
-				startline(c, TO_CLIENT, "%04x:%u: Reply to %s: ", seq, (unsigned int)c->serverignore,replyto->from->name);
-				print_parameters(c,
-					c->serverbuffer,len,replyto->from->answers,false,&stack);
+				const char *name = replyto->from->name;
+
+				if( name == NULL )
+					name = "UNKNOWN";
+				startline(c, TO_CLIENT, "%04x:%u: Reply to %s: ",
+						seq,
+						(unsigned int)c->serverignore,
+						name);
+				print_parameters(c, c->serverbuffer, len,
+					replyto->from->answers, false, &stack);
 				putc('\n',out);
 			}
 			if( !dontremove ) {
@@ -1490,8 +1503,11 @@ static inline void print_server_reply(struct connection *c) {
 			return;
 		}
 	}
-	startline(c, TO_CLIENT, "%04x:%u: unexpected reply\n",
-			seq, c->serverignore);
+	startline(c, TO_CLIENT, "%04x:%u: unexpected Reply: ",
+			seq, (unsigned int)c->serverignore);
+	print_parameters(c, c->serverbuffer, len,
+			unexpected_reply, false, &stack);
+	putc('\n',out);
 }
 
 const char * const *errors;

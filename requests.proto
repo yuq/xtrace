@@ -648,6 +648,19 @@ REQUEST ChangeWindowAttributes
 12 	value-list	LISTofWindowAttributes
 END
 
+# This is used for all UNKNOWN or unsupported requests:
+templateREQUEST unknown
+0	opcode	CARD8
+1	opcode2	CARD8
+4	unparsed-data	LISTofCARD8
+END
+# reply to an UNKNOWN, UNSUPPORTED or unexpected reply
+templateRESPONSE unknown
+0	data1	CARD8
+1	data2	CARD8
+8	unparsed-data	LISTofCARD8
+END
+
 templateREQUEST WINDOW
 4	window	WINDOW
 END
