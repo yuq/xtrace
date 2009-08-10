@@ -51,12 +51,12 @@ static void startline(struct connection *c, enum package_direction d, const char
 	if( (print_timestamps || print_reltimestamps)
 			&& gettimeofday(&tv, NULL) == 0 ) {
 		if( print_timestamps )
-			fprintf(out, "%lu.%3u ", (unsigned long)tv.tv_sec,
+			fprintf(out, "%lu.%03u ", (unsigned long)tv.tv_sec,
 					(unsigned int)(tv.tv_usec/1000));
 		if( print_reltimestamps ) {
 			unsigned long long tt = ((unsigned long long)1000)*tv.tv_sec +
 						(tv.tv_usec/1000);
-			fprintf(out, "%lu.%3u ",
+			fprintf(out, "%lu.%03u ",
 				(unsigned long)((tt - c->starttime)/1000),
 				(unsigned int)((tt - c->starttime)%1000));
 		}
