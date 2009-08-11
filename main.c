@@ -157,7 +157,7 @@ static int mainqueue(int listener) {
 					free(c);
 					c = connections;
 					if( connections == NULL &&
-				            ( stopwhennone || child_pid != 0 ))
+				            stopwhennone && child_pid == 0 )
 						return EXIT_SUCCESS;
 					continue;
 				}
