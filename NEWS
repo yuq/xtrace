@@ -1,3 +1,5 @@
+new after 1.0.0~alpha1:
+- fix bug in when to terminate when run with a command
 new after 0.11.0:
 - add parser so that protocol descriptions are no longer compiled in but
   read from text files in a language for the virtual parsing machine of
