@@ -350,7 +350,7 @@ REQUEST Trapezoids
 22	ySrc	INT16
 12	dst	PICTURE
 16	maskFormat	PICTFORMAT constants none
-20	trapezoids	LISTofTRAPEZOID
+24	trapezoids	LISTofTRAPEZOID
 END
 
 REQUEST Triangles

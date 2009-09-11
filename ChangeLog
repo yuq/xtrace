@@ -1,3 +1,6 @@
+2009-09-11
+	* bugfix: fix LISTofTRAPEZOIDS offset in RenderTrapezoids (thanks to
+	Chris Wilson)
 2009-08-11
 	* bugfix: when running xtrace with command, it was terminating
 	  when all connections were closed while the command still run
