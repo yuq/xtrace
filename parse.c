@@ -1536,12 +1536,12 @@ static inline void print_server_error(struct connection *c) {
 
 	}
 	seq = (unsigned int)serverCARD16(2);
-	startline(c, TO_CLIENT, "%x:Error %hhu=%s: major=%u, minor=%u, bad=%u\n",
+	startline(c, TO_CLIENT, "%04x:Error %hhu=%s: major=%u, minor=%u, bad=%u\n",
 			seq,
 			cmd,
 			errorname,
-			(int)serverCARD16(8),
 			(int)serverCARD8(10),
+			(int)serverCARD16(8),
 			(int)serverCARD32(4));
 	/* don't wait for any answer */
 	for( lastp = &c->expectedreplies ;

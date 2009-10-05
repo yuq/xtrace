@@ -1,6 +1,9 @@
+2009-10-05
+	* bugfix: the major/minor codes were transposed in
+	  print_server_error() (thanks to Chris Wilson)
 2009-09-11
 	* bugfix: fix LISTofTRAPEZOIDS offset in RenderTrapezoids (thanks to
-	Chris Wilson)
+	  Chris Wilson)
 2009-08-11
 	* bugfix: when running xtrace with command, it was terminating
 	  when all connections were closed while the command still run
