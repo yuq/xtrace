@@ -1,3 +1,5 @@
+new after 1.0.0:
+- bugfixes (RenderTrapezoids and server errors)
 new after 1.0.0~alpha1:
 - fix bug in when to terminate when run with a command
 new after 0.11.0:
