@@ -1,3 +1,6 @@
+2009-10-18
+	* fix printing of column in protocoal description parser errors
+	  on 64 bit architectures.
 2009-10-05
 	* bugfix: the major/minor codes were transposed in
 	  print_server_error() (thanks to Chris Wilson)

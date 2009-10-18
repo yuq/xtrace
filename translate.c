@@ -475,7 +475,7 @@ static void error(struct parser *parser, const char *fmt, ...) {
 	if( parser->last != NULL )
 		fprintf(stderr, "%s:%ld:%d: ", parser->current->filename,
 				parser->current->lineno,
-				1 + (parser->last - parser->buffer));
+				(int)(1 + (parser->last - parser->buffer)));
 	else
 		fprintf(stderr, "%s:%ld: ", parser->current->filename,
 				parser->current->lineno);
