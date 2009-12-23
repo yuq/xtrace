@@ -16,7 +16,7 @@
 #include <config.h>
 
 #include <assert.h>
-#include <values.h>
+#include <limits.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <stdbool.h>

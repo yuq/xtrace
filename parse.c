@@ -16,7 +16,6 @@
 #include <config.h>
 
 #include <assert.h>
-#include <values.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/time.h>
