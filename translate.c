@@ -819,6 +819,8 @@ static bool parse_typespec(struct parser *parser, struct typespec *t) {
 
 			attribute = get_const_token(parser, false);
 			cv = find_variable(parser, vt_constants, attribute);
+			if( cv == NULL )
+				return false;
 			if( C(td, NEEDS_BITMASK) && ! cv->c.bitmask ) {
 				error(parser,
 "Not-BITMASK constants %s used for bitmask!",
@@ -846,6 +848,8 @@ static bool parse_typespec(struct parser *parser, struct typespec *t) {
 
 				attribute = get_const_token(parser, false);
 				cv = find_variable(parser, vt_constants, attribute);
+				if( cv == NULL )
+					return false;
 				t->data = cv;
 				cv->refcount++;
 			}
