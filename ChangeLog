@@ -1,3 +1,5 @@
+2010-01-02
+	* fix SelectionNotify (thanks to Peter Collingbourne)
 2009-10-18
 	* fix printing of column in protocoal description parser errors
 	  on 64 bit architectures.
