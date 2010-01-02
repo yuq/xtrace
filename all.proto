@@ -1,6 +1,7 @@
 NEEDS "requests.proto"
 NEEDS "events.proto"
 NEEDS "errors.proto"
+NEEDS "setup.proto"
 
 NEEDS "bigfont.proto"
 NEEDS "bigrequest.proto"

@@ -1553,6 +1553,8 @@ static inline void print_server_error(struct connection *c) {
 	}
 }
 
+const struct parameter *setup_parameters;
+
 void parse_client(struct connection *c) {
 	size_t l;
 	bool bigrequest;
@@ -1634,7 +1636,6 @@ void parse_server(struct connection *c) {
 	 case s_start:
 		 if( c->servercount/4 < 2+len )
 			 return;
-		 c->serverstate = s_normal;
 		 c->serverignore = 8+4*len;
 		 cmd = serverCARD16(0);
 		 switch( cmd ) {
@@ -1644,17 +1645,32 @@ void parse_server(struct connection *c) {
 					 (int)serverCARD16(4),
 					 (int)(4*len),
 					 &c->serverbuffer[8]);
+			  break;
 		  case 2:
 			  startline(c, TO_CLIENT, " More authentication needed, reason is '%*s'.\n",
 					 (int)(4*len),
 					 &c->serverbuffer[8]);
+			  break;
 		  case 1:
-			  startline(c, TO_CLIENT, " Success, version is %d:%d-%d.\n",
+			  startline(c, TO_CLIENT, " Success, version is %d:%d ",
 					 (int)serverCARD16(2),
-					 (int)serverCARD16(4),
-					 (int)serverCARD16(8));
-		 }
+					 (int)serverCARD16(4));
+			  {
+				  unsigned long stackvalues[30];
+				  struct stack stack;
+				  stack.base = stackvalues;
+				  stack.num = 30;
+				  stack.ofs = 0;
 
+				  print_parameters(c, c->serverbuffer,
+						  c->serverignore,
+						  setup_parameters,
+						  false, &stack);
+				  putc('\n',out);
+			  }
+			  c->serverstate = s_normal;
+			  break;
+		 }
 		 return;
 	 case s_normal:
 		if( c->servercount < 32 )

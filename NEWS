@@ -1,5 +1,6 @@
 new after 1.0.1:
 - bugfixes (SelectionNotify)
+- show more details of the initial X server response
 new after 1.0.0:
 - bugfixes (RenderTrapezoids and server errors)
 new after 1.0.0~alpha1:

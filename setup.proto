@@ -1,0 +1,106 @@
+#  This file is part of xtrace
+#  Copyright (C) 2010 Bernhard R. Link
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2 as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not write to the Free Software
+#  Foundation Inc. 51 Franklin St Fifth Floor Boston MA  02110-1301  USA
+
+NAMESPACE core
+
+CONSTANTS visualtypeclass
+0	StaticGray
+1	GrayScale
+2	StaticColor
+3	PseudoColor
+4	TrueColor
+5	DirectColor
+END
+
+LIST VISUALTYPE length 24
+ 0	id	CARD32
+ 4	class	ENUM8 visualtypeclass
+ 5	bits/rgb-value	UINT8
+ 6	colormap-entries	UINT16
+ 8	red-mask	CARD32
+12	green-mask	CARD32
+16	blue-mask	CARD32
+#20 	pad		CARD32
+END
+
+LIST DEPTH variable min-length 8
+ 0	depth	UINT8
+ 2	"#types"	COUNT16
+ 8	visuals	LISTofVISUALTYPE
+END
+
+CONSTANTS backingstore
+0	Never
+1	WhenMapped
+2	Always
+END
+
+LIST SCREEN variable min-length 40
+ 0	root	WINDOW
+ 4	default-colormap	COLORMAP
+ 8	white-pixel	CARD32
+12	black-pixel	CARD32
+16	input-mask	SETofEVENT
+20	width[pixel]	UINT16
+22	height[pixel]	UINT16
+24	width[mm]	UINT16
+26	height[mm]	UINT16
+28	min-installed-maps	UINT16
+30	max-installed-maps	UINT16
+32	root	VISUALID
+36	backing-stores	ENUM8 backingstore
+37	save-unders	BOOL
+38	root-depth	UINT8
+39	"#depths"	COUNT8
+40	"allowed depths" LISTofDEPTH
+END
+
+LIST FORMAT length 8
+ 0	depth	UINT8
+ 1	bits/pixel	UINT8
+ 2	scanline-pad	UINT8
+END
+
+CONSTANTS lsbmsb
+0	LSBFirst
+1	MSBFirst
+END
+CONSTANTS lsms
+0	LeastSignificant
+1	MostSignificant
+END
+
+SETUP
+24	len(vendor)	COUNT16
+40	vendor		STRING8
+ROUND
+ 8	release	UINT32
+12	resource-id	CARD32
+16	resource-mask	CARD32
+20	motion-buffer-size	UINT32
+26	max-request-len	UINT16
+30	image-byte-order	ENUM8 lsbmsb
+31	bitmap-bit-order	ENUM8 lsms
+32	scanline-unit	UINT8
+33	scanline-pad	UINT8
+34	min-keycode	KEYCODE
+36	max-keycode	KEYCODE
+29	"#formats"	COUNT8
+LATER	pixmap-formats	LISTofFORMAT
+28	"#screens"	COUNT8
+LATER	roots		LISTofSCREEN
+END
+
+EOF
