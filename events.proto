@@ -401,7 +401,13 @@ EVENT SelectionRequest
 24	property	ATOM constants none
 END
 
-EVENT SelectionNotify ALIASES SelectionRequest
+EVENT SelectionNotify
+4	time	TIMESTAMP constants curtime
+8	requestor	WINDOW
+12	selection	ATOM
+16	target	ATOM
+20	property	ATOM constants none
+END
 
 CONSTANTS uninstalledinstalled
 0	Uninstalled
