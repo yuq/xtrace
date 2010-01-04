@@ -214,6 +214,14 @@ SetPointerMapping RESPONDS
 GetPointerMapping RESPONDS
 SetModifierMapping RESPONDS
 GetModifierMapping RESPONDS
+UNKNOWN /*120*/
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+UNKNOWN
+NoOperation /*127*/
 END
 
 CONSTANTS function
@@ -1790,5 +1798,6 @@ REQUEST UnmapWindow ALIASES WINDOW
 REQUEST UnmapSubwindows ALIASES WINDOW
 REQUEST GrabServer ALIASES Empty
 REQUEST UngrabServer ALIASES Empty
+REQUEST NoOperation ALIASES Empty
 
 EOF

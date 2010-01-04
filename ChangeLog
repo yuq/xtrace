@@ -2,6 +2,7 @@
 	* fix SelectionNotify (thanks to Peter Collingbourne)
 	* show more details of the initial X server response
 	* fix segfault after some protocol description parsing errors
+	* correctly identify core request NoOperation
 2009-10-18
 	* fix printing of column in protocoal description parser errors
 	  on 64 bit architectures.
