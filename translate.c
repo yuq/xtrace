@@ -711,7 +711,7 @@ static void parse_errors(struct parser *parser) {
 		} else if( strcmp(name, "EOF") == 0 ) {
 			no_more_arguments(parser);
 			error(parser,
-"Missing END (begining at line %ld)", first_line);
+"Missing END (beginning at line %ld)", first_line);
 		}
 		no_more_arguments(parser);
 		name = string_add(name);
