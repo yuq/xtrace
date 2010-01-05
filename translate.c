@@ -746,7 +746,7 @@ static unsigned long parse_number(struct parser *parser, const char *value) {
 
 		e = strrchr(value, ':');
 		if( e == NULL || ( e > value && *(e-1) == ':' ) ) {
-			error(parser, "Constants name and member must be seperated with a single colon!");
+			error(parser, "Constants name and member must be separated with a single colon!");
 			return 0;
 		}
 		v = strndup(value + 1, e - (value+1));
