@@ -1631,13 +1631,13 @@ void parse_server(struct connection *c) {
 	}
 	if( c->servercount < 8 )
 		return;
-	len = serverCARD16(6);
 	switch( c->serverstate ) {
 	 case s_start:
+		 len = serverCARD16(6);
 		 if( c->servercount/4 < 2+len )
 			 return;
 		 c->serverignore = 8+4*len;
-		 cmd = serverCARD16(0);
+		 cmd = serverCARD8(0);
 		 switch( cmd ) {
 		  case 0:
 			  startline(c, TO_CLIENT, " Failed, version is %d:%d reason is '%*s'.\n",

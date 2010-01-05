@@ -1,3 +1,6 @@
+2010-01-05
+	* fix parsing initial server response
+	(old bug, but became obvious on big endian with the new code)
 2010-01-02
 	* fix SelectionNotify (thanks to Peter Collingbourne)
 	* show more details of the initial X server response
