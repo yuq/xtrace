@@ -1725,8 +1725,8 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 			fprintf(out,"unknown code %hhu",code);
 			return;
 		} else {
-			fputs(u->extension->name, stdout);
-			putchar('-');
+			fputs(u->extension->name, out);
+			putc('-', out);
 		}
 	} else
 		event = &events[code];

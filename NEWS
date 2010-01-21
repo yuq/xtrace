@@ -1,3 +1,5 @@
+new after 1.0.2:
+- bugfixes
 new after 1.0.1:
 - bugfixes (SelectionNotify, NoOperation, initial server response)
 - show more details of the initial X server response
