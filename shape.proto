@@ -74,6 +74,7 @@ END
 CONSTANTS shape_kind
 0	Bounding
 1	Clip
+2	Input
 END
 TYPE SHAPE_KIND	ENUM8	shape_kind
 CONSTANTS shape_op

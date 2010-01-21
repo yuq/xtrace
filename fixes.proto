@@ -14,6 +14,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 NEEDS "render.proto"
+NEEDS "shape.proto"
 
 EXTENSION "XFIXES" Fixes
 USE core
@@ -228,7 +229,7 @@ END
 
 REQUEST SetWindowShapeRegion
 4	window	WINDOW
-8	kind	FIXES_REGION_KIND
+8	kind	Shape::SHAPE_KIND
 12	"x offset"	INT16
 14	"y offset"	INT16
 16	region	CARD32

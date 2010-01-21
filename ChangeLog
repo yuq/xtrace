@@ -1,6 +1,8 @@
 2010-01-21
 	* fix extension name output to not go to stdout unconditionaly
 	  (Thanks to Tommi Komulainen)
+	* fix missing contants in shape kind and wrong kind in fixes
+	  extension (Thanks to Tommi Komulainen)
 2010-01-05
 	* fix parsing initial server response
 	(old bug, but became obvious on big endian with the new code)
