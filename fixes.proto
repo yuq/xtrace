@@ -218,6 +218,7 @@ RESPONSE FetchRegion
 10	y	INT16
 12	width	UINT16
 14	height	UINT16
+32	rects	LISTofRECTANGLE
 END
 
 REQUEST SetGCClipRegion
@@ -270,6 +271,7 @@ RESPONSE GetCursorImageAndName
 24	"cursor name"	ATOM
 28	""	COUNT16
 32	name	STRING8
+# cursor image??
 END
 
 REQUEST ChangeCursor
