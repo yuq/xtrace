@@ -6,7 +6,7 @@ UseExtension RESPONDS /* 0 */
 # TODO:
 SelectEvents UNSUPPORTED /* 1 */
 Unknown UNSUPPORTED
-Bell UNSUPPORTED /* 3 */
+Bell /* 3 */
 GetState RESPONDS UNSUPPORTED /* 4 */
 LatchLockState UNSUPPORTED /* 5 */
 GetControls RESPONDS UNSUPPORTED /* 6 */
@@ -48,6 +48,38 @@ END
 RESPONSE UseExtension
  8	major	UINT16
 10	minor	UINT16
+END
+
+CONSTANTS DEVICESPEC
+0x100 UseCoreKbd
+0x200 UseCorePtr
+END
+TYPE DEVICESPEC UINT16 constants DEVICESPEC
+
+CONSTANTS BELLCLASSSPEC
+0 KbdFeedback
+5 LedFeedback
+0x300 DefaultXI
+# AllXI ???
+END
+TYPE BELLCLASSSPEC ENUM16 BELLCLASSSPEC
+
+CONSTANTS IDSPEC
+0x400 DfltXIId
+END
+TYPE IDSPEC UINT16 constants IDSPEC
+
+REQUEST Bell
+ 4 deviceSpec DEVICESPEC
+ 6 bellClass BELLCLASSSPEC
+ 8 bellID IDSPEC
+10 percent INT8
+11 forceSound BOOL
+12 eventOnly BOOL
+14 pitch INT16
+16 duration INT16
+20 name ATOM
+24 window WINDOW
 END
 
 EVENT XkbEvent
