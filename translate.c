@@ -92,6 +92,7 @@ static const struct base_type {
 	{ "FORMAT8",		ft_FORMAT8,		SETS_FORMAT,	1},
 	{ "BE32",		ft_BE32,		ALLOWS_CONSTANTS,	4},
 	{ "FRACTION16_16",	ft_FRACTION16_16,	0,	4},
+	{ "FRACTION32_32",	ft_FRACTION32_32,	0,	8},
 	{ "FIXED",		ft_FIXED,		0,	4},
 	{ "LISTofFIXED",	ft_LISTofFIXED,		USES_STORE|SETS_NEXT,	0},
 	{ "FLOAT32",		ft_FLOAT32,		0,	4},

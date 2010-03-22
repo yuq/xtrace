@@ -106,6 +106,8 @@ struct parameter {
 		ft_LISTofFLOAT32,
 		/* fraction with nominator and denominator 16 bit */
 		ft_FRACTION16_16,
+		/* dito 32 bit */
+		ft_FRACTION32_32,
 		/* set stored value to specific value */
 		ft_DECREMENT_STORED,
 		ft_SET

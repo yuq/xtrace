@@ -1036,9 +1036,19 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			if( print_offsets )
 				fprintf(out,"[%d]",(int)ofs);
 			fputs(p->name,out);putc('=',out);
-			i16 = getCARD32(ofs);
-			u16 = getCARD32(ofs + 2);
+			i16 = getCARD16(ofs);
+			u16 = getCARD16(ofs + 2);
 			fprintf(out,"%hd/%hu", i16, u16);
+			continue;
+		 case ft_FRACTION32_32:
+			if( ofs + 8 > len )
+				continue;
+			if( print_offsets )
+				fprintf(out,"[%d]",(int)ofs);
+			fputs(p->name,out);putc('=',out);
+			i32 = getCARD32(ofs);
+			u32 = getCARD32(ofs + 4);
+			fprintf(out,"%d/%u", i32, u32);
 			continue;
 		 case ft_EVENT:
 			if( len >= ofs + 32 )
@@ -1215,6 +1225,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_SET:
 		 case ft_EVENT:
 		 case ft_FRACTION16_16:
+		 case ft_FRACTION32_32:
 		 case ft_FIXED:
 		 case ft_LISTofFIXED:
 		 case ft_FLOAT32:
