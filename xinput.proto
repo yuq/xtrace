@@ -455,8 +455,7 @@ LIST FEEDBACKSTATE variable min-length 4
 # XIproto.ps has strange values here, XI.h looks more reasonable:
  0	"feedback class"	ENUM8 feedback_class
  1	id	CARD8
-IF 0 CARD8 0
-# KBD:
+IF 0 CARD8 $feedback_class:Kbd
  4	pitch	UINT16
  6	duration	UINT16
  8	led_mask	CARD32
@@ -466,29 +465,25 @@ IF 0 CARD8 0
 18	percent	UINT8
 SET_COUNTER 32
 20	auto-repeats	LISTofCARD8
-ELSEIF 0 CARD8 1
+ELSEIF 0 CARD8 $feedback_class:Ptr
 # PTR
  6	acceleration	FRACTION16_16
 10	treshold	UINT16
 NEXT	12
-ELSEIF 0 CARD8 2
-# STRING
+ELSEIF 0 CARD8 $feedback_class:String
  4	"max symbols"	UINT16
  6	"#keysyms"	COUNT16
  8	keysyms	LISTofKEYSYM
-ELSEIF 0 CARD8 3
-# INTEGER
+ELSEIF 0 CARD8 $feedback_class:Integer
  4	resolution	UINT32
  8	min	INT32
 12	max	INT32
 NEXT 16
-ELSEIF 0 CARD8 4
-# LED
+ELSEIF 0 CARD8 $feedback_class:Led
  4	mask	CARD32
  8	values	CARD32
 NEXT 12
-ELSEIF 0 CARD8 5
-# BELL
+ELSEIF 0 CARD8 $feedback_class:Bell
  4	percent	UINT8
  8	pitch	UINT16
 10	duration	UINT16
@@ -496,7 +491,7 @@ NEXT 12
 ELSE
 # fallback in case of unsupported:
  2	length	COUNT16
- 0	sunsupported	LISTofCARD8
+ 0	unsupported	LISTofCARD8
 END
 
 REQUEST GetFeedbackControl ALIASES Device
@@ -510,8 +505,7 @@ REQUEST ChangeFeedbackControl
  9	"feedback id"	CARD8
 12	"feedback class"	ENUM8 feedback_class
 13	"feedback id"	CARD8
-IF 12 CARD8 0
-# KBD
+IF 12 CARD8 $feedback_class:Kbd
  4	mask	BITMASK32 dv_keyboardbellled
 16	key	CARD8
 17	auto-repeat	ENUM8 auto_repeat_mode
@@ -521,27 +515,22 @@ IF 12 CARD8 0
 22	bell-duration	UINT16
 24	led_mask	CARD32
 28	led_values	CARD32
-ELSEIF 12 CARD8 1
-# PTR
+ELSEIF 12 CARD8 $feedback_class:Ptr
  4	mask	BITMASK32 dv_pointer
 18	acceleration	FRACTION16_16
 22	treshold	UINT16
-ELSEIF 12 CARD8 2
-# STRING
+ELSEIF 12 CARD8 $feedback_class:String
  4	mask	BITMASK32 dv_string
 18	"#keysyms"	COUNT16
 20	keysyms	LISTofCARD32
-ELSEIF 12 CARD8 3
-# INTEGER
+ELSEIF 12 CARD8 $feedback_class:Integer
  4	mask	BITMASK32 dv_integer
 16	integer	INT32
-ELSEIF 12 CARD8 4
-# LED
+ELSEIF 12 CARD8 $feedback_class:Led
  4	mask	BITMASK32 dv_keyboardbellled
 16	led_mask	CARD32
 20	led_values	CARD32
-ELSEIF 12 CARD8 5
-# BELL
+ELSEIF 12 CARD8 $feedback_class:Bell
  4	mask	BITMASK32 dv_keyboardbellled
 16	percent	UINT8
 20	pitch	INT16
@@ -598,18 +587,15 @@ RESPONSE SetDeviceButtonMapping ALIASES Status
 
 LIST INPUTSTATE variable min-length 2
  0	class	ENUM8 input_class_id
-IF 0 CARD8 0
-# KEYSTATE
+IF 0 CARD8 $input_class_id:key
  2	"#keys"	UINT8
 SET_COUNTER	32
  4	"key states"	LISTofCARD8
-ELSEIF 0 CARD8 1
-# BUTTONSTATE
+ELSEIF 0 CARD8 $input_class_id:button
  2	"#buttons"	UINT8
 SET_COUNTER	32
  4	"button states"	LISTofCARD8
-ELSEIF 0 CARD8 2
-# VALUATORSTATE
+ELSEIF 0 CARD8 $input_class_id:valuator
  2	"#valuators"	COUNT8
  3	mode	ENUM8 device_mode_and_prox
  4	"valuator states"	LISTofCARD32
