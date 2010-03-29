@@ -1,0 +1,45 @@
+# This file is part of "xtrace"
+# Copyright (C) 2008 Bernhard R. Link
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+EXTENSION "Generic Event Extension" ge
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+END
+
+EVENTS
+Generic SPECIAL
+END
+
+ERRORS
+END
+
+REQUEST QueryVersion
+4	"major version"	UINT16
+6	"minor version"	UINT16
+END
+RESPONSE QueryVersion
+8	"major version"	UINT16
+10	"minor version"	UINT16
+END
+
+EVENT Generic
+1	extension	CARD8
+4	length		UINT32
+32	data		LISTofCARD8
+END
+
+EOF

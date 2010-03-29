@@ -183,6 +183,7 @@ struct namespace {
 		const char *name;
 		int number;
 		bool unsupported;
+		bool special;
 		struct variable *event;
 	} *events;
 	int num_errors;
@@ -1442,7 +1443,11 @@ static void parse_events(struct parser *parser) {
 			}
 		}
 		while( (attribute = get_const_token(parser, true)) != NULL ) {
-			if( strcmp(attribute, "UNSUPPORTED") == 0 )
+			if( strcmp(attribute, "SPECIAL") == 0 ) {
+				if( event.name == NULL )
+					error(parser, "SPECIAL not possible with UNKNOWN!");
+				event.special = true;
+			} else if( strcmp(attribute, "UNSUPPORTED") == 0 )
 				event.unsupported = true;
 			else if( attribute[0] == '/' && attribute[1]  == '*' ) {
 				char *e;
@@ -2295,9 +2300,11 @@ static const struct request *finalize_requests(struct parser *parser, struct nam
 		if( !ns->requests[i].special )
 			continue;
 		assert( rs[i].name != NULL );
-		if( strcmp(ns->name, "core") != 0 )
-			continue;
-		if( strcmp(rs[i].name, "QueryExtension") == 0 ) {
+		if( strcmp(ns->name, "core") != 0 ) {
+			fprintf(stderr, "No specials available in namespace '%s'!\n",
+					ns->name);
+			parser->error = true;
+		} else if( strcmp(rs[i].name, "QueryExtension") == 0 ) {
 			rs[i].request_func = requestQueryExtension;
 			rs[i].reply_func = replyQueryExtension;
 		} else if( strcmp(rs[i].name, "InternAtom") == 0 ) {
@@ -2336,6 +2343,20 @@ static const struct event *finalize_events(struct parser *parser, struct namespa
 		es[i].name = ns->events[i].name;
 		es[i].parameters = variable_finalize(parser,
 				ns->events[i].event);
+		if( !ns->events[i].special )
+			continue;
+		assert( es[i].name != NULL );
+		if( strcmp(ns->name, "ge") != 0 ) {
+			fprintf(stderr, "No specials available in namespace '%s'!\n",
+					ns->name);
+			parser->error = true;
+		} else if( strcmp(es[i].name, "Generic") == 0 ) {
+			// TODO: ...
+		} else {
+			fprintf(stderr, "No specials available for '%s::%s'!\n",
+					ns->name, es[i].name);
+			parser->error = true;
+		}
 	}
 	f = finalize_data(es, ns->num_events * sizeof(struct event),
 		       __alignof__(struct event));
