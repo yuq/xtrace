@@ -40,6 +40,34 @@ DeviceBell /* 32 */
 SetDeviceValuators RESPONDS /* 33 */
 GetDeviceControl RESPONDS /* 34 */
 ChangeDeviceControl RESPONDS /* 35 */
+# XI 1.5
+ListDeviceProperties RESPONDS /* 36 */
+ChangeDeviceProperty /* 37 */
+DeleteDeviceProperty /* 38 */
+GetDeviceProperty RESPONDS /* 39 */
+
+# XI 2
+XIQueryPointer RESPONDS /* 40 */
+XIWarpPointer /* 41 */
+XIChangeCursor /* 42 */
+XIChangeHierarchy /* 43 */
+XISetClientPointer /* 44 */
+XIGetClientPointer RESPONDS /* 45 */
+XISelectEvents /* 46 */
+XIQueryVersion RESPONDS /* 47 */
+XIQueryDevice RESPONDS /* 48 */
+XISetFocus /* 49 */
+XIGetFocus RESPONDS /* 50 */
+XIGrabDevice /* 51 */
+XIUngrabDevice UNSUPPORTED /* 52 */
+XIAllowEvents UNSUPPORTED /* 53 */
+XIPassiveGrabDevice UNSUPPORTED /* 54 */
+XIPassiveUngrabDevice UNSUPPORTED /* 55 */
+XIListProperties RESPONDS /* 56 */
+XIChangeProperty /* 57 */
+XIDeleteProperty /* 58 */
+XIGetProperty RESPONDS /* 59 */
+XIGetSelectedEvents UNSUPPORTED /* 60 */
 END
 
 EVENTS
@@ -59,6 +87,7 @@ ChangeDeviceNotify
 DeviceKeystateNotify
 DeviceButtonstateNotify
 DevicePresenceNotify
+DevicePropertyNotify
 END
 
 ERRORS
@@ -754,6 +783,321 @@ REQUEST ChangeDeviceControl
 END
 RESPONSE ChangeDeviceControl ALIASES Status
 
+REQUEST ListDeviceProperties
+ 4	device	UINT8
+END
+RESPONSE ListDeviceProperties
+ 8	nAtoms	COUNT16
+32	Atoms	LISTofATOM
+END
+
+REQUEST ChangeDeviceProperty
+ 4	property	ATOM
+ 8	type	ATOM
+12	device	UINT8
+13	format	FORMAT8
+14	mode	ENUM8 change_mode
+16	nUnits	COUNT32
+IF 8 ATOM "ATOM"
+20	value	LISTofATOM
+ELSEIF 8 ATOM "FLOAT"
+20	value	LISTofFLOAT32
+ELSE
+20	value	LISTofFormat
+END
+
+REQUEST DeleteDeviceProperty
+ 4	property	ATOM
+ 8	device	UINT8
+END
+
+REQUEST GetDeviceProperty
+ 4	property	ATOM
+ 8	type	ATOM
+12	longOffset	UINT32
+16	longLength	UINT32
+20	device	UINT8
+21	delete	BOOL
+END
+RESPONSE GetDeviceProperty
+ 8	type	ATOM
+12	bytesAfter	UINT32
+16	nItems	COUNT32
+20	format	FORMAT8
+21	device	UINT8
+IF 8 ATOM "ATOM"
+32	value	LISTofATOM
+ELSEIF 8 ATOM "FLOAT"
+32	value	LISTofFLOAT32
+ELSE
+32	value	LISTofFormat
+END
+
+STRUCT MODIFIERINFO length 16
+ 0	base_mods	CARD32
+ 4	latched_mods	CARD32
+ 8	locked_mods	CARD32
+12	effective_mods	CARD32
+END
+
+STRUCT GROUPINFO length 4
+0	base_group	CARD8
+1	latched_group	CARD8
+2	locked_group	CARD8
+3	effective_group	CARD8
+END
+
+REQUEST XIQueryPointer
+ 4	window	WINDOW
+ 8	device	UINT16
+END
+RESPONSE XIQueryPointer
+ 8	root	WINDOW
+12	child	WINDOW
+16	root_x	FIXED
+20	root_y	FIXED
+24	win_x	FIXED
+28	win_y	FIXED
+32	same_screen	BOOL
+34	buttons_len	COUNT16
+36	mods	MODIFIERINFO
+52	groups	GROUPINFO
+56	buttons	LISTofCARD8
+END
+
+REQUEST XIWarpPointer
+ 4	src_win	WINDOW
+ 8	dst_win	WINDOW
+12	src_x	FIXED
+16	src_y	FIXED
+20	src_width	UINT16
+22	src_height	UINT16
+24	dst_x	FIXED
+28	dst_y	FIXED
+32	device	CARD16
+END
+
+REQUEST XIChangeCursor
+ 4	win	WINDOW
+ 8	cursor	CURSOR
+12	device	CARD16
+END
+
+CONSTANTS hierarchy_change
+1	AddMaster
+2	RemoveMaster
+3	AttachSlave
+4	DetachSlave
+END
+
+CONSTANTS change_mode
+1	Attach
+2	Float
+END
+
+LIST HIERARCHYCHANGE variable min-length 8
+ 0	type	ENUM16 hierarchy_change
+ 2	length	COUNT16
+IF 0 CARD16 $hierarchy_change:AddMaster
+ 4	name_len	COUNT16
+ 6	send_core	BOOL
+ 7	enable	BOOL
+ 8	name	STRING8
+ELSEIF 0 CARD16 $hierarchy_change:RemoveMaster
+ 4	device	UINT16
+ 6	return_mode	ENUM8 change_mode
+ 8	return_pointer	UINT16
+10	return_keyboard	UINT16
+ NEXT	12
+ELSEIF 0 CARD16 $hierarchy_change:AttachSlave
+ 4	device	UINT16
+ 6	new_master	UINT16
+ NEXT	8
+ELSEIF 0 CARD16 $hierarchy_change:DetachSlave
+ 4	device	UINT16
+ NEXT	8
+ELSE
+ 0	pad	LISTofCARD32
+END
+
+REQUEST XIChangeHierarchy
+ 4	num_changes	COUNT8
+ 8	changes	LISTofHIERARCHYCHANGE
+END
+
+REQUEST XISetClientPointer
+ 4	win	WINDOW
+ 8	device	UINT16
+END
+
+REQUEST XIGetClientPointer
+ 4	win	WINDOW
+END
+RESPONSE XIGetClientPointer
+ 8	set	BOOL
+10	device	UINT16
+END
+
+LIST EVENTMASK variable min-length 4
+0	device	UINT16
+2	mask_len	COUNT16
+4	mask	LISTofCARD32
+END
+
+REQUEST XISelectEvents
+ 4	win	WINDOW
+ 8	num_masks	COUNT16
+12	masks	LISTofEVENTMASK
+END
+
+REQUEST XIQueryVersion
+ 4	major	UINT16
+ 6	minor	UINT16
+END
+RESPONSE XIQueryVersion
+ 8	major	UINT16
+10	minor	UINT16
+END
+
+# TODO: could be > 32bits if the device has more than 2^32 buttons
+TYPE SETofBUTTONMASK CARD32
+
+CONSTANTS class
+0	KeyClass
+1	ButtonClass
+2	AxisClass
+END
+
+LIST CLASS variable min-length 8
+0	type	ENUM16	class
+2	length	COUNT16
+4	sourceid	UINT16
+IF 0 CARD16 $class:KeyClass
+6	num_keys	COUNT16
+8	keys	LISTofCARD32
+ELSEIF 0 CARD16 $class:ButtonClass
+6	num_buttons	COUNT16
+8	state	SETofBUTTONMASK
+12	labels	LISTofATOM
+ELSEIF 0 CARD16 $class:AxisClass
+6	axisnumber	COUNT16
+8	label	ATOM
+12	min	FRACTION32_32
+20	max	FRACTION32_32
+28	value	FRACTION32_32
+36	resolution	UINT32
+40	mode	CARD8
+NEXT	44
+ELSE
+0	pad	LISTofCARD32
+END
+
+CONSTANTS xi_device_use
+1	MasterPointer
+2	MasterKeyboard
+3	SlavePointer
+4	SlaveKeyboard
+5	FloatingSlave
+END
+
+LIST XIDEVICEINFO variable min-length 12
+ 0	device	UINT16
+ 2	use	ENUM16 xi_device_use
+ 4	attachment	CARD16
+10	enabled	BOOL
+ 8	name_len	COUNT16
+12	name	STRING8
+ROUND
+ 6	num_classes	COUNT16
+LATER	classes	LISTofCLASS
+END
+
+CONSTANTS xidevice
+0	AllDevices
+1	AllMasterDevices
+END
+
+REQUEST XIQueryDevice
+ 4	device	ENUM16 xidevice
+END
+RESPONSE XIQueryDevice
+ 8	num_devices	COUNT16
+32	deviceinfo	LISTofXIDEVICEINFO
+END
+
+REQUEST XISetFocus
+ 4	focus	WINDOW
+ 8	time	TIMESTAMP
+10	device	UINT16
+END
+
+REQUEST XIGetFocus
+ 4	device	UINT16
+END
+RESPONSE XIGetFocus
+ 8	focus	WINDOW
+END
+
+REQUEST XIGrabDevice
+ 4	grab_window	WINDOW
+ 8	time	TIMESTAMP
+12	cursor	CURSOR
+16	device	UINT16
+18	grab_mode	ENUM8	synmode
+19	paired_device_mode	ENUM8	synmode
+20	owner_events	BOOL
+22	mask_len	COUNT16
+24	masks	LISTofCARD32
+END
+
+REQUEST XIListProperties
+ 4	device	UINT16
+END
+RESPONSE XIListProperties
+ 8	"#properties"	COUNT16
+32	properties	LISTofATOM
+END
+
+REQUEST XIChangeProperty
+ 4	device	UINT16
+ 6	mode	ENUM8	device_mode
+ 7	format	FORMAT8
+ 8	property	ATOM
+12	type	ATOM
+16	num_items	COUNT32
+IF 12 ATOM "ATOM"
+20	value	LISTofATOM
+ELSEIF 12 ATOM "FLOAT"
+20	value	LISTofFLOAT32
+ELSE
+20	value	LISTofFormat
+END
+
+REQUEST XIDeleteProperty
+ 4	device	UINT16
+ 8	property	ATOM
+END
+
+REQUEST XIGetProperty
+ 4	device	UINT16
+ 6	delete	BOOL
+ 8	property	ATOM
+12	type	ATOM
+16	offset	UINT32
+20	len	UINT32
+END
+RESPONSE XIGetProperty
+ 8	type	ATOM
+12	bytes_after	UINT32
+16	num_items	COUNT32
+20	format	FORMAT8
+IF 8 ATOM "ATOM"
+32	value	LISTofATOM
+ELSEIF 8 ATOM "FLOAT"
+32	value	LISTofFLOAT32
+ELSE
+32	value	LISTofFormat
+END
 
 # Events
 
@@ -871,6 +1215,13 @@ EVENT DevicePresenceNotify
  8	change	ENUM8 device_change
  9	device	CARD8
 10	control	CARD16
+END
+
+EVENT DevicePropertyNotify
+ 1	state	ENUM8	newdeleted
+ 4	timestamp	TIMESTAMP
+ 8	atom	ATOM
+31	device	CARD8
 END
 
 EOF

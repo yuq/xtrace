@@ -1,3 +1,6 @@
+2010-03-30
+	* Add support for XInputExtension 1.5, and partial support for
+	  XInputExtension 2.0
 2010-03-22
 	* fix FRACTION16_16 on big-endian systems
 	* add FRACTION32_32
