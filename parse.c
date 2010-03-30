@@ -1767,6 +1767,8 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 	/* first look in extensions, in case we are on an xserver that
 	 * uses some of the new core event codes for extensions */
 	for( u = c->usedextensions ; u != NULL ; u = u->next ) {
+		if( u->first_event == 0)
+			continue;
 		if( code >= u->first_event &&
 				code-u->first_event < u->extension->numevents) {
 			event = u->extension->events +
