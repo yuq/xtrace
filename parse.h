@@ -5,9 +5,11 @@ struct constant {
 	unsigned long value;
 	const char *name;
 };
+struct event;
 
 typedef bool request_func(struct connection*,bool,bool,struct expectedreply *);
 typedef void reply_func(struct connection*,bool*,bool*,int,void*);
+typedef void event_func(struct connection *, const unsigned char *, const struct event *);
 
 struct request {
 	const char *name;
@@ -20,6 +22,7 @@ struct request {
 struct event {
 	const char *name;
 	const struct parameter *parameters;
+	event_func *handler;
 };
 
 struct extension {
@@ -134,10 +137,12 @@ extern size_t num_extensions;
 extern const struct parameter *unexpected_reply;
 extern const struct parameter *setup_parameters;
 
-bool requestQueryExtension(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply);
-bool requestInternAtom(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply);
-void replyListFontsWithInfo(struct connection *c,bool *ignore,bool *dontremove,int datatype UNUSED,void *data UNUSED);
-void replyQueryExtension(struct connection *c,bool *ignore UNUSED,bool *dontremove UNUSED,int datatype,void *data);
-void replyInternAtom(struct connection *c,bool *ignore UNUSED,bool *dontremove UNUSED,int datatype UNUSED,void *data);
+/* special handlers, for the SPECIAL requests/events */
+extern request_func requestQueryExtension;
+extern request_func requestInternAtom;
+extern reply_func replyListFontsWithInfo;
+extern reply_func replyQueryExtension;
+extern reply_func replyInternAtom;
+extern event_func print_generic_event;
 
 #endif

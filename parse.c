@@ -1366,26 +1366,43 @@ static inline void free_expectedreplylist(struct expectedreply *r) {
 	}
 }
 
-static inline const struct request *find_extension_request(struct connection *c,unsigned char req,unsigned char subreq,const char **extension) {
+static inline const struct extension *find_extension_by_opcode(struct connection *c, unsigned char req) {
 	struct usedextension *u;
-	struct unknownextension *e;
 
 	for( u = c->usedextensions; u != NULL ; u = u->next ) {
 		if( req != u->major_opcode )
 			continue;
-		*extension = u->extension->name;
-		if( subreq < u->extension->numsubrequests )
-			return u->extension->subrequests + subreq;
+		return u->extension;
+	}
+	return NULL;
+}
+
+static inline const char *find_unknown_extension(struct connection *c, unsigned char req) {
+	struct unknownextension *e;
+
+	for( e = c->unknownextensions ; e != NULL ; e = e->next ) {
+		if( req == e->major_opcode ) {
+			return e->name;
+		}
+	}
+	return NULL;
+}
+
+static inline const struct request *find_extension_request(struct connection *c,unsigned char req,unsigned char subreq,const char **extension) {
+	const struct extension *e;
+	const char *name;
+
+	e = find_extension_by_opcode(c, req);
+	if( e != NULL ) {
+		*extension = e->name;
+		if( subreq < e->numsubrequests )
+			return e->subrequests + subreq;
 		else
 			return NULL;
 	}
-	for( e = c->unknownextensions ; e != NULL ; e = e->next ) {
-		if( req == e->major_opcode ) {
-			*extension = e->name;
-			break;
-		}
-	}
-
+	name = find_unknown_extension(c, req);
+	if( name != NULL )
+		*extension = name;
 	return NULL;
 }
 
@@ -1709,6 +1726,31 @@ void parse_server(struct connection *c) {
 const struct event *events;
 size_t num_events;
 
+void print_generic_event(struct connection *c, const unsigned char *buffer, const struct event *event) {
+	unsigned long stackvalues[30];
+	struct stack stack;
+	stack.base = stackvalues;
+	stack.num = 30;
+	stack.ofs = 0;
+	uint8_t opcode = getCARD8(1);
+	const struct extension *extension;
+
+	extension = find_extension_by_opcode(c, opcode);
+	if( extension != NULL ) {
+		fprintf(out, "%s(%hhu) ", extension->name, opcode);
+		// TODO: get description from format...
+		print_parameters(c, buffer, 32, event->parameters, false, &stack);
+	} else {
+		const char *name = find_unknown_extension(c, opcode);
+		if( name != NULL ) {
+			fprintf(out, "%s(%hhu) ", name, opcode);
+		} else {
+			fprintf(out, "unknown extension %hhu ", opcode);
+		}
+		print_parameters(c, buffer, 32, event->parameters, false, &stack);
+	}
+}
+
 static void print_event(struct connection *c,const unsigned char *buffer) {
 	const struct event *event;
 	uint8_t code = getCARD8(0);
@@ -1742,7 +1784,11 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 	} else
 		event = &events[code];
 	fprintf(out,"%s(%hhu) ",event->name,code);
-	print_parameters(c,buffer,32,event->parameters,false,&stack);
+	if( event->handler == NULL ) {
+		print_parameters(c,buffer,32,event->parameters,false,&stack);
+	} else {
+		event->handler(c, buffer, event);
+	}
 }
 
 const struct extension *extensions;
@@ -1760,4 +1806,3 @@ const struct extension *find_extension(const uint8_t *name,size_t len) {
 
 	return NULL;
 }
-

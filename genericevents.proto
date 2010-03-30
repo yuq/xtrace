@@ -39,7 +39,8 @@ END
 EVENT Generic
 1	extension	CARD8
 4	length		UINT32
-32	data		LISTofCARD8
+8	evtype		CARD16
+10	data		LISTofCARD8
 END
 
 EOF
