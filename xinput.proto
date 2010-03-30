@@ -61,7 +61,7 @@ XIGetFocus RESPONDS /* 50 */
 XIGrabDevice /* 51 */
 XIUngrabDevice UNSUPPORTED /* 52 */
 XIAllowEvents UNSUPPORTED /* 53 */
-XIPassiveGrabDevice UNSUPPORTED /* 54 */
+XIPassiveGrabDevice UNSUPPORTED RESPONDS /* 54 */
 XIPassiveUngrabDevice UNSUPPORTED /* 55 */
 XIListProperties RESPONDS /* 56 */
 XIChangeProperty /* 57 */
