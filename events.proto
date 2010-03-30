@@ -130,6 +130,7 @@ SelectionNotify
 ColormapNotify
 ClientMessage
 MappingNotify
+Generic		SPECIAL
 END
 
 templateEVENT Key
@@ -438,6 +439,13 @@ EVENT MappingNotify
 4	request	ENUM8 modkeypoi
 5	first-keycode	KEYCODE
 6	count	CARD8
+END
+
+EVENT Generic
+1	extension	CARD8
+4	length		UINT32
+8	evtype		CARD16
+10	data		LISTofCARD8
 END
 
 EOF

@@ -2346,7 +2346,7 @@ static const struct event *finalize_events(struct parser *parser, struct namespa
 		if( !ns->events[i].special )
 			continue;
 		assert( es[i].name != NULL );
-		if( strcmp(ns->name, "ge") != 0 ) {
+		if( strcmp(ns->name, "ge") != 0 && strcmp(ns->name, "core") != 0) {
 			fprintf(stderr, "No specials available in namespace '%s'!\n",
 					ns->name);
 			parser->error = true;

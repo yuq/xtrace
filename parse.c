@@ -1752,6 +1752,7 @@ void print_generic_event(struct connection *c, const unsigned char *buffer, cons
 }
 
 static void print_event(struct connection *c,const unsigned char *buffer) {
+	struct usedextension *u;
 	const struct event *event;
 	uint8_t code = getCARD8(0);
 	unsigned long stackvalues[30];
@@ -1763,26 +1764,26 @@ static void print_event(struct connection *c,const unsigned char *buffer) {
 	if( (code & 0x80) != 0 )
 		fputs("(generated) ",out);
 	code &= 0x7F;
-	if( code <= 1 || code > num_events ) {
-		struct usedextension *u = c->usedextensions;
-		while( u != NULL ) {
-			if( code >= u->first_event &&
-			    code-u->first_event < u->extension->numevents) {
-				event = u->extension->events +
-						(code-u->first_event);
-				break;
-			}
-			u = u->next;
+	/* first look in extensions, in case we are on an xserver that
+	 * uses some of the new core event codes for extensions */
+	for( u = c->usedextensions ; u != NULL ; u = u->next ) {
+		if( code >= u->first_event &&
+				code-u->first_event < u->extension->numevents) {
+			event = u->extension->events +
+				(code - u->first_event);
+			break;
 		}
-		if( u == NULL ) {
-			fprintf(out,"unknown code %hhu",code);
+	}
+	if( u == NULL ) {
+		if( code <= 1 || code > num_events ) {
+			fprintf(out, "unknown code %hhu", code);
 			return;
-		} else {
-			fputs(u->extension->name, out);
-			putc('-', out);
-		}
-	} else
-		event = &events[code];
+		} else
+			event = &events[code];
+	} else {
+		fputs(u->extension->name, out);
+		putc('-', out);
+	}
 	fprintf(out,"%s(%hhu) ",event->name,code);
 	if( event->handler == NULL ) {
 		print_parameters(c,buffer,32,event->parameters,false,&stack);
