@@ -2351,7 +2351,7 @@ static const struct event *finalize_events(struct parser *parser, struct namespa
 					ns->name);
 			parser->error = true;
 		} else if( strcmp(es[i].name, "Generic") == 0 ) {
-			es[i].handler = print_generic_event;
+			es[i].type = event_xge;
 		} else {
 			fprintf(stderr, "No specials available for '%s::%s'!\n",
 					ns->name, es[i].name);

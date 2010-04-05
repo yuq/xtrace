@@ -22,7 +22,7 @@ struct request {
 struct event {
 	const char *name;
 	const struct parameter *parameters;
-	event_func *handler;
+	enum event_type { event_normal = 0, event_xge } type;
 };
 
 struct extension {
@@ -143,6 +143,5 @@ extern request_func requestInternAtom;
 extern reply_func replyListFontsWithInfo;
 extern reply_func replyQueryExtension;
 extern reply_func replyInternAtom;
-extern event_func print_generic_event;
 
 #endif
