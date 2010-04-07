@@ -178,14 +178,14 @@ struct namespace {
 		bool special;
 		struct variable *request, *response;
 	} *requests;
-	int num_events;
+	int num_events[event_COUNT];
 	struct event_data {
 		const char *name;
 		int number;
 		bool unsupported;
 		bool special;
 		struct variable *event;
-	} *events;
+	} *events[event_COUNT];
 	int num_errors;
 	const char **errors;
 	struct variable *setup;
@@ -1379,17 +1379,17 @@ static void parse_response(struct parser *parser, bool template) {
 		parse_parameters(parser, v, false);
 }
 
-static struct event_data *find_event(struct parser *parser, const char *name) {
+static struct event_data *find_event(struct parser *parser, enum event_type et, const char *name) {
 	struct namespace *n = parser->current->namespace;
-	int i;
+	struct event_data *e;
+	int i, num = n->num_events[et];
 
 	if( parser->error )
 		return NULL;
-	if( n->requests == NULL || n->num_requests <= 0 ) {
+	if( n->events[et] == NULL || num <= 0 ) {
 		return NULL;
 	}
-	for( i = 0 ; i < n->num_events ; i++ ) {
-		struct event_data *e = &n->events[i];
+	for( i = 0, e = n->events[et] ; i < num ; i++, e++ ) {
 		if( e->name == NULL )
 			continue;
 		if( strcmp(name, e->name) == 0 )
@@ -1398,17 +1398,19 @@ static struct event_data *find_event(struct parser *parser, const char *name) {
 	return NULL;
 }
 
-static void parse_events(struct parser *parser) {
+static void parse_events(struct parser *parser, enum event_type et) {
 	struct namespace *n = parser->current->namespace;
 	long firstline = parser->current->lineno;
 
 	assert( n != NULL );
 	if( n->extension == NULL && strcmp(n->name, "core") != 0 ) {
-		error(parser, "'EVENTS' only allowed in extension or namespace 'core'!");
+		error(parser, "'%sEVENTS' only allowed in extension or namespace 'core'!",
+				(et==event_xge)?"XG":"");
 		return;
 	}
-	if( n->events != NULL || n->num_events != 0 ) {
-		error(parser, "multiple 'EVENTS' in the same namespace!");
+	if( n->events[et] != NULL || n->num_events[et] != 0 ) {
+		error(parser, "multiple '%sEVENTS' in the same namespace!",
+				(et==event_xge)?"XG":"");
 		return;
 	}
 
@@ -1419,7 +1421,7 @@ static void parse_events(struct parser *parser) {
 
 		memset(&event, 0, sizeof(event));
 		/* TODO: allow excplicit setting */
-		event.number = n->num_events;
+		event.number = n->num_events[et];
 
 		name = get_const_token(parser, false);
 		if( name == NULL )
@@ -1475,17 +1477,19 @@ static void parse_events(struct parser *parser) {
 						attribute);
 			}
 		}
-		newevents = realloc(n->events, sizeof(struct event_data)*(n->num_events+1));
+		newevents = realloc(n->events[et],
+				sizeof(struct event_data)*(n->num_events[et]+1));
 		if( newevents == NULL ) {
 			oom(parser);
 			break;
 		}
-		n->events = newevents;
-		newevents[n->num_events] = event;
-		n->num_events++;
+		n->events[et] = newevents;
+		newevents[n->num_events[et]] = event;
+		n->num_events[et]++;
 	}
 }
-static void parse_event(struct parser *parser, bool template) {
+
+static void parse_event(struct parser *parser, bool template, enum event_type et) {
 	const char *name, *attribute;
 	struct variable *v = NULL;
 	bool complete = false;
@@ -1513,16 +1517,18 @@ static void parse_event(struct parser *parser, bool template) {
 		if( v == NULL )
 			return;
 	}
-	event = find_event(parser, name);
+	event = find_event(parser, et, name);
 	if( template ) {
 		if( event != NULL ) {
-			error(parser, "'%s' cannot be the name for a templateEvent as it is already the name for an event in EVENTS!\n", name);
+			error(parser, "'%s' cannot be the name for a templateEvent as it is already the name for an event in EVENTS or XGEVENTS!\n", name);
 			return;
 		}
 	} else {
 		if( event == NULL ) {
-			error(parser, "EVENT '%s' not listed in previous EVENTS!\n",
-					name);
+			error(parser, "%sEVENT '%s' not listed in previous %sEVENTS!\n",
+					(et == event_xge)?"XG":"",
+					name,
+					(et == event_xge)?"XG":"");
 			return;
 		}
 		event->event = v;
@@ -1972,16 +1978,28 @@ static void check_namespace_complete(struct parser *parser) {
 				error(parser, "Expected 'RESPONSE %s'!", r->name);
 		}
 	}
-	if( n->events != NULL ) {
+	if( n->events[event_normal] != NULL ) {
 		int i;
 
-		for( i = 0 ; i < n->num_events ; i++ ) {
-			const struct event_data *e = &n->events[i];
+		for( i = 0 ; i < n->num_events[event_normal] ; i++ ) {
+			const struct event_data *e = &n->events[event_normal][i];
 
 			if( e->name == NULL )
 				continue;
 			if( !e->unsupported && e->event == NULL )
 				error(parser, "Missing 'EVENT %s'!", e->name);
+		}
+	}
+	if( n->events[event_xge] != NULL ) {
+		int i;
+
+		for( i = 0 ; i < n->num_events[event_xge] ; i++ ) {
+			const struct event_data *e = &n->events[event_xge][i];
+
+			if( e->name == NULL )
+				continue;
+			if( !e->unsupported && e->event == NULL )
+				error(parser, "Missing 'XGEVENT %s'!", e->name);
 		}
 	}
 }
@@ -2041,7 +2059,9 @@ bool translate(struct parser *parser, const char *name) {
 		} else if( command_is("REQUESTS") ) {
 			parse_requests(parser);
 		} else if( command_is("EVENTS") ) {
-			parse_events(parser);
+			parse_events(parser, event_normal);
+		} else if( command_is("XGEVENTS") ) {
+			parse_events(parser, event_xge);
 		} else if( command_is("ERRORS") ) {
 			parse_errors(parser);
 		} else if( command_is("TYPE") ) {
@@ -2065,9 +2085,11 @@ bool translate(struct parser *parser, const char *name) {
 		} else if( command_is("REQUEST") ) {
 			parse_request(parser, false);
 		} else if( command_is("templateEVENT") ) {
-			parse_event(parser, true);
+			parse_event(parser, true, event_normal);
 		} else if( command_is("EVENT") ) {
-			parse_event(parser, false);
+			parse_event(parser, false, event_normal);
+		} else if( command_is("XGEVENT") ) {
+			parse_event(parser, false, event_xge);
 		} else {
 			error(parser, "Unknown command '%s'\n", command);
 		}
@@ -2103,12 +2125,16 @@ bool parser_free(struct parser *parser) {
 			variable_unref(ns->requests[i].response);
 		}
 		free(ns->requests);
-		for( i = 0 ; i < ns->num_events ; i++ ) {
-			variable_unref(ns->events[i].event);
+		for( i = 0 ; i < ns->num_events[event_normal] ; i++ ) {
+			variable_unref(ns->events[event_normal][i].event);
+		}
+		for( i = 0 ; i < ns->num_events[event_xge] ; i++ ) {
+			variable_unref(ns->events[event_xge][i].event);
 		}
 		if( ns->setup != NULL )
 			variable_unref(ns->setup);
-		free(ns->events);
+		free(ns->events[event_normal]);
+		free(ns->events[event_xge]);
 		free(ns->errors);
 		free(ns->used);
 		free(ns);
@@ -2329,21 +2355,21 @@ static const struct request *finalize_requests(struct parser *parser, struct nam
 	return f;
 }
 
-static const struct event *finalize_events(struct parser *parser, struct namespace *ns) {
+static const struct event *finalize_events(struct parser *parser, struct namespace *ns, enum event_type et) {
 	struct event *es;
 	const struct event *f;
 	int i;
 
-	es = calloc(ns->num_events, sizeof(struct event));
+	es = calloc(ns->num_events[et], sizeof(struct event));
 	if( es == NULL ) {
 		oom(parser);
 		return NULL;
 	}
-	for( i = 0 ; i < ns->num_events ; i++ ) {
-		es[i].name = ns->events[i].name;
+	for( i = 0 ; i < ns->num_events[et] ; i++ ) {
+		es[i].name = ns->events[et][i].name;
 		es[i].parameters = variable_finalize(parser,
-				ns->events[i].event);
-		if( !ns->events[i].special )
+				ns->events[et][i].event);
+		if( !ns->events[et][i].special )
 			continue;
 		assert( es[i].name != NULL );
 		if( strcmp(ns->name, "ge") != 0 && strcmp(ns->name, "core") != 0) {
@@ -2358,7 +2384,7 @@ static const struct event *finalize_events(struct parser *parser, struct namespa
 			parser->error = true;
 		}
 	}
-	f = finalize_data(es, ns->num_events * sizeof(struct event),
+	f = finalize_data(es, ns->num_events[et] * sizeof(struct event),
 		       __alignof__(struct event));
 	if( f == NULL )
 		parser->error = true;
@@ -2394,8 +2420,13 @@ void finalize_everything(struct parser *parser) {
 		parser->error = true;
 		return;
 	}
-	if( core->num_events == 0 ) {
+	if( core->num_events[event_normal] == 0 ) {
 		fputs("No core events defined!\n", stderr);
+		parser->error = true;
+		return;
+	}
+	if( core->num_events[event_xge] != 0 ) {
+		fputs("Generic Events (XGE) outside of extensions not yet supported!\n", stderr);
 		parser->error = true;
 		return;
 	}
@@ -2437,8 +2468,10 @@ void finalize_everything(struct parser *parser) {
 			e->numsubrequests = ns->num_requests;
 			e->subrequests = finalize_requests(parser, ns,
 					unknownrequest, unknownresponse);
-			e->numevents = ns->num_events;
-			e->events = finalize_events(parser, ns);
+			e->numevents = ns->num_events[event_normal];
+			e->events = finalize_events(parser, ns, event_normal);
+			e->numxgevents = ns->num_events[event_xge];
+			e->xgevents = finalize_events(parser, ns, event_xge);
 			e->numerrors = ns->num_errors;
 			e->errors = finalize_data(ns->errors,
 					ns->num_errors*sizeof(const char*),
@@ -2459,8 +2492,8 @@ void finalize_everything(struct parser *parser) {
 	}
 	requests = finalize_requests(parser, core, unknownrequest, unknownresponse);
 	num_requests = core->num_requests;
-	events = finalize_events(parser, core);
-	num_events = core->num_events;
+	events = finalize_events(parser, core, event_normal);
+	num_events = core->num_events[event_normal];
 	errors = finalize_data(core->errors,
 			core->num_errors*sizeof(const char*),
 			__alignof__(const char*));

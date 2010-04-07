@@ -1503,14 +1503,11 @@ static inline void print_generic_event(struct connection *c, const unsigned char
 	stack.num = 30;
 	stack.ofs = 0;
 	uint8_t opcode = getCARD8(1);
+	uint16_t evtype = getCARD16(8);
 	const struct extension *extension;
 
 	extension = find_extension_by_opcode(c, opcode);
-	if( extension != NULL ) {
-		fprintf(out, "%s(%hhu) ", extension->name, opcode);
-		// TODO: get description from format...
-		print_parameters(c, buffer, len, event->parameters, false, &stack);
-	} else {
+	if( extension == NULL ) {
 		const char *name = find_unknown_extension(c, opcode);
 		if( name != NULL ) {
 			fprintf(out, "%s(%hhu) ", name, opcode);
@@ -1518,6 +1515,23 @@ static inline void print_generic_event(struct connection *c, const unsigned char
 			fprintf(out, "unknown extension %hhu ", opcode);
 		}
 		print_parameters(c, buffer, len, event->parameters, false, &stack);
+		return;
+	}
+	fprintf(out, "%s(%hhu) ", extension->name, opcode);
+	if( evtype > extension->numxgevents
+			|| extension->xgevents[evtype].name == NULL ) {
+		fprintf(out, "unknown(%hu) ", evtype);
+		print_parameters(c, buffer, len,
+				event->parameters, false, &stack);
+	} else {
+		const struct event *xgevent = &extension->xgevents[evtype];
+		const struct parameter *parameters = xgevent->parameters;
+
+		if( parameters == NULL )
+			parameters = event->parameters;
+
+		fprintf(out, "%s(%hu) ", xgevent->name, evtype);
+		print_parameters(c, buffer, len, parameters, false, &stack);
 	}
 }
 

@@ -98,6 +98,27 @@ DeviceBusy
 BadClass
 END
 
+XGEVENTS
+UNKNOWN
+DeviceChanged		/* 1 */ UNSUPPORTED
+KeyPress		/* 2 */ UNSUPPORTED
+KeyRelease		/* 3 */ UNSUPPORTED
+ButtonPress		/* 4 */ UNSUPPORTED
+ButtonRelease		/* 5 */ UNSUPPORTED
+Motion			/* 6 */ UNSUPPORTED
+Enter			/* 7 */ UNSUPPORTED
+Leave			/* 8 */ UNSUPPORTED
+FocusIn			/* 9 */ UNSUPPORTED
+FocusOut		/* 10 */ UNSUPPORTED
+HierarchyChanged	/* 11 */ UNSUPPORTED
+PropertyEvent		/* 12 */ UNSUPPORTED
+RawKeyPress		/* 13 */ UNSUPPORTED
+RawKeyRelease		/* 14 */ UNSUPPORTED
+RawButtonPress		/* 15 */ UNSUPPORTED
+RawButtonRelease	/* 16 */ UNSUPPORTED
+RawMotion		/* 17 */ UNSUPPORTED
+END
+
 CONSTANTS device_change
 0	Added
 1	Removed

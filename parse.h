@@ -22,7 +22,8 @@ struct request {
 struct event {
 	const char *name;
 	const struct parameter *parameters;
-	enum event_type { event_normal = 0, event_xge } type;
+	enum event_type { event_normal = 0, event_xge = 1} type;
+#define event_COUNT 2
 };
 
 struct extension {
@@ -34,6 +35,8 @@ struct extension {
 	unsigned char numevents;
 	const char * const *errors;
 	unsigned char numerrors;
+	unsigned short numxgevents;
+	const struct event *xgevents;
 };
 
 struct parameter {
