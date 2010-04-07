@@ -106,6 +106,10 @@ struct parameter {
 		ft_FIXED,
 		/* a list of those */
 		ft_LISTofFIXED,
+		/* a fixed-point number 32+32 bit */
+		ft_FIXED3232,
+		/* a list of those */
+		ft_LISTofFIXED3232,
 		/* a 32 bit floating pointer number */
 		ft_FLOAT32,
 		/* a list of those */

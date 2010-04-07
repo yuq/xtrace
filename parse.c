@@ -366,6 +366,41 @@ static size_t printLISTofFIXED(struct connection *c,const uint8_t *buffer,size_t
 	return ofs;
 }
 
+static size_t printLISTofFIXED3232(struct connection *c, const uint8_t *buffer, size_t buflen, const struct parameter *p, size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( (buflen - ofs)/8 <= len )
+		len = (buflen - ofs)/8;
+
+	if( print_offsets )
+		fprintf(out,"[%d]", (int)ofs);
+	fprintf(out, "%s=", p->name);
+	while( len > 0 ) {
+		int32_t i32;
+		uint32_t u32;
+		double d;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...", out);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putc(',', out);
+			notfirst = true;
+			i32 = getCARD32(ofs);
+			u32 = getCARD32(ofs + 4);
+			d = i32 + (u32 / ((double)65536.0 * (double)65536.0)) ;
+			fprintf(out, "%.11f", d);
+		}
+		len--; ofs += 8; nr++;
+	}
+	putc(';', out);
+	return ofs;
+}
+
+
 static size_t printLISTofFLOAT32(struct connection *c, const uint8_t *buffer, size_t buflen, const struct parameter *p, size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
@@ -1036,6 +1071,21 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_LISTofFIXED:
 			lastofs = printLISTofFIXED(c,buffer,len,p,stored,ofs);
 			continue;
+		 case ft_FIXED3232:
+			if( ofs + 8 > len )
+				continue;
+			if( print_offsets )
+				fprintf(out, "[%d]", (int)ofs);
+			fputs(p->name, out); putc('=', out);
+			i32 = getCARD32(ofs);
+			u32 = getCARD32(ofs + 4);
+			d = i32 + (u32 / ((double)65536.0 * (double)65536.0));
+			fprintf(out, "%.11f", d);
+			continue;
+		 case ft_LISTofFIXED3232:
+			lastofs = printLISTofFIXED3232(c, buffer, len, p,
+					stored, ofs);
+			continue;
 		 case ft_FLOAT32:
 			if( ofs + 4 > len )
 				continue;
@@ -1249,6 +1299,8 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_FRACTION32_32:
 		 case ft_FIXED:
 		 case ft_LISTofFIXED:
+		 case ft_FIXED3232:
+		 case ft_LISTofFIXED3232:
 		 case ft_FLOAT32:
 		 case ft_LISTofFLOAT32:
 			 assert(0);
