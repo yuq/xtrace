@@ -1603,6 +1603,8 @@ static void parse_struct(struct parser *parser, bool list) {
 	name = get_const_token(parser, false);
 	v = add_var(parser, "", name, &name, vt_struct);
 	vl = add_var(parser, "LISTof", name, NULL, vt_type);
+	if( !v || !vl )
+		return;
 	vl->t.data = v;
 	v->refcount++;
 	if( !list ) {
