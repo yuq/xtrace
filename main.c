@@ -390,7 +390,7 @@ char *strndup(const char *str,size_t n) {
 }
 #endif
 
-enum {LO_DEFAULT=0, LO_TIMESTAMPS, LO_RELTIMESTAMPS, LO_VERSION, LO_HELP};
+enum {LO_DEFAULT=0, LO_TIMESTAMPS, LO_RELTIMESTAMPS, LO_VERSION, LO_HELP, LO_PRINTCOUNTS, LO_PRINTOFFSETS};
 static int long_only_option = 0;
 static const struct option longoptions[] = {
 	{"display",	required_argument,	NULL,	'd'},
@@ -412,6 +412,8 @@ static const struct option longoptions[] = {
 	{"version",		no_argument, &long_only_option,	LO_VERSION},
 	{"timestamps",		no_argument, &long_only_option,	LO_TIMESTAMPS},
 	{"relative-timestamps",	no_argument, &long_only_option,	LO_RELTIMESTAMPS},
+	{"print-counts",	no_argument, &long_only_option,	LO_PRINTCOUNTS},
+	{"print-offsets",	no_argument, &long_only_option,	LO_PRINTOFFSETS},
 	{NULL,		0,			NULL,	0}
 };
 
@@ -419,6 +421,9 @@ static void catchsig(int signum UNUSED)
 {
   caught_child_signal = true;
 }
+
+extern bool print_counts;
+extern bool print_offsets;
 
 int main(int argc, char *argv[]) {
 	int listener,r;
@@ -525,6 +530,12 @@ argv[0]);
 					 break;
 				 case LO_RELTIMESTAMPS:
 					 print_reltimestamps = true;
+					 break;
+				case LO_PRINTCOUNTS:
+					 print_counts = true;
+					 break;
+				case LO_PRINTOFFSETS:
+					 print_offsets = true;
 					 break;
 			 }
 			 break;

@@ -36,8 +36,8 @@ enum package_direction { TO_SERVER, TO_CLIENT };
 
 static void startline(struct connection *c, enum package_direction d, const char *format, ...) FORMAT(printf,3,4);
 
-static const bool print_counts = false;
-static const bool print_offsets = false;
+const bool print_counts;
+const bool print_offsets;
 
 static inline unsigned int padded(unsigned int s) {
 	return (s+3)&(~3);
