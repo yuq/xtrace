@@ -3,6 +3,7 @@
 	* Fix bug in error reporting when multiple STRUCTs have the same name
 	* add --print-counts --print-offsets
 	* add FIXED3232 (fixed point with 32 bits before and 32 after the dot)
+	* add some of the generic events of XI2
 2010-03-30
 	* Add support for XInputExtension 1.5, and partial support for
 	  XInputExtension 2.0

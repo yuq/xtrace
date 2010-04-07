@@ -1,6 +1,9 @@
 EXTENSION "XInputExtension" XInput
 USE core
 
+TYPE FP1616 FIXED
+TYPE FP3232 FIXED3232
+
 #define ra(a) { #a , parameterXInput ## a , NULL,NULL,NULL}
 #define rb(a) { #a , parameterXInput ## a , returnXInput ## a ,NULL,NULL}
 REQUESTS
@@ -101,15 +104,15 @@ END
 XGEVENTS
 UNKNOWN
 DeviceChanged		/* 1 */ UNSUPPORTED
-KeyPress		/* 2 */ UNSUPPORTED
-KeyRelease		/* 3 */ UNSUPPORTED
-ButtonPress		/* 4 */ UNSUPPORTED
-ButtonRelease		/* 5 */ UNSUPPORTED
-Motion			/* 6 */ UNSUPPORTED
-Enter			/* 7 */ UNSUPPORTED
-Leave			/* 8 */ UNSUPPORTED
-FocusIn			/* 9 */ UNSUPPORTED
-FocusOut		/* 10 */ UNSUPPORTED
+KeyPress		/* 2 */
+KeyRelease		/* 3 */
+ButtonPress		/* 4 */
+ButtonRelease		/* 5 */
+Motion			/* 6 */
+Enter			/* 7 */
+Leave			/* 8 */
+FocusIn			/* 9 */
+FocusOut		/* 10 */
 HierarchyChanged	/* 11 */ UNSUPPORTED
 PropertyEvent		/* 12 */ UNSUPPORTED
 RawKeyPress		/* 13 */ UNSUPPORTED
@@ -142,6 +145,26 @@ CONSTANTS device_use
 2	ExtensionDevice
 3	ExtensionKeyboard
 4	ExtensionPointer
+END
+
+CONSTANTS notify_mode
+0	Normal
+1	Grab
+2	Ungrab
+3	WhileGrabbed
+4	PassiveGrab
+5	PassiveUngrab
+END
+
+CONSTANTS notify_detail
+0	Ancestor
+1	Virtual
+2	Inferior
+3	Nonlinear
+4	NonlinearVirtual
+5	Pointer
+6	PointerRoot
+7	DetailNone
 END
 
 CONSTANTS usexkeyboard
@@ -243,6 +266,12 @@ CONSTANTS devicecontroltype
 4	ENABLE
 5	ABS_AREA
 END
+
+CONSTANTS changereason
+1	SlaveSwitch
+2	DeviceChange
+END
+TYPE CHANGEREASON ENUM8 changereason
 
 REQUEST GetExtensionVersion
  4	len	COUNT16
@@ -1244,5 +1273,86 @@ EVENT DevicePropertyNotify
  8	atom	ATOM
 31	device	CARD8
 END
+
+STRUCT ModifierInfo length 16
+ 0	base_mods	CARD32
+ 4	latched_mods	CARD32
+ 8	locked_mods	CARD32
+12	effective_mods	CARD32
+END
+
+STRUCT GroupInfo length 4
+0	base_group	CARD8
+1	latched_group	CARD8
+2	locked_group	CARD8
+3	effective_group	CARD8
+END
+
+# This does not work. I do not know if XIDEVICEINFO
+# is broken or if the event encodes it differently...
+# XGEVENT DeviceChanged
+# 10	deviceid	CARD8
+# 12	time		TIMESTAMP
+# 16	"#classes"	COUNT16
+# 18	sourceid	CARD8
+# 20	reason		CHANGEREASON
+# 32	classes		LISTofXIDEVICEINFO
+# END
+
+templateEVENT Device
+10	deviceid	CARD8
+12	time		TIMESTAMP
+16	detail		CARD32
+20	root		WINDOW
+24	event		WINDOW
+28	child		WINDOW
+32	root_x		FP1616
+36	root_y		FP1616
+40	event_x		FP1616
+44	event_y		FP1616
+52	sourceid	CARD16
+# TODO: meaning of flags...
+56	flags		CARD32
+60	mods		ModifierInfo
+76	group		GroupInfo
+48	buttons_len	COUNT16
+80	buttons		LISTofCARD32
+50	valuators_len	COUNT16
+LATER	valuators	LISTofCARD32
+RESET_COUNTER
+LATER	axisvalues	LISTofFIXED3232
+END
+
+XGEVENT KeyPress ALIASES Device
+XGEVENT KeyRelease ALIASES Device
+XGEVENT ButtonPress ALIASES Device
+XGEVENT ButtonRelease ALIASES Device
+XGEVENT Motion ALIASES Device
+
+templateEVENT Notify
+10	deviceid	CARD8
+12	time		TIMESTAMP
+16	sourceid	CARD8
+18	mode		ENUM8 notify_mode
+19	detail		ENUM8 notify_detail
+20	root		WINDOW
+24	event		WINDOW
+28	child		WINDOW
+32	root_x		FP1616
+36	root_y		FP1616
+40	event_x		FP1616
+44	event_y		FP1616
+48	same_screen	BOOL
+49	focus		BOOL
+52	mods		ModifierInfo
+68	group		GroupInfo
+50	buttons_len	COUNT16
+72	masks		LISTofCARD32
+END
+
+XGEVENT Enter ALIASES Notify
+XGEVENT Leave ALIASES Notify
+XGEVENT FocusIn ALIASES Notify
+XGEVENT FocusOut ALIASES Notify
 
 EOF
