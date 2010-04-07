@@ -1,5 +1,6 @@
 2010-04-07
 	* Add support for Generic Events (XGE)
+	* Fix bug in error reporting when multiple STRUCTs have the same name
 2010-03-30
 	* Add support for XInputExtension 1.5, and partial support for
 	  XInputExtension 2.0
