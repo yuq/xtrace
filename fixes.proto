@@ -84,6 +84,7 @@ CONSTANTS fixes_region_kind
 1	clip
 END
 TYPE FIXES_REGION_KIND	ENUM8	fixes_region_kind
+TYPE REGION	CARD32
 
 BITMASK fixes_mask
 0x00000001	"owner notify"
@@ -148,33 +149,33 @@ RESPONSE GetCursorImage
 END
 
 REQUEST CreateRegion
-4	region	CARD32
+4	region	REGION
 8	rectangles	LISTofRECTANGLE
 END
 
 REQUEST CreateRegionFromBitmap
-4	region	CARD32
+4	region	REGION
 8	bitmap	PIXMAP
 END
 
 REQUEST CreateRegionFromWindow
-4	region	CARD32
+4	region	REGION
 8	window	WINDOW
 12	kind	FIXES_REGION_KIND
 END
 
 REQUEST CreateRegionFromGC
-4	region	CARD32
+4	region	REGION
 8	gc	GCONTEXT
 END
 
 REQUEST CreateRegionFromPicture
-4	region	CARD32
+4	region	REGION
 8	picture	PICTURE
 END
 
 templateREQUEST Region
-4	region	CARD32
+4	region	REGION
 END
 
 REQUEST DestroyRegion ALIASES Region
@@ -182,30 +183,30 @@ REQUEST DestroyRegion ALIASES Region
 REQUEST SetRegion ALIASES Region
 
 REQUEST CopyRegion
-4	src-region	CARD32
-8	dst-region	CARD32
+4	src-region	REGION
+8	dst-region	REGION
 END
 
 templateREQUEST CombineRegion
-4	region1	CARD32
-8	region2	CARD32
-12	dst-region	CARD32
+4	region1	REGION
+8	region2	REGION
+12	dst-region	REGION
 END
 REQUEST UnionRegion ALIASES CombineRegion
 REQUEST IntersectRegion ALIASES CombineRegion
 REQUEST SubtractRegion ALIASES CombineRegion
 
 REQUEST InvertRegion
-4	src-region	CARD32
+4	src-region	REGION
 8	x	INT16
 10	y	INT16
 12	width	UINT16
 14	height	UINT16
-16	dst-region	CARD32
+16	dst-region	REGION
 END
 
 REQUEST TranslateRegion
-4	region	CARD32
+4	region	REGION
 8	delta-x	INT16
 10	delta-y	INT16
 END
@@ -223,7 +224,7 @@ END
 
 REQUEST SetGCClipRegion
 4	gc	GCONTEXT
-8	region	CARD32
+8	region	REGION
 12	"x origin"	INT16
 14	"y origin"	INT16
 END
@@ -233,12 +234,12 @@ REQUEST SetWindowShapeRegion
 8	kind	Shape::SHAPE_KIND
 12	"x offset"	INT16
 14	"y offset"	INT16
-16	region	CARD32
+16	region	REGION
 END
 
 REQUEST SetPictureClipRegion
 4	picture	PICTURE
-8	region	CARD32
+8	region	REGION
 12	"x origin"	INT16
 14	"y origin"	INT16
 END
@@ -286,8 +287,8 @@ REQUEST ChangeCursorByName
 END
 
 REQUEST ExpandRegion
- 4	src-region	CARD32
- 8	dst-region	CARD32
+ 4	src-region	REGION
+ 8	dst-region	REGION
 12	left	UINT16
 14	right	UINT16
 16	top	UINT16
