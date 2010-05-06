@@ -1,0 +1,263 @@
+# This file is part of "xtrace"
+# Copyright (C) 2010 Julien Cristau
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# This file is based on /usr/include/X11/extensions/dri2proto.h which states:
+#
+# Copyright © 2008 Red Hat, Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Soft-
+# ware"), to deal in the Software without restriction, including without
+# limitation the rights to use, copy, modify, merge, publish, distribute,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, provided that the above copyright
+# notice(s) and this permission notice appear in all copies of the Soft-
+# ware and that both the above copyright notice(s) and this permission
+# notice appear in supporting documentation.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
+# ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY
+# RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN
+# THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSE-
+# QUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+# DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+# TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFOR-
+# MANCE OF THIS SOFTWARE.
+#
+# Except as contained in this notice, the name of a copyright holder shall
+# not be used in advertising or otherwise to promote the sale, use or
+# other dealings in this Software without prior written authorization of
+# the copyright holder.
+#
+# Authors:
+#   Kristian Høgsberg (krh@redhat.com)
+#
+
+NEEDS "fixes.proto"
+
+EXTENSION "DRI2" DRI2
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+Connect RESPONDS
+Authenticate RESPONDS
+CreateDrawable
+DestroyDrawable
+GetBuffers RESPONDS
+CopyRegion RESPONDS
+GetBuffersWithFormat RESPONDS
+SwapBuffers RESPONDS
+GetMSC RESPONDS
+WaitMSC RESPONDS
+WaitSBC RESPONDS
+SwapInterval
+END
+
+EVENTS
+BufferSwapComplete
+InvalidateBuffers
+END
+
+ERRORS
+END
+
+REQUEST QueryVersion
+ 4	major-version	UINT32
+ 8	minor-version	UINT32
+END
+RESPONSE QueryVersion
+ 8	major-version	UINT32
+12	minor-version	UINT32
+END
+
+CONSTANTS driver_type
+0	DRI
+1	VDPAU
+END
+
+REQUEST Connect
+ 4	window	WINDOW
+ 8	driver-type	ENUM32 driver_type
+END
+RESPONSE Connect
+ 8	driver-name-len	COUNT32
+32	driver-name	STRING8
+12	device-name-len	COUNT32
+LATER	device-name	STRING8
+END
+
+REQUEST Authenticate
+ 4	window	WINDOW
+ 8	token	CARD32
+END
+RESPONSE Authenticate
+ 8	authenticated	ENUM32 bool
+END
+
+REQUEST CreateDrawable
+ 4	drawable	DRAWABLE
+END
+
+REQUEST DestroyDrawable
+ 4	drawable	DRAWABLE
+END
+
+CONSTANTS attachment
+ 0x0	FrontLeft
+ 0x1	BackLeft
+ 0x2	FrontRight
+ 0x3	BackRight
+ 0x4	Depth
+ 0x5	Stencil
+ 0x6	Accum
+ 0x7	FakeFrontLeft
+ 0x8	FakeFrontRight
+ 0x9	DepthStencil
+END
+
+TYPE DRI2ATTACHMENT ENUM32 attachment
+
+LIST DRI2ATTACHMENT length 4
+ 0	attachment	DRI2ATTACHMENT
+END
+
+LIST DRI2BUFFER length 20
+ 0	attachment	DRI2ATTACHMENT
+ 4	name	CARD32
+ 8	pitch	UINT32
+12	cpp	UINT32
+16	flags	CARD32
+END
+
+REQUEST GetBuffers
+ 4	drawable	DRAWABLE
+ 8	count	COUNT32
+12	attachments	LISTofDRI2ATTACHMENT
+END
+RESPONSE GetBuffers
+ 8	width	UINT32
+12	height	UINT32
+16	count	COUNT32
+32	buffers	LISTofDRI2BUFFER
+END
+
+
+
+REQUEST CopyRegion
+ 4	drawable	DRAWABLE
+ 8	region	Fixes::REGION
+12	dest	DRI2ATTACHMENT
+16	src	DRI2ATTACHMENT
+END
+RESPONSE CopyRegion
+END
+
+LIST DRI2ATTACH_FORMAT length 8
+ 0	attachment	DRI2ATTACHMENT
+ 4	format	CARD32
+END
+
+REQUEST GetBuffersWithFormat
+ 4	drawable	DRAWABLE
+ 8	count	COUNT32
+12	attachments	LISTofDRI2ATTACH_FORMAT
+END
+RESPONSE GetBuffersWithFormat
+ 8	width	UINT32
+12	height	UINT32
+16	count	COUNT32
+32	buffers	LISTofDRI2BUFFER
+END
+
+REQUEST SwapBuffers
+ 4	drawable	DRAWABLE
+ 8	target_msc_hi	UINT32
+12	target_msc_lo	UINT32
+16	divisor_hi	UINT32
+20	divisor_lo	UINT32
+24	remainder_hi	UINT32
+28	remainder_lo	UINT32
+END
+RESPONSE SwapBuffers
+ 8	swap_hi	UINT32
+12	swap_lo	UINT32
+END
+
+REQUEST GetMSC
+ 4	drawable	DRAWABLE
+END
+RESPONSE GetMSC
+ 8	ust_hi	UINT32
+12	ust_lo	UINT32
+16	msc_hi	UINT32
+20	msc_lo	UINT32
+24	sbc_hi	UINT32
+28	sbc_lo	UINT32
+END
+
+REQUEST WaitMSC
+ 4	drawable	DRAWABLE
+ 8	target_msc_hi	UINT32
+12	target_msc_lo	UINT32
+16	divisor_hi	UINT32
+20	divisor_lo	UINT32
+24	remainder_hi	UINT32
+28	remainder_lo	UINT32
+END
+RESPONSE WaitMSC
+ 8	ust_hi	UINT32
+12	ust_lo	UINT32
+16	msc_hi	UINT32
+20	msc_lo	UINT32
+24	sbc_hi	UINT32
+28	sbc_lo	UINT32
+END
+
+REQUEST WaitSBC
+ 4	drawable	DRAWABLE
+ 8	target_sbc_hi	UINT32
+12	target_sbc_lo	UINT32
+END
+RESPONSE WaitSBC
+ 8	ust_hi	UINT32
+12	ust_lo	UINT32
+16	msc_hi	UINT32
+20	msc_lo	UINT32
+24	sbc_hi	UINT32
+28	sbc_lo	UINT32
+END
+
+REQUEST SwapInterval
+ 4	drawable	DRAWABLE
+ 8	interval	UINT32
+END
+
+EVENT BufferSwapComplete
+ 4	drawable	DRAWABLE
+ 8	ust_hi	UINT32
+12	ust_lo	UINT32
+16	msc_hi	UINT32
+20	msc_lo	UINT32
+24	sbc_hi	UINT32
+28	sbc_lo	UINT32
+END
+
+EVENT InvalidateBuffers
+ 4	drawable	DRAWABLE
+END
+
+EOF

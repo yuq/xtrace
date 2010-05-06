@@ -2,6 +2,7 @@ new after 1.0.2:
 - bugfixes
 - support Generic Events (XGE)
 - support XInputExtension 1.5, and partially XInputExtension 2.0
+- support DRI2
 new after 1.0.1:
 - bugfixes (SelectionNotify, NoOperation, initial server response)
 - show more details of the initial X server response
