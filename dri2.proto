@@ -97,6 +97,7 @@ RESPONSE Connect
  8	driver-name-len	COUNT32
 32	driver-name	STRING8
 12	device-name-len	COUNT32
+ROUND
 LATER	device-name	STRING8
 END
 
