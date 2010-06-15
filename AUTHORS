@@ -1,10 +1,9 @@
 Bernhard R. Link <brlink@debian.org>
+Julien Cristau (jcristau%debian.org)
 
 Contributions by:
 	Justin Pryzby (justinpryzby%users.sourceforge.net)
 		manpage fixes
-	Julien Cristau (jcristau%debian.org)
-		bug fixes
 	Bruce Guenter (bruce%untroubled.org)
 		starting a client given at the command line
 	RALOVICH, Kristóf
