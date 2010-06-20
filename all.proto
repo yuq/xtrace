@@ -20,4 +20,5 @@ NEEDS "vidmode.proto"
 NEEDS "xinerama.proto"
 NEEDS "xinput.proto"
 NEEDS "xkb.proto"
+NEEDS "xvideo.proto"
 EOF

@@ -1,0 +1,398 @@
+# This file is part of xtrace.
+# Copyright (C) 2006 Bernhard R. Link
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+# 
+# This file is based on /usr/include/X11/extensions/Xvproto.h which states:
+# Copyright 1991 by Digital Equipment Corporation, Maynard, Massachusetts,
+# and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+# 
+#                         All Rights Reserved
+# 
+# Permission to use, copy, modify, and distribute this software and its 
+# documentation for any purpose and without fee is hereby granted, 
+# provided that the above copyright notice appear in all copies and that
+# both that copyright notice and this permission notice appear in 
+# supporting documentation, and that the names of Digital or MIT not be
+# used in advertising or publicity pertaining to distribution of the
+# software without specific, written prior permission.  
+# 
+# DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+# ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+# DIGITAL BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+# ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+# WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+# ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+# SOFTWARE.
+#
+# and on /usr/share/xcb/xv.xml, which states:
+# Copyright (C) 2006 Jeremy Kolb.
+# All Rights Reserved.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# 
+# Except as contained in this notice, the names of the authors or their
+# institutions shall not be used in advertising or otherwise to promote the
+# sale, use or other dealings in this Software without prior written
+# authorization from the authors.
+
+EXTENSION "XVideo" XV
+USE core
+
+REQUESTS
+QueryExtension RESPONDS /* 0 */
+QueryAdaptors RESPONDS
+QueryEncodings RESPONDS
+GrabPort RESPONDS
+UngrabPort
+PutVideo
+PutStill
+GetVideo
+GetStill
+StopVideo
+SelectVideoNotify /* 10 */
+SelectPortNotify
+QueryBestSize RESPONDS
+SetPortAttribute
+GetPortAttribute RESPONDS
+QueryPortAttributes RESPONDS
+ListImageFormats RESPONDS
+QueryImageAttributes RESPONDS
+PutImage
+ShmPutImage
+END
+
+EVENTS
+VideoNotify
+PortNotify
+END
+
+ERRORS
+BadPort
+BadEncoding
+BadMode
+END
+
+TYPE PORT	UINT32
+TYPE ENCODING UINT32
+
+BITMASK xvtype
+1<<0	Input
+1<<1	Output
+1<<2	Video
+1<<3	Still
+1<<4	Image
+END
+
+CONSTANTS ImageFormatInfoType
+ 0	RGB
+ 1	YUV
+END
+
+CONSTANTS ImageFormatInfoFormat
+ 0	Packed
+ 1	Planar
+END
+
+BITMASK attribute_flag
+ 1	Gettable
+ 2	Settable
+END
+
+CONSTANTS video_notify_reason
+ 0	Started
+ 1	Stopped
+ 2	Busy
+ 3	Preempted
+ 4	HardError
+END
+
+CONSTANTS scanline_order
+ 0	TopToBottom
+ 1	BottomToTop
+END
+
+CONSTANTS grab_port_status
+ 0	Success
+ 1	BadExtension
+ 2	AlreadyGrabbed
+ 3	InvalidTime
+ 4	BadReply
+ 5	BadAlloc
+END
+
+STRUCT Rational length 8
+0	numerator	INT32
+4	denominator	INT32
+END
+
+LIST XVFormat length 8
+ 0	visual	VISUALID
+ 4	depth	UINT8
+END
+
+LIST AdaptorInfo variable min-length 12
+ 0	base_id	PORT
+ 6	num_ports	UINT16
+10	type	BITMASK8 xvtype
+ 4	name_size	COUNT16
+12	name	STRING8
+ROUND
+ 8	num_formats	COUNT16
+LATER	formats	LISTofXVFormat
+END
+
+LIST EncodingInfo variable min-length 20
+ 0	encoding	ENCODING
+ 4	name_size	COUNT16
+ 6	width	UINT16
+ 8	height	UINT16
+12	rate	Rational
+20	name	STRING8
+ROUND
+END
+
+LIST AttributeInfo variable min-length 16
+ 0	flags	BITMASK32 attribute_flag
+ 4	min	INT32
+ 8	max	INT32
+12	size	COUNT32
+16	name	STRING8
+ROUND
+END
+
+LIST ImageFormatInfo length 128
+ 0	id	CARD32
+ 4	type	ENUM8 ImageFormatInfoType
+ 5	byte_order	CARD8
+SET_COUNTER 16
+ 8	guid	STRING8
+24	bpp	UINT8
+25	num_planes	UINT8
+28	depth	UINT8
+32	red_mask	CARD32
+36	green_mask	CARD32
+40	blue_mask	CARD32
+44	format	ENUM8 ImageFormatInfoFormat
+48	y_sample_bits	CARD32
+52	u_sample_bits	CARD32
+56	v_sample_bits	CARD32
+60	vhorz_y_period	CARD32
+64	vhorz_u_period	CARD32
+68	vhorz_v_period	CARD32
+72	vvert_y_period	CARD32
+76	vvert_u_period	CARD32
+80	vvert_v_period	CARD32
+SET_COUNTER 32
+84	vcomp_order	LISTofCARD8
+116	vscanline_order	ENUM8 scanline_order
+END
+
+REQUEST QueryExtension
+END
+RESPONSE QueryExtension
+ 8	major	UINT16
+10	minor	UINT16
+END
+
+REQUEST QueryAdaptors
+ 4	window	WINDOW
+END
+RESPONSE QueryAdaptors
+ 8	num_adaptors	COUNT16
+32	adaptors	LISTofAdaptorInfo
+END
+
+REQUEST QueryEncodings
+ 4	port	PORT
+END
+RESPONSE QueryEncodings
+ 8	num_encodings	COUNT16
+32	encodings	LISTofEncodingInfo
+END
+
+REQUEST GrabPort
+ 4	port	PORT
+ 8	time	TIMESTAMP
+END
+RESPONSE GrabPort
+ 1	result	ENUM8 grab_port_status
+END
+
+REQUEST UngrabPort
+ 4	port	PORT
+ 8	time	TIMESTAMP
+END
+
+templateREQUEST Put
+ 4	port	PORT
+ 8	drawable	DRAWABLE
+12	gc	GCONTEXT
+16	vid_x	INT16
+18	vid_y	INT16
+20	vid_w	UINT16
+22	vid_h	UINT16
+24	drw_x	INT16
+26	drw_y	INT16
+28	drw_w	UINT16
+30	drw_h	UINT16
+END
+
+REQUEST PutVideo ALIASES Put
+REQUEST PutStill ALIASES Put
+REQUEST GetVideo ALIASES Put
+REQUEST GetStill ALIASES Put
+
+REQUEST StopVideo
+ 4	port	PORT
+ 8	drawable	DRAWABLE
+END
+
+REQUEST SelectVideoNotify
+ 4	drawable	DRAWABLE
+ 8	onoff	BOOL
+END
+
+REQUEST SelectPortNotify
+ 4	port	PORT
+ 8	onoff	BOOL
+END
+
+REQUEST QueryBestSize
+ 4	port	PORT
+ 8	vid_w	UINT16
+10	vid_h	UINT16
+12	drw_w	UINT16
+14	drw_h	UINT16
+16	motion	BOOL
+END
+RESPONSE QueryBestSize
+ 8	actual_width	UINT16
+10	actual_height	UINT16
+END
+
+REQUEST SetPortAttribute
+ 4	port	PORT
+ 8	attribute	ATOM
+12	value	INT32
+END
+
+REQUEST GetPortAttribute
+ 4	port	PORT
+ 8	attribute	ATOM
+END
+RESPONSE GetPortAttribute
+ 8	value	INT32
+END
+
+REQUEST QueryPortAttributes
+ 4	port	PORT
+END
+RESPONSE QueryPortAttributes
+ 8	num_attributes	COUNT32
+12	text_size	UINT32
+32	attributes	LISTofAttributeInfo
+END
+
+REQUEST ListImageFormats
+ 4	port	PORT
+END
+RESPONSE ListImageFormats
+ 8	num_formats	COUNT32
+32	format	LISTofImageFormatInfo
+END
+
+REQUEST QueryImageAttributes
+ 4	port	PORT
+ 8	id	CARD32
+12	width	UINT16
+14	height	UINT16
+END
+RESPONSE QueryImageAttributes
+12	data_size	UINT32
+16	width	UINT16
+18	height	UINT16
+ 8	num_planes	COUNT32
+32	pitches	LISTofUINT32
+RESET_COUNTER
+LATER	offsets	LISTofUINT32
+END
+
+REQUEST PutImage
+ 4	port	PORT
+ 8	drawable	DRAWABLE
+12	gc	GCONTEXT
+16	id	CARD32
+20	src_x	INT16
+22	src_y	INT16
+24	src_w	UINT16
+26	src_h	UINT16
+28	drw_x	INT16
+30	drw_y	INT16
+32	drw_w	UINT16
+34	drw_h	UINT16
+36	width	UINT16
+38	height	UINT16
+40	data	LISTofCARD8
+END
+
+REQUEST ShmPutImage
+ 4	port	PORT
+ 8	drawable	DRAWABLE
+12	gc	GCONTEXT
+16	shmseg	Shm::ShmSeg
+20	id	CARD32
+24	offset	UINT32
+28	src_x	INT16
+30	src_y	INT16
+32	src_w	UINT16
+34	src_h	UINT16
+36	drw_x	INT16
+38	drw_y	INT16
+40	drw_w	UINT16
+42	drw_h	UINT16
+44	width	UINT16
+46	height	UINT16
+48	send_event	BOOL
+END
+
+EVENT VideoNotify
+ 1	reason	ENUM8 video_notify_reason
+ 4	timestamp	TIMESTAMP
+ 8	drawable	DRAWABLE
+12	port	PORT
+END
+
+EVENT PortNotify
+ 4	timestamp	TIMESTAMP
+ 8	port	PORT
+12	attribute	ATOM
+16	value	INT32
+END
+
+EOF
