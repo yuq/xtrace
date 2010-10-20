@@ -690,7 +690,7 @@ RESPONSE GetWindowAttributes
 28	colormap	COLORMAP constants none
 32	all-event-masks	SETofEVENT
 36	your-event-mask	SETofEVENT
-38	do-not-propagate-mask	SETofDEVICEEVENT
+38	do-not-propagate-mask	BITMASK16 setofevent
 40	unused		CARD16
 END
 
