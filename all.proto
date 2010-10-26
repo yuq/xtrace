@@ -21,4 +21,5 @@ NEEDS "xinerama.proto"
 NEEDS "xinput.proto"
 NEEDS "xkb.proto"
 NEEDS "xvideo.proto"
+NEEDS "composite.proto"
 EOF

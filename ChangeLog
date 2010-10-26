@@ -1,3 +1,5 @@
+2010-10-26
+	* Add Composite (Thanks to Adam Endrodi)
 2010-10-20
 	* fix size of do-not-propagate-mask in GetWindowAttributes results
 	  (Thanks to Pierre-Yves Baccou for noticing).

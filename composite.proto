@@ -1,0 +1,77 @@
+NEEDS "requests.proto"
+NEEDS "fixes.proto"
+
+EXTENSION "Composite" Composite
+USE core
+
+REQUESTS
+QueryVersion			RESPONDS
+RedirectWindow
+RedirectSubwindows
+UnredirectWindow
+UnredirectSubwindows
+CreateRegionFromBorderClip
+NameWindowPixmap
+GetOverlayWindow		RESPONDS
+ReleaseOverlayWindow	/*8*/
+END
+
+CONSTANTS updateType
+0	Automatic
+1	Manual
+END
+TYPE UpdateType ENUM8 updateType
+
+REQUEST QueryVersion
+4	majorVersion	UINT32
+8	minorVersion	UINT32
+END
+RESPONSE QueryVersion
+ 8	majorVersion	UINT32
+12	minorVersion	UINT32
+END
+
+REQUEST RedirectWindow
+4	window		WINDOW
+8	update		UpdateType
+END
+
+REQUEST RedirectSubwindows
+4	window		WINDOW
+8	update		UpdateType
+END
+
+# UpdateType doesn't make sense, but it's transmitted through the wire
+REQUEST UnredirectWindow
+4	window		WINDOW
+8	update		UpdateType
+END
+
+# Likewise
+REQUEST UnredirectSubwindows
+4	window		WINDOW
+8	update		UpdateType
+END
+
+REQUEST CreateRegionFromBorderClip
+4	region		Fixes::REGION
+8	window		WINDOW
+END
+
+REQUEST NameWindowPixmap
+4	window		WINDOW
+8	pixmap		PIXMAP
+END
+
+REQUEST GetOverlayWindow
+4	window		WINDOW
+END
+RESPONSE GetOverlayWindow
+4	overlayWin	WINDOW
+END
+
+REQUEST ReleaseOverlayWindow
+4	window		WINDOW
+END
+
+EOF
