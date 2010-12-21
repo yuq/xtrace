@@ -118,6 +118,16 @@ a packet is received and the time a packet is sent,
 but it gives no other information than that.
 
 .TP
+.B \-\-monotonic-timestamps
+Print a CLOCK_MONOTONIC (see
+.BR clock_gettime (3))
+timestamp each time a package is printed.
+This is likely to be the uptime of your system.
+
+Note that the time a packet is printed is between the time
+a packet is received and the time a packet is sent,
+but it gives no other information than that.
+.TP
 .B \-\-print-offsets
 Print offsets of all fields
 (useful to debug nested lists in protocol descriptions)

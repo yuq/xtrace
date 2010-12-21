@@ -1,3 +1,6 @@
+2010-12-21
+	* Add --monotonic-timestamps to print timestamps relative to system
+	start (or whatever CLOCK_MONOTONIC returns on your system).
 2010-10-26
 	* Add Composite (Thanks to Adam Endrodi)
 2010-10-20

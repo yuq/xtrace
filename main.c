@@ -1,5 +1,5 @@
 /*  This file is part of "xtrace"
- *  Copyright (C) 2005, 2007 Bernhard R. Link
+ *  Copyright (C) 2005, 2007, 2010 Bernhard R. Link
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
  *  published by the Free Software Foundation.
@@ -45,6 +45,7 @@ bool denyallextensions = false;
 bool interactive = false;
 bool print_timestamps = false;
 bool print_reltimestamps = false;
+bool print_uptimestamps = false;
 static bool buffered = false;
 size_t maxshownlistlen = SIZE_MAX;
 
@@ -390,7 +391,7 @@ char *strndup(const char *str,size_t n) {
 }
 #endif
 
-enum {LO_DEFAULT=0, LO_TIMESTAMPS, LO_RELTIMESTAMPS, LO_VERSION, LO_HELP, LO_PRINTCOUNTS, LO_PRINTOFFSETS};
+enum {LO_DEFAULT=0, LO_TIMESTAMPS, LO_RELTIMESTAMPS, LO_UPTIMESTAMPS, LO_VERSION, LO_HELP, LO_PRINTCOUNTS, LO_PRINTOFFSETS};
 static int long_only_option = 0;
 static const struct option longoptions[] = {
 	{"display",	required_argument,	NULL,	'd'},
@@ -412,6 +413,7 @@ static const struct option longoptions[] = {
 	{"version",		no_argument, &long_only_option,	LO_VERSION},
 	{"timestamps",		no_argument, &long_only_option,	LO_TIMESTAMPS},
 	{"relative-timestamps",	no_argument, &long_only_option,	LO_RELTIMESTAMPS},
+	{"monotonic-timestamps",no_argument, &long_only_option,	LO_UPTIMESTAMPS},
 	{"print-counts",	no_argument, &long_only_option,	LO_PRINTCOUNTS},
 	{"print-offsets",	no_argument, &long_only_option,	LO_PRINTOFFSETS},
 	{NULL,		0,			NULL,	0}
@@ -530,6 +532,18 @@ argv[0]);
 					 break;
 				 case LO_RELTIMESTAMPS:
 					 print_reltimestamps = true;
+					 break;
+				case LO_UPTIMESTAMPS:
+#ifndef HAVE_MONOTONIC_CLOCK
+					 fprintf(stderr, "--monotonic-timestamps not supported as clock_gettime(MONOTONIC_CLOCK, ) was not available at compile time\n");
+					 exit(EXIT_FAILURE);
+#else
+					 if (sysconf(_SC_MONOTONIC_CLOCK) < 0) {
+					 	fprintf(stderr, "--monotonic-timestamps not supported on this system\n");
+					 	exit(EXIT_FAILURE);
+					 }
+					 print_uptimestamps = true;
+#endif
 					 break;
 				case LO_PRINTCOUNTS:
 					 print_counts = true;

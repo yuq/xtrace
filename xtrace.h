@@ -46,6 +46,7 @@ extern bool denyallextensions;
 extern size_t maxshownlistlen;
 extern bool print_timestamps;
 extern bool print_reltimestamps;
+extern bool print_uptimestamps;
 
 #ifdef __GNUC__
 #define UNUSED __attribute__ ((unused))

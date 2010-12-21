@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <sys/select.h>
 #include <unistd.h>
+#include <time.h>
+#include <errno.h>
 
 #include "xtrace.h"
 #include "parse.h"
@@ -60,6 +62,24 @@ static void startline(struct connection *c, enum package_direction d, const char
 				(unsigned int)((tt - c->starttime)%1000));
 		}
 	}
+#ifdef HAVE_MONOTONIC_CLOCK
+	if( print_uptimestamps ) {
+		static bool already_warned = false;
+		struct timespec ts;
+		int i;
+		i = clock_gettime(CLOCK_MONOTONIC, &ts);
+		if( i == 0 ) {
+			fprintf(out, "%lu.%03u ",
+					(unsigned long)ts.tv_sec,
+					(unsigned int)(ts.tv_nsec/1000000L));
+		} else if (!already_warned) {
+			int e = errno;
+			fprintf(stderr, "Error %d from clock_gettime(CLOCK_MONOTIC,): %s\n",
+					e, strerror(e));
+			already_warned = true;
+		}
+	}
+#endif
 	va_start(ap, format);
 	fprintf(out, "%03d:%c:", c->id, (d == TO_SERVER)?'<':'>');
 	vfprintf(out, format, ap);
