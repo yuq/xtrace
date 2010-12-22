@@ -731,6 +731,21 @@ static size_t printLISTofVALUE(struct connection *c,const uint8_t *buffer,size_t
 		u32 = getCARD32(ofs); i32 = u32;
 		u16 = u32 & 65535; i16 = u16;
 		u8 = u32 & 255; i8 = u8;
+		if( v->type == ft_INT32_32 ) {
+			long long ll;
+
+			/* XSync suddenly has 64 bit values allowed in
+			 * VALUES... */
+			if( buflen-ofs < 8 ) {
+				c++;
+				continue;
+			}
+			u32 = getCARD32(ofs + 4);
+			ll = (((long long)i32)<< 32LL) + (long long)u32;
+			fprintf(out, "%s=%lld", v->name, ll);
+			ofs += 8;v++;
+			continue;
+		}
 		if( v->type >= ft_BITMASK8 ) {
 			assert(v->type <= ft_BITMASK32 );
 			print_bitfield(v->name,v->constants,u32);
