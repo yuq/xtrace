@@ -1,0 +1,214 @@
+EXTENSION "SYNC" XSync
+USE core
+
+REQUESTS
+Initialize RESPONDS
+ListSystemCounters RESPONDS
+CreateCounter
+SetCounter
+ChangeCounter
+QueryCounter RESPONDS
+DestroyCounter
+Await
+CreateAlarm
+ChangeAlarm
+QueryAlarm RESPONDS
+DestroyAlarm
+SetPriority
+GetPriority RESPONDS
+CreateFence
+TriggerFence
+ResetFence
+DestroyFence
+QueryFence RESPONDS
+AwaitFence /* 19 */
+END
+
+EVENTS
+CounterNotify
+AlarmNotify
+END
+
+ERRORS
+BadCounter
+BadAlarm
+END
+
+# XSyncCounter, XSyncAlarm and XSyncFence are just IDs:
+TYPE Counter	CARD32
+TYPE Alarm	CARD32
+TYPE Fence	CARD32
+# a XSyncValue is two 32 bit integers meaning on 64 bit one:
+TYPE Value	INT32_32
+
+CONSTANTS alarm_state
+0	Active
+1	Inactive
+2	Destroyed
+END
+TYPE AlarmState	ENUM8	alarm_state
+
+CONSTANTS test_type
+0	PositiveTransition
+1	NegativeTransition
+2	PositiveComparison
+3	NegativeComparison
+END
+TYPE TestType	ENUM32	test_type
+
+CONSTANTS value_type
+0	Absolute
+1	Relative
+END
+TYPE ValueType	ENUM32	value_type
+
+REQUEST Initialize
+ 4	major-version	UINT8
+ 5	minor-version	UINT8
+END
+RESPONSE Initialize
+ 8	major-version	UINT8
+ 9	minor-version	UINT8
+END
+
+LIST SystemCounter variable min-length 14
+ 0	counter		Counter
+ 4	resolution	Value
+12	name_length	COUNT16
+14	name		STRING8
+END
+
+REQUEST ListSystemCounters ALIASES Empty
+RESPONSE ListSystemCounters
+ 8	num-counters	COUNT32
+32	counter		LISTofSystemCounter
+# TODO: check if there are same names left here...
+END
+
+REQUEST CreateCounter
+ 4	counter		Counter
+ 8	initial-value	Value
+END
+
+REQUEST SetCounter
+ 4	counter	Counter
+ 8	value	Value
+END
+
+REQUEST ChangeCounter
+ 4	counter	Counter
+ 8	value	Value
+END
+
+REQUEST QueryCounter
+ 4	counter	Counter
+END
+RESPONSE QueryCounter
+ 8	value	Value
+END
+
+REQUEST DestroyCounter
+ 4	counter	Counter
+END
+
+LIST WaitCondition length 28
+ 0	counter		Counter
+ 4	value-type	ValueType
+ 8	wait-value	Value
+16	test-type	TestType
+20	event-threshold Value
+END
+
+REQUEST Await
+ 4	debug LISTofWaitCondition
+END
+
+VALUES AlarmAttributes
+1<<0	Counter		Counter
+1<<1	ValueType	ValueType
+1<<2	Value		Value
+1<<3	TestType	TestType
+1<<4	Delta		Value
+1<<5	Events		BOOL
+END
+
+REQUEST CreateAlarm
+ 4	alarm		Alarm
+ 8	value-mask	STORE16
+12	values		LISTofAlarmAttributes
+END
+
+REQUEST ChangeAlarm
+ 4	alarm		Alarm
+ 8	value-mask	STORE16
+12	values		LISTofAlarmAttributes
+END
+
+REQUEST QueryAlarm
+ 4	alarm	Alarm
+END
+RESPONSE QueryAlarm
+ 8	counter		Counter
+12	value-type	ValueType
+16	wait-value	Value
+24	test-type	TestType
+28	delta		Value
+36	events		BOOL
+37	state		AlarmState
+END
+
+REQUEST DestroyAlarm
+ 4	alarm	Alarm
+END
+
+REQUEST SetPriority
+ 4	client-resource-id	CARD32	constants none
+ 8	priority		INT32
+END
+
+REQUEST GetPriority
+ 4	client-resource-id	CARD32	constants none
+END
+RESPONSE GetPriority
+ 8	priority	INT32
+END
+
+REQUEST CreateFence
+ 4	drawable	DRAWABLE
+ 8	fid		Fence
+12	initial-triggered	BOOL
+END
+
+templateREQUEST Fence
+ 4	fid		Fence
+END
+
+REQUEST TriggerFence ALIASES Fence
+REQUEST ResetFence ALIASES Fence
+REQUEST DestroyFence ALIASES Fence
+REQUEST QueryFence ALIASES Fence
+
+RESPONSE QueryFence
+ 8	triggered	BOOL
+END
+
+REQUEST AwaitFence ALIASES Empty
+
+EVENT CounterNotify
+ 4	counter		Counter
+ 8	wait-value	Value
+16	counter-value	Value
+24	time		TIMESTAMP
+28	count		INT16
+30	destroyed	BOOL
+END
+
+EVENT AlarmNotify
+ 4	alarm		Alarm
+ 8	counter-value	Value
+16	alarm-value	Value
+24	time		TIMESTAMP
+28	state		AlarmState
+END
+
+EOF
