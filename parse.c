@@ -955,6 +955,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		const char *atom;
 		double d;
 		float f;
+		long long ll;
 
 		if( p->offse == OFS_LATER )
 			ofs = lastofs;
@@ -1140,6 +1141,17 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			u32 = getCARD32(ofs + 4);
 			fprintf(out,"%d/%u", i32, u32);
 			continue;
+		 case ft_INT32_32:
+			if( ofs + 8 > len )
+				continue;
+			if( print_offsets )
+				fprintf(out,"[%d]",(int)ofs);
+			fputs(p->name,out);putc('=',out);
+			i32 = getCARD32(ofs);
+			u32 = getCARD32(ofs + 4);
+			ll = (((long long)i32)<< 32LL) + (long long)u32;
+			fprintf(out, "%lld",  ll);
+			continue;
 		 case ft_EVENT:
 			if( len >= ofs + 32 )
 				print_event(c, buffer + ofs, len - ofs);
@@ -1317,6 +1329,7 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		 case ft_EVENT:
 		 case ft_FRACTION16_16:
 		 case ft_FRACTION32_32:
+		 case ft_INT32_32:
 		 case ft_FIXED:
 		 case ft_LISTofFIXED:
 		 case ft_FIXED3232:

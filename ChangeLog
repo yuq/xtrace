@@ -1,3 +1,5 @@
+2010-12-22
+	* Add INT32_32 type for a 64 bit integer stored in two 32 bit integers
 2010-12-21
 	* Add --monotonic-timestamps to print timestamps relative to system
 	start (or whatever CLOCK_MONOTONIC returns on your system).

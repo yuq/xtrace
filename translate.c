@@ -93,6 +93,7 @@ static const struct base_type {
 	{ "BE32",		ft_BE32,		ALLOWS_CONSTANTS,	4},
 	{ "FRACTION16_16",	ft_FRACTION16_16,	0,	4},
 	{ "FRACTION32_32",	ft_FRACTION32_32,	0,	8},
+	{ "INT32_32",		ft_INT32_32,		0,	8},
 	{ "FIXED",		ft_FIXED,		0,	4},
 	{ "FIXED1616",		ft_FIXED,		0,	4},
 	{ "FIXED3232",		ft_FIXED3232,		0,	8},
