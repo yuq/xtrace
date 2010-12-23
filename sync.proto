@@ -76,13 +76,13 @@ LIST SystemCounter variable min-length 14
  4	resolution	Value
 12	name_length	COUNT16
 14	name		STRING8
+ROUND
 END
 
 REQUEST ListSystemCounters ALIASES Empty
 RESPONSE ListSystemCounters
  8	num-counters	COUNT32
 32	counter		LISTofSystemCounter
-# TODO: check if there are same names left here...
 END
 
 REQUEST CreateCounter
@@ -199,7 +199,7 @@ EVENT CounterNotify
  8	wait-value	Value
 16	counter-value	Value
 24	time		TIMESTAMP
-28	count		INT16
+28	count		UINT16
 30	destroyed	BOOL
 END
 
