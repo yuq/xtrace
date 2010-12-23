@@ -120,7 +120,7 @@ LIST WaitCondition length 28
 END
 
 REQUEST Await
- 4	debug LISTofWaitCondition
+ 4	conditions LISTofWaitCondition
 END
 
 VALUES AlarmAttributes
