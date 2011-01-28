@@ -2,6 +2,7 @@
 	* allow to TRANSFER data from REQUEST to RESPONSE on the stack
 	* allow 'IF STORED ...' to compare stored value
 	* fix PUSH32 (was PUSH16 by mistake)
+	* error out early in case of not yet supported min-length 0
 2010-12-22
 	* Add INT32_32 type for a 64 bit integer stored in two 32 bit integers
 	* Add SYNC extension

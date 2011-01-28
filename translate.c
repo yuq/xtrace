@@ -1659,6 +1659,9 @@ static void parse_struct(struct parser *parser, bool list) {
 				error(parser, "min-length only allowed after variable keyword!");
 			modifier = get_const_token(parser, false);
 			length = parse_number(parser, modifier);
+			if( length == 0 ) {
+				error(parser, "min-length 0 currently not supported to avoid endless loops.\nIf you find a case where it is needed, let me know.");
+			}
 			have_length = true;
 		} else {
 			error(parser, "Unknown attribute '%s'", modifier);
