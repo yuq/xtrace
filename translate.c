@@ -1263,11 +1263,22 @@ static void parse_request(struct parser *parser, bool template) {
 			v = find_variable(parser, vt_request, t);
 			if( v == NULL )
 				return;
-		} else if( strncmp(attribute, "TRANSFER=", 9) == 0 ) {
+		} else if( strcmp(attribute, "TRANSFER") == 0 ||
+				strcmp(attribute, "transfer") == 0 ) {
+			char *e;
+
+			attribute = get_const_token(parser, false);
+			if( attribute == NULL )
+				return;
+			record = strtoll(attribute, &e, 10);
+			if( *e != '\0' || record > 30 || record <= 0 )
+				error(parser, "Parse error: invalid number after 'transfer'!");
+		} else if( strncmp(attribute, "TRANSFER=", 9) == 0 ||
+				strncmp(attribute, "transfer=", 9) == 0 ) {
 			char *e;
 			record = strtoll(attribute + 9, &e, 10);
 			if( *e != '\0' || record > 30 || record <= 0 )
-				error(parser, "Parse error: invalid number after 'TRANSFER='!");
+				error(parser, "Parse error: invalid number after 'transfer='!");
 		} else {
 			error(parser, "Unknown REQUEST attribute '%s'!",
 					attribute);

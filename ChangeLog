@@ -1,5 +1,5 @@
 2011-01-28
-	* allow to TRANSFER data from REQUEST to RESPONSE on the stack
+	* allow to 'transfer' data from REQUEST to RESPONSE on the stack
 	* allow 'IF STORED ...' to compare stored value
 	* fix PUSH32 (was PUSH16 by mistake)
 	* error out early in case of not yet supported min-length 0
