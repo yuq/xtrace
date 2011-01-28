@@ -1,5 +1,5 @@
 /*  This file is part of "xtrace"
- *  Copyright (C) 2009 Bernhard R. Link
+ *  Copyright (C) 2009,2010,2011 Bernhard R. Link
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
  *  published by the Free Software Foundation.
@@ -1030,7 +1030,10 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 			enum fieldtype ft;
 
 			v = get_const_token(parser, false);
-			number = parse_number(parser, v);
+			if( strcmp(v, "STORED") == 0 )
+				number = (size_t)-1; // compare store value
+			else
+				number = parse_number(parser, v);
 			v = get_const_token(parser, false);
 			if( v == NULL )
 				break;

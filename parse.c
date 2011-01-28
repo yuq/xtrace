@@ -1,5 +1,5 @@
 /*  This file is part of "xtrace"
- *  Copyright (C) 2005,2006,2009 Bernhard R. Link
+ *  Copyright (C) 2005,2006,2009,2010,2011 Bernhard R. Link
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
  *  published by the Free Software Foundation.
@@ -854,7 +854,7 @@ static void push(struct stack *stack, unsigned long value) {
 static void pop(struct stack *stack UNUSED, struct stack *oldstack UNUSED) {
 }
 
-static size_t print_parameters(struct connection *c,const unsigned char *buffer,unsigned int len, const struct parameter *parameters, bool bigrequest, struct stack *oldstack);
+static size_t print_parameters(struct connection *c, const unsigned char *buffer, unsigned int len, const struct parameter *parameters, bool bigrequest, struct stack *oldstack, bool returnstack);
 
 static size_t printLISTofStruct(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t count, size_t ofs, struct stack *stack){
 	bool notfirst = false;
@@ -885,7 +885,8 @@ static size_t printLISTofStruct(struct connection *c,const uint8_t *buffer,size_
 			notfirst = true;
 			putc('{',out);
 
-			print_parameters(c,buffer+ofs,len,substruct,false,stack);
+			print_parameters(c, buffer+ofs, len, substruct, false,
+					stack, false);
 
 			putc('}',out);
 		}
@@ -926,7 +927,8 @@ static size_t printLISTofVarStruct(struct connection *c,const uint8_t *buffer,si
 		notfirst = true;
 		putc('{',out);
 
-		lentoadd = print_parameters(c,buffer+ofs,buflen-ofs,substruct,false,stack);
+		lentoadd = print_parameters(c, buffer+ofs, buflen-ofs,
+				substruct, false, stack, false);
 
 		putc('}',out);
 		ofs += lentoadd; count--; nr++;
@@ -958,7 +960,7 @@ static inline void print_event(struct connection *c, const unsigned char *buffer
 	print_event_data(c, buffer, l, event, name);
 }
 
-static size_t print_parameters(struct connection *c,const unsigned char *buffer,unsigned int len, const struct parameter *parameters,bool bigrequest, struct stack *oldstack) {
+static size_t print_parameters(struct connection *c, const unsigned char *buffer, unsigned int len, const struct parameter *parameters, bool bigrequest, struct stack *oldstack, bool returnstack) {
 	const struct parameter *p;
 	unsigned long stored = INT_MAX;
 	unsigned char format = 0;
@@ -990,45 +992,65 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 		else
 			ofs = p->offse;
 
-		if( printspace )
-			putc(' ',out);
-		printspace = true;
-
 		if( p->type == ft_IF8 ) {
-			if( ofs < len &&
-			  /* some more overloading: */
-			  getCARD8(ofs) == (unsigned char)(p->name[0]) )
+			unsigned char v;
+
+			if( p->offse == OFS_LATER )
+				v = stored & 0xFF;
+			else if( ofs <len )
+				v = getCARD8(ofs);
+			else
+				continue;
+			/* some more overloading: */
+			if( v == (unsigned char)(p->name[0]) )
 				p = ((struct parameter *)p->constants)-1;
-			printspace = false;
 			continue;
 		} else if( p->type == ft_IF16 ) {
-			if( ofs+1 < len &&
-			  getCARD16(ofs) == (unsigned char)(p->name[1])
-			  + (unsigned int)0x100*(unsigned char)(p->name[0]))
+			unsigned int v;
+
+			if( p->offse == OFS_LATER )
+				v = stored & 0xFFFF;
+			else if( ofs+1 <len )
+				v = getCARD16(ofs);
+			else
+				continue;
+			if( v == (unsigned char)(p->name[1])
+			  + (unsigned int)0x100*(unsigned char)(p->name[0]) )
 				p = ((struct parameter *)p->constants)-1;
-			printspace = false;
 			continue;
 		} else if( p->type == ft_IF32 ) {
-			if( ofs+3 < len &&
-			  getCARD32(ofs) == (unsigned char)(p->name[3])
+			unsigned long v;
+
+			if( p->offse == OFS_LATER )
+				v = stored;
+			else if( ofs+3 <len )
+				v = getCARD32(ofs);
+			else
+				continue;
+			if( v == (unsigned char)(p->name[3])
 			  + (((unsigned long)((unsigned char)(p->name[2])))<<8)
 			  + (((unsigned long)((unsigned char)(p->name[1])))<<16)
 			  + (((unsigned long)((unsigned char)(p->name[0])))<<24) )
 				p = ((struct parameter *)p->constants)-1;
-			printspace = false;
 			continue;
 		} else if( p->type == ft_IFATOM ) {
 			const char *atomname;
-			if( ofs+4 >= len )
+			if( p->offse == OFS_LATER )
+				atomname = getAtom(c, stored);
+			else if( ofs+4 >= len )
 				continue;
-			atomname = getAtom(c, getCARD32(ofs));
+			else
+				atomname = getAtom(c, getCARD32(ofs));
 			if( atomname == NULL )
 				continue;
 			if( strcmp(atomname, p->name) == 0 )
 				p = ((struct parameter *)p->constants)-1;
-			printspace = false;
 			continue;
 		}
+
+		if( printspace )
+			putc(' ', out);
+		printspace = true;
 
 		switch( p->type ) {
 		 case ft_LASTMARKER:
@@ -1367,7 +1389,10 @@ static size_t print_parameters(struct connection *c,const unsigned char *buffer,
 			putc(')',out);
 		}
 	}
-	pop(&newstack,oldstack);
+	if( returnstack )
+		*oldstack = newstack;
+	else
+		pop(&newstack,oldstack);
 	return lastofs;
 }
 
@@ -1591,7 +1616,7 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 		      );
 		if( r->parameters != NULL )
 			print_parameters(c, c->clientbuffer, len,
-					r->parameters, bigrequest, &stack);
+					r->parameters, bigrequest, &stack, true);
 		if( r->request_func != NULL )
 			(void)r->request_func(c,false,bigrequest,NULL);
 		putc('\n',out);
@@ -1638,7 +1663,8 @@ static inline void print_generic_event(struct connection *c, const unsigned char
 		} else {
 			fprintf(out, "unknown extension %hhu ", opcode);
 		}
-		print_parameters(c, buffer, len, event->parameters, false, &stack);
+		print_parameters(c, buffer, len, event->parameters, false,
+				&stack, false);
 		return;
 	}
 	fprintf(out, "%s(%hhu) ", extension->name, opcode);
@@ -1646,7 +1672,7 @@ static inline void print_generic_event(struct connection *c, const unsigned char
 			|| extension->xgevents[evtype].name == NULL ) {
 		fprintf(out, "unknown(%hu) ", evtype);
 		print_parameters(c, buffer, len,
-				event->parameters, false, &stack);
+				event->parameters, false, &stack, false);
 	} else {
 		const struct event *xgevent = &extension->xgevents[evtype];
 		const struct parameter *parameters = xgevent->parameters;
@@ -1655,7 +1681,8 @@ static inline void print_generic_event(struct connection *c, const unsigned char
 			parameters = event->parameters;
 
 		fprintf(out, "%s(%hu) ", xgevent->name, evtype);
-		print_parameters(c, buffer, len, parameters, false, &stack);
+		print_parameters(c, buffer, len, parameters, false,
+				&stack, false);
 	}
 }
 
@@ -1682,8 +1709,8 @@ static void print_event_data(struct connection *c, const unsigned char *buffer, 
 	fprintf(out,"%s(%hhu) ", event->name, code);
 	switch( event->type ) {
 		case event_normal:
-			print_parameters(c, buffer, len,
-					event->parameters, false, &stack);
+			print_parameters(c, buffer, len, event->parameters,
+					false, &stack, false);
 			break;
 		case event_xge:
 			print_generic_event(c, buffer, len,
@@ -1754,7 +1781,8 @@ static inline void print_server_reply(struct connection *c) {
 					push(&stack, replyto->values[i]);
 				}
 				print_parameters(c, c->serverbuffer, len,
-					replyto->from->answers, false, &stack);
+					replyto->from->answers, false,
+					&stack, false);
 				putc('\n',out);
 			}
 			if( !dontremove ) {
@@ -1770,7 +1798,7 @@ static inline void print_server_reply(struct connection *c) {
 	startline(c, TO_CLIENT, "%04x:%u: unexpected Reply: ",
 			seq, (unsigned int)c->serverignore);
 	print_parameters(c, c->serverbuffer, len,
-			unexpected_reply, false, &stack);
+			unexpected_reply, false, &stack, false);
 	putc('\n',out);
 }
 
@@ -1932,7 +1960,7 @@ void parse_server(struct connection *c) {
 				  print_parameters(c, c->serverbuffer,
 						  c->serverignore,
 						  setup_parameters,
-						  false, &stack);
+						  false, &stack, false);
 				  putc('\n',out);
 			  }
 			  c->serverstate = s_normal;
