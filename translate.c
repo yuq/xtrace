@@ -104,7 +104,7 @@ static const struct base_type {
 	{ "LISTofFLOAT32",    	ft_LISTofFLOAT32,	USES_STORE|SETS_NEXT,	0},
 	{ "PUSH8",		ft_PUSH8,		PUSHES,	1},
 	{ "PUSH16",		ft_PUSH16,		PUSHES,	2},
-	{ "PUSH32",		ft_PUSH16,		PUSHES,	4},
+	{ "PUSH32",		ft_PUSH32,		PUSHES,	4},
 	{ "STORE8",		ft_STORE8,		SETS_STORE,	1},
 	{ "STORE16",		ft_STORE16,		SETS_STORE,	2},
 	{ "STORE32",		ft_STORE32,		SETS_STORE,	4},
