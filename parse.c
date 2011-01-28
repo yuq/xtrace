@@ -170,8 +170,17 @@ struct expectedreply {
 	struct expectedreply *next;
 	uint64_t seq;
 	const struct request *from;
-	int datatype;
-	void *data;
+	enum datatype { dt_NONE = 0,
+		dt_UNKNOWN_EXTENSION, /* uextension used */
+		dt_EXTENSION, /* extension used */
+		dt_ATOM, /* atom used */
+	} data_type;
+	union {
+		void *data;
+		struct atom *atom;
+		const struct extension *extension;
+		struct unknownextension *uextension;
+	} data;
 };
 
 const struct extension *find_extension(const uint8_t *name,size_t len);
@@ -1386,14 +1395,16 @@ bool requestQueryExtension(struct connection *c, bool pre, bool bigrequest UNUSE
 		return false;
 	if( c->clientignore <= 8 )
 		return false;
-	reply->datatype = 0;
-	reply->data = (void*)find_extension(c->clientbuffer+8,c->clientignore-8);
-	if( reply->data == NULL ) {
+	reply->data_type = dt_EXTENSION;
+	reply->data.extension = find_extension(c->clientbuffer+8,
+			c->clientignore-8);
+	if( reply->data.extension == NULL ) {
 		size_t len = c->clientignore-8;
 		if( len > clientCARD16(4) )
 			len = clientCARD16(4);
-		reply->data = register_unknown_extension(c, c->clientbuffer+8, len);
-		reply->datatype = 1;
+		reply->data_type = dt_UNKNOWN_EXTENSION;
+		reply->data.uextension = register_unknown_extension(c,
+				c->clientbuffer+8, len);
 	}
 	return false;
 }
@@ -1409,13 +1420,14 @@ bool requestInternAtom(struct connection *c, bool pre, bool bigrequest UNUSED, s
 	len = clientCARD16(4);
 	if( c->clientignore < (unsigned int)8 + len)
 		return false;
-	reply->data = newAtom((const char*)c->clientbuffer+8,len);
+	reply->data_type = dt_ATOM;
+	reply->data.atom = newAtom((const char*)c->clientbuffer+8, len);
 	return false;
 }
 
 /* Reactions to some replies */
 
-void replyListFontsWithInfo(struct connection *c,bool *ignore,bool *dontremove,int datatype UNUSED,void *data UNUSED) {
+void replyListFontsWithInfo(struct connection *c, bool *ignore, bool *dontremove, struct expectedreply *dummy UNUSED) {
 	unsigned int seq = serverCARD16(2);
 	if( serverCARD8(1) == 0 ) {
 
@@ -1424,17 +1436,18 @@ void replyListFontsWithInfo(struct connection *c,bool *ignore,bool *dontremove,i
 	} else
 		*dontremove = true;
 }
-void replyQueryExtension(struct connection *c,bool *ignore UNUSED,bool *dontremove UNUSED,int datatype,void *data) {
+void replyQueryExtension(struct connection *c, bool *ignore UNUSED, bool *dontremove UNUSED, struct expectedreply *d) {
 	/* nothing to do if the extension is not available */
 	if( serverCARD8(8) == 0)
 		return;
 
-	if( datatype == 1 && data != NULL ) {
+	if( d->data_type == dt_UNKNOWN_EXTENSION
+			&& d->data.uextension != NULL ) {
 		struct unknownextension *n, **e = &c->waiting;
-		while( *e != NULL && *e != data )
+		while( *e != NULL && *e != d->data.uextension )
 			e = &(*e)->next;
 		if( *e != NULL ) {
-			data = NULL;
+			d->data.uextension = NULL;
 			n = *e; *e = n->next;
 			n->next = c->unknownextensions;
 			c->unknownextensions = n;
@@ -1443,13 +1456,13 @@ void replyQueryExtension(struct connection *c,bool *ignore UNUSED,bool *dontremo
 			n->first_error = serverCARD8(11);
 		}
 	}
-	if( datatype == 0 && data != NULL ) {
+	if( d->data_type == dt_EXTENSION && d->data.extension != NULL ) {
 		struct usedextension *u;
 		u = malloc(sizeof(struct usedextension));
 		if( u == NULL )
 			abort();
 		u->next = c->usedextensions;
-		u->extension = data;
+		u->extension = d->data.extension;
 		u->major_opcode = serverCARD8(9);
 		u->first_event = serverCARD8(10);
 		u->first_error = serverCARD8(11);
@@ -1461,12 +1474,12 @@ void replyQueryExtension(struct connection *c,bool *ignore UNUSED,bool *dontremo
 	}
 }
 
-void replyInternAtom(struct connection *c,bool *ignore UNUSED,bool *dontremove UNUSED,int datatype UNUSED,void *data) {
+void replyInternAtom(struct connection *c, bool *ignore UNUSED, bool *dontremove UNUSED, struct expectedreply *d) {
 	uint32_t atom;
-	if( data == NULL )
+	if( d->data_type != dt_ATOM || d->data.atom == NULL )
 		return;
 	atom = serverCARD32(8);
-	internAtom(c, atom, data);
+	internAtom(c, atom, d->data.atom);
 }
 
 #define ft_COUNT8 ft_STORE8
@@ -1590,6 +1603,8 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 		a->next = c->expectedreplies;
 		a->seq = c->seq;
 		a->from = r;
+		a->data_type = dt_NONE;
+		a->data.data = NULL;
 		if( r->request_func != NULL )
 			(void)r->request_func(c,false,bigrequest,a);
 		c->expectedreplies = a;
@@ -1712,7 +1727,7 @@ static inline void print_server_reply(struct connection *c) {
 
 			assert( replyto->from != NULL);
 			if( replyto->from->reply_func != NULL )
-				replyto->from->reply_func(c,&ignore,&dontremove,replyto->datatype,replyto->data);
+				replyto->from->reply_func(c, &ignore, &dontremove, replyto);
 
 			if( !ignore ) {
 				const char *name = replyto->from->name;

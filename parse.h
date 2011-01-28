@@ -7,8 +7,8 @@ struct constant {
 };
 struct event;
 
-typedef bool request_func(struct connection*,bool,bool,struct expectedreply *);
-typedef void reply_func(struct connection*,bool*,bool*,int,void*);
+typedef bool request_func(struct connection*, bool, bool, struct expectedreply *);
+typedef void reply_func(struct connection*, bool*, bool*, struct expectedreply *);
 typedef void event_func(struct connection *, const unsigned char *, const struct event *);
 
 struct request {
