@@ -181,6 +181,7 @@ struct expectedreply {
 		const struct extension *extension;
 		struct unknownextension *uextension;
 	} data;
+	unsigned long values[];
 };
 
 const struct extension *find_extension(const uint8_t *name,size_t len);
@@ -1597,7 +1598,9 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 	}
 	if( r->answers != NULL ) {
 		/* register an awaited response */
-		struct expectedreply *a = malloc(sizeof(struct expectedreply));
+		int vc = r->record_variables;;
+		struct expectedreply *a = malloc(sizeof(struct expectedreply)
+				+ vc * sizeof(long));
 		if( a == NULL )
 			abort();
 		a->next = c->expectedreplies;
@@ -1605,6 +1608,12 @@ static inline void print_client_request(struct connection *c,bool bigrequest) {
 		a->from = r;
 		a->data_type = dt_NONE;
 		a->data.data = NULL;
+		while( vc > 0 ) {
+			if( stack.ofs > 0 )
+				a->values[--vc] = stack.base[--stack.ofs];
+			else
+				a->values[--vc] = 0;
+		}
 		if( r->request_func != NULL )
 			(void)r->request_func(c,false,bigrequest,a);
 		c->expectedreplies = a;
@@ -1731,6 +1740,7 @@ static inline void print_server_reply(struct connection *c) {
 
 			if( !ignore ) {
 				const char *name = replyto->from->name;
+				int i;
 
 				if( name == NULL )
 					name = "UNKNOWN";
@@ -1738,6 +1748,11 @@ static inline void print_server_reply(struct connection *c) {
 						seq,
 						(unsigned int)c->serverignore,
 						name);
+				for( i = 0;
+				     i < replyto->from->record_variables;
+				     i++ ) {
+					push(&stack, replyto->values[i]);
+				}
 				print_parameters(c, c->serverbuffer, len,
 					replyto->from->answers, false, &stack);
 				putc('\n',out);

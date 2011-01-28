@@ -181,6 +181,7 @@ struct namespace {
 		bool has_response;
 		bool unsupported;
 		bool special;
+		int record_variables;
 		struct variable *request, *response;
 	} *requests;
 	int num_events[event_COUNT];
@@ -1250,6 +1251,7 @@ static void parse_request(struct parser *parser, bool template) {
 	struct variable *v = NULL;
 	bool complete = false;
 	struct request_data *request;
+	long record = 0;
 
 	name = get_const_token(parser, false);
 	while( (attribute = get_const_token(parser, true)) != NULL ) {
@@ -1258,6 +1260,11 @@ static void parse_request(struct parser *parser, bool template) {
 			v = find_variable(parser, vt_request, t);
 			if( v == NULL )
 				return;
+		} else if( strncmp(attribute, "TRANSFER=", 9) == 0 ) {
+			char *e;
+			record = strtoll(attribute + 9, &e, 10);
+			if( *e != '\0' || record > 30 || record <= 0 )
+				error(parser, "Parse error: invalid number after 'TRANSFER='!");
 		} else {
 			error(parser, "Unknown REQUEST attribute '%s'!",
 					attribute);
@@ -1279,6 +1286,10 @@ static void parse_request(struct parser *parser, bool template) {
 			error(parser, "'%s' is already listed in REQUESTS, thus cannot be a template!", name);
 			return;
 		}
+		if( record > 0 ) {
+			error(parser, "TRANSFER not possible for templated");
+			return;
+		}
 	} else  {
 		if( request == NULL ) {
 			error(parser, "Unknow request '%s'! (Must be listed in REQUESTS or use templateREQUEST", name);
@@ -1293,6 +1304,13 @@ static void parse_request(struct parser *parser, bool template) {
 			error(parser, "Unexpected definition of unsupported request '%s::%s'!",
 					parser->current->namespace->name,
 					name);
+		}
+		if( record > 0 ) {
+			if( !request->has_response ) {
+				error(parser, "TRANSFER only possible if it RESPONDS!");
+				return;
+			}
+			request->record_variables = record;
 		}
 		request->request = v;
 		v->refcount ++;
@@ -2330,6 +2348,7 @@ static const struct request *finalize_requests(struct parser *parser, struct nam
 			}
 		} else
 			assert( ns->requests[i].response == NULL);
+		rs[i].record_variables = ns->requests[i].record_variables;
 		if( !ns->requests[i].special )
 			continue;
 		assert( rs[i].name != NULL );

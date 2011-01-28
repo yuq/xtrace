@@ -18,6 +18,8 @@ struct request {
 
 	request_func *request_func;
 	reply_func *reply_func;
+	/* stack values to be transfered to the reply code */
+	int record_variables;
 };
 struct event {
 	const char *name;
