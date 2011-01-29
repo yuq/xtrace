@@ -1052,6 +1052,7 @@ END
 
 LIST RenderCommand variable min-length 4
 0	length		COUNT16
+SIZE COUNT
 2	command		ENUM16 gl_command
 IF 2 CARD16 $gl_command:Begin
 4	mode	glENUM
@@ -1088,7 +1089,7 @@ ELSEIF 8 CARD32 $glENUM:4_BYTES
 12	lists	LISTof4BYTES
 ELSE
 0	n	CARD16
-DECREMENT_COUNT	12
+RESET_COUNTER
 12	strange-data	LISTofCARD8
 
 ELSEIF 2 CARD16 $gl_command:Clear
@@ -1135,8 +1136,7 @@ ELSEIF 8 CARD32 $glENUM:QUADRATIC_ATTENUATION
 NEXT	16
 ELSE
 8	pname	CARD32
-0	len	COUNT16
-DECREMENT_COUNT	4
+RESET_COUNTER
 4	unknown-light	LISTofCARD8
 
 ELSEIF 2 CARD16 $gl_command:ListBase
@@ -1169,8 +1169,7 @@ ELSEIF 8 CARD32 $glENUM:COLOR_INDEXES
 SET_COUNTER 3
 12	data	LISTofFLOAT32
 ELSE
-0	len	COUNT16
-DECREMENT_COUNT	12
+RESET_COUNTER
 12	unknown-material-data	LISTofCARD8
 
 ELSEIF 2 CARD16 $gl_command:Normal3fv
@@ -1221,7 +1220,6 @@ NEXT 16
 
 # TODO: all the other commands still need to be implemented
 ELSE
-DECREMENT_COUNT	4
 4	unknown	LISTofCARD8
 END
 

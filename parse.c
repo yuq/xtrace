@@ -259,7 +259,7 @@ static size_t printSTRING8(const uint8_t *buffer,size_t buflen,const struct para
 	return ofs;
 }
 
-static size_t printLISTofCARD8(const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+static size_t printLISTofCARD8(const uint8_t *buffer, size_t buflen, const char *name, const struct constant *constants, size_t len, size_t ofs){
 	bool notfirst = false;
 	size_t nr = 0;
 
@@ -270,7 +270,7 @@ static size_t printLISTofCARD8(const uint8_t *buffer,size_t buflen,const struct 
 
 	if( print_offsets )
 		fprintf(out,"[%d]",(int)ofs);
-	fprintf(out,"%s=",p->name);
+	fprintf(out, "%s=", name);
 	while( len > 0 ) {
 		const char *value;
 		unsigned char u8;
@@ -282,7 +282,7 @@ static size_t printLISTofCARD8(const uint8_t *buffer,size_t buflen,const struct 
 				putc(',',out);
 			notfirst = true;
 			u8 = getCARD8(ofs);
-			value = findConstant(p->constants,u8);
+			value = findConstant(constants, u8);
 			if( value )
 				fprintf(out,"%s(0x%hhx)",value,u8);
 			else
@@ -967,8 +967,10 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 	bool printspace = false;
 	size_t lastofs = 0;
 	struct stack newstack = *oldstack;
+	bool sizeset = false;
 
 	for( p = parameters; p->name != NULL; p++ ) {
+		size_t s;
 		int8_t i8; int16_t i16; int32_t i32;
 #ifdef STUPIDCC
 		uint8_t u8=0; uint16_t u16=0; uint32_t u32=0;
@@ -1060,6 +1062,21 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 				 lastofs = ofs;
 			 printspace = false;
 			 continue;
+		 case ft_SET_SIZE:
+			printspace = false;
+			sizeset = true;
+			if( p->offse == (size_t)-1 )
+				s = stored;
+			else if( (p->offse & 0x80000000U) != 0 )
+				s = getFromStack(&newstack,
+						p->offse - 0x80000000U);
+			else
+				s =  p->offse;
+			if( p->name != NULL && p->name[0] != '\0' )
+				s *= (unsigned char)(p->name[0]);
+			if( len > s )
+				len = s;
+			continue;
 		 case ft_FORMAT8:
 			 if( ofs < len )
 				 format = getCARD8(ofs);
@@ -1069,7 +1086,9 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 			lastofs = printSTRING8(buffer,len,p,stored,ofs);
 			continue;
 		 case ft_LISTofCARD8:
-			lastofs = printLISTofCARD8(buffer,len,p,stored,ofs);
+			lastofs = printLISTofCARD8(buffer, len,
+					p->name, p->constants,
+					stored, ofs);
 			continue;
 		 case ft_LISTofCARD16:
 			lastofs = printLISTofCARD16(c,buffer,len,p,stored,ofs);
@@ -1101,7 +1120,9 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 		 case ft_LISTofFormat:
 			switch( format ) {
 			 case 8:
-				lastofs = printLISTofCARD8(buffer,len,p,stored,ofs);
+				lastofs = printLISTofCARD8(buffer, len,
+						p->name, p->constants,
+						stored, ofs);
 				break;
 			 case 16:
 				lastofs = printLISTofCARD16(c,buffer,len,p,stored,ofs);
@@ -1370,6 +1391,7 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 		 case ft_BE32:
 		 case ft_ATOM:
 		 case ft_LASTMARKER:
+		 case ft_SET_SIZE:
 		 case ft_GET:
 		 case ft_DECREMENT_STORED:
 		 case ft_SET:
@@ -1393,7 +1415,21 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 		*oldstack = newstack;
 	else
 		pop(&newstack,oldstack);
-	return lastofs;
+	if( sizeset ) {
+		if( lastofs < len ) {
+			if( printspace )
+				putc(' ', out);
+			lastofs = printLISTofCARD8(buffer, len,
+					"unexpected-data", NULL,
+					len - lastofs, lastofs);
+			assert( lastofs == len );
+		} else if( lastofs > len ) {
+			fprintf(out, "[strange: size-len=%d]",
+					(int)(lastofs-len));
+		}
+		return len;
+	} else
+		return lastofs;
 }
 
 

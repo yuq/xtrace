@@ -896,17 +896,35 @@ static struct unfinished_parameter *new_parameter_special(struct parser *parser,
    if nothing is accessed past the length in a struct,
    if things overlap, ...
 */
+
+struct parameter_state {
+	struct parameter_state *parent;
+	struct unfinished_parameter *junction;
+	size_t maxsize, minsize;
+	bool store_set,
+	     store_used,
+	     format_set,
+	     sizemarker_set,
+	     nextmarker_set,
+	     nextmarker_at_end_of_packet;
+};
+
+static void field_accessed(struct parser *parser, struct parameter_state *state, size_t ofs, size_t fieldlen) {
+	if( ofs == (size_t)-1 )
+		return;
+	if( ofs + fieldlen > state->minsize ) {
+		if( ofs + fieldlen > state->maxsize ) {
+			error(parser, "Accessing field past specified SIZE of %lu!", (unsigned long)state->maxsize);
+		}
+		state->minsize = ofs + fieldlen;
+	}
+	/* TODO: record here what areas are used to avoid overlaps and
+	 * gaps? */
+}
+
 static bool parse_parameters(struct parser *parser, struct variable *variable, bool needsnextmarker) {
 	long first_line = parser->current->lineno;
-	struct parameter_state {
-		struct parameter_state *parent;
-		struct unfinished_parameter *junction;
-		bool store_set,
-		     store_used,
-		     format_set,
-		     nextmarker_set,
-		     nextmarker_at_end_of_packet;
-	} *state;
+	struct parameter_state *state;
 	struct unfinished_parameter *parameters = NULL, **last = &parameters;
 
 	assert( variable->parameter == NULL );
@@ -916,6 +934,7 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 		oom(parser);
 		return false;
 	}
+	state->maxsize = SIZE_MAX;
 
 	while( get_next_line(parser, first_line) ) {
 		const char *position, *name;
@@ -1028,6 +1047,7 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 			struct unfinished_parameter *i;
 			const char *v, *condition;
 			enum fieldtype ft;
+			size_t fieldlen;
 
 			v = get_const_token(parser, false);
 			if( strcmp(v, "STORED") == 0 )
@@ -1041,6 +1061,7 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 				ft = ft_IFATOM;
 				v = get_const_token(parser, false);
 				condition = string_add(v);
+				fieldlen = 4;
 			} else if( strcmp(v, "CARD8") == 0 ) {
 				unsigned char c;
 
@@ -1048,6 +1069,7 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 				v = get_const_token(parser, false);
 				c = parse_number(parser, v);
 				condition = string_add_l((const char*)&c, 1);
+				fieldlen = 1;
 			} else if( strcmp(v, "CARD16") == 0 ) {
 				unsigned char c[2];
 				unsigned long l;
@@ -1058,6 +1080,7 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 				c[1] = l & 0xFF;
 				c[0] = l >> 8;
 				condition = string_add_l((const char*)c, 2);
+				fieldlen = 2;
 			} else if( strcmp(v, "CARD32") == 0 ) {
 				unsigned char c[4];
 				unsigned long l;
@@ -1070,11 +1093,13 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 				c[1] = (l >> 16) & 0xFF;
 				c[0] = l >> 24;
 				condition = string_add_l((const char*)c, 4);
+				fieldlen = 4;
 			} else {
 				error(parser, "unknown IF type '%s'!", v);
 				break;
 			}
 			no_more_arguments(parser);
+			field_accessed(parser, state, number, fieldlen);
 			i = new_parameter_special(parser, &last,
 					ft, number, condition);
 			s = malloc(sizeof(*s));
@@ -1149,6 +1174,57 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 					ft_SET, INT_MAX, NULL);
 			continue;
 		}
+		if( strcmp(position, "SIZE") == 0 ) {
+			const char *v;
+			unsigned long t = 1;
+
+			v = get_const_token(parser, false);
+			if( v == NULL )
+				break;
+			if( strcmp(v, "STORE") == 0 || strcmp(v, "COUNT") == 0 ) {
+				if( !state->store_set )
+					error(parser, "store variable not yet set, so cannot be used!");
+				state->store_used = true;
+				number = (size_t)-1;
+			} else if( strcmp(v, "GET") == 0 ) {
+				// TODO: check if stack can have something...
+				number = parse_number(parser, v);
+				if( number >= 30 ) {
+					error(parser, "Absurd big stack index: %lu\n", number);
+					continue;
+				}
+				number |= 0x80000000;
+			} else {
+				number = parse_number(parser, v);
+				if( number > 65536 ) {
+					error(parser, "Absurd big number for length of substructure: %lu\n", number);
+					continue;
+				}
+				state->maxsize = number;
+				if( state->minsize > state->maxsize ) {
+					error(parser, "Setting size to %lu >= Data yet looked at up to %lu!", (unsigned long)state->maxsize, (unsigned long)state->minsize);
+					continue;
+				}
+			}
+			v = get_const_token(parser, true);
+			if( v != NULL ) {
+
+				if( strcmp(v, "TIMES") != 0 ) {
+					error(parser, "Unexpected argument '%s'!", v);
+					continue;
+				}
+				error(parser, "'TIMES' not yet supported!");
+				continue;
+				v = get_const_token(parser, false);
+				t = parse_number(parser, v);
+			}
+			no_more_arguments(parser);
+			state->sizemarker_set = true;
+
+			new_parameter_special(parser, &last,
+					ft_SET_SIZE, number, NULL);
+			continue;
+		}
 		if( strcmp(position, "NEXT") == 0 ) {
 			const char *v;
 
@@ -1219,6 +1295,9 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 		(*last)->regular.offse = number;
 		(*last)->regular.name = string_add(name);;
 		(*last)->regular.type = type;
+		/* TODO: better size estimate for structs and for lists
+		 * where the counter was explicitly set */
+		field_accessed(parser, state, number, type.base_type->size);
 		last = &(*last)->next;
 	}
 	error(parser, "missing END!");

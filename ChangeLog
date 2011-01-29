@@ -1,3 +1,8 @@
+2011-01-29
+	* add a 'SIZE' directive to limit some structure to an explicit size
+	  (in VarStructs everything after that size is printed as unexpected
+	   data and otherwise ignored, also all field output or list length
+	   is automatically truncated to that value)
 2011-01-28
 	* allow to 'transfer' data from REQUEST to RESPONSE on the stack
 	* allow 'IF STORED ...' to compare stored value

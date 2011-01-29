@@ -77,7 +77,7 @@ struct parameter {
 		ft_LISTofStruct,
 		/*	- same but length is mininum length and
 		 *	  actual length is taken from end of last list
-		 *	  or LASTMARKER */
+		 *	  or LASTMARKER, unless there is a SIZESET */
 		ft_LISTofVarStruct,
 		/*	- like ENUM for last STORE, but constants
 		 *	  are of type (struct value*) interpreteted at this
@@ -98,6 +98,9 @@ struct parameter {
 		ft_IFATOM,
 		/* set end of last list manually, (for LISTofVarStruct) */
 		ft_LASTMARKER,
+		/* set the end of the current context, also change length
+		 * of a VarStruct: */
+		ft_SET_SIZE,
 		/* a ft_CARD32 looking into the ATOM list */
 		ft_ATOM,
 		/* always big endian */
