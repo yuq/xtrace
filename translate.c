@@ -149,7 +149,7 @@ struct variable {
 					const char *condition;
 					bool isjunction;
 					struct unfinished_parameter *iftrue;
-					const void *finalized;
+					const struct parameter *finalized;
 				} special;
 			};
 		} *parameter;
@@ -166,7 +166,7 @@ struct variable {
 		} *values;
 		struct typespec t;
 	};
-	const void *finalized;
+	union parameter_option finalized;
 };
 
 struct namespace {
@@ -2270,13 +2270,13 @@ bool parser_free(struct parser *parser) {
 	return success;
 }
 
-static const void *variable_finalize(struct parser *, struct variable *);
+static void variable_finalize(struct parser *, struct variable *, union parameter_option *);
 
-static const void *parameter_finalize(struct parser *parser, struct unfinished_parameter *parameter) {
+static const struct parameter *parameter_finalize(struct parser *parser, struct unfinished_parameter *parameter) {
 	struct unfinished_parameter *p;
 	size_t count = 0;
 	struct parameter *prepared, *f;
-	const void *finalized;
+	const struct parameter *finalized;
 	/* no need to do add empty ones all the time,
 	   just take the last one... */
 	static const struct parameter *empty = NULL;
@@ -2301,13 +2301,12 @@ static const void *parameter_finalize(struct parser *parser, struct unfinished_p
 			f->offse = p->special.offse;
 			f->name = p->special.condition;
 			f->type = p->special.type;
-			f->constants = p->special.finalized;
+			f->o.parameters = p->special.finalized;
 		} else {
 			f->offse = p->regular.offse;
 			f->name = p->regular.name;
 			f->type = p->regular.type.base_type->type;
-			f->constants = variable_finalize(parser,
-					p->regular.type.data);
+			variable_finalize(parser, p->regular.type.data, &f->o);
 		}
 	}
 	assert( (size_t)(f - prepared) == count );
@@ -2321,96 +2320,125 @@ static const void *parameter_finalize(struct parser *parser, struct unfinished_p
 	return finalized;
 }
 
-static const void *variable_finalize(struct parser *parser, struct variable *v) {
+static const struct parameter *parameters_finalize(struct parser *parser, struct variable *v) {
+	struct unfinished_parameter *p, *todo, *startat;
+
 	if( v == NULL )
 		return NULL;
-	if( v->finalized != NULL )
-		return v->finalized;
-	if( v->type == vt_values ) {
-		struct value *values;
-		struct unfinished_value *uv;
-		size_t i = 0, count = 0;
+	assert( v->type == vt_struct || v->type == vt_response ||
+			v->type == vt_setup ||
+			v->type == vt_request || v->type == vt_event );
+	if( v->finalized.parameters != NULL )
+		return v->finalized.parameters;
+	do {
+		todo = NULL;
+		startat = v->parameter;
+		p = startat;
 
-		for( uv = v->values; uv != NULL ; uv = uv->next )
-			count++;
-		values = calloc(count + 1, sizeof(struct value));
-		if( values == NULL ) {
-			oom(parser);
-			return NULL;
+		while( p != NULL ) {
+			if( !p->isspecial ) {
+				p = p->next;
+				continue;
+			}
+			if( p->special.finalized != NULL ) {
+				p = p->next;
+				continue;
+			}
+			if( !p->special.isjunction ) {
+				p = p->next;
+				continue;
+			}
+			if( p->special.iftrue == NULL ) {
+				/* empty branch still needs
+				   an end command, but no recursion
+				   for that */
+				p->special.finalized =
+					parameter_finalize(parser, NULL);
+				p = p->next;
+				continue;
+			}
+			todo = p;
+			startat = p->special.iftrue;
+			p = startat;
 		}
-		for( uv = v->values; uv != NULL ; uv = uv->next ) {
-			assert( i < count);
-			values[i].flag = uv->flag;
-			values[i].name = uv->name;
-			assert( C(uv->type.base_type, ELEMENTARY) );
-			values[i].type = uv->type.base_type->type;
-			values[i].constants = variable_finalize(
-					parser, uv->type.data);
-			i++;
+		if( todo != NULL ) {
+			todo->special.finalized =
+				parameter_finalize(parser, startat);
+		} else {
+			v->finalized.parameters =
+				parameter_finalize(parser, startat);
 		}
-		v->finalized = finalize_data(values, (count+1)*sizeof(struct value),
-				__alignof__(struct value));
-		free(values);
-		if( v->finalized == NULL )
-			parser->error = true;
-		return v->finalized;
+	} while( todo != NULL );
+	return v->finalized.parameters;
+}
+
+static const struct constant *constants_finalize(struct parser *parser, struct variable *v) {
+	if( v == NULL )
+		return NULL;
+	assert( v->type == vt_constants );
+
+	if( v->finalized.constants != NULL )
+		return v->finalized.constants;
+	v->finalized.constants = finalize_data(v->c.constants,
+			v->c.size, __alignof__(struct constant));
+	if( v->finalized.constants == NULL )
+		parser->error = true;
+	return v->finalized.constants;
+}
+
+static inline const struct value *values_finalize(struct parser *parser, struct variable *v) {
+	struct value *values;
+	struct unfinished_value *uv;
+	size_t i = 0, count = 0;
+
+	if( v == NULL )
+		return NULL;
+	assert( v->type == vt_values );
+
+	if( v->finalized.values != NULL )
+		return v->finalized.values;
+
+	for( uv = v->values; uv != NULL ; uv = uv->next )
+		count++;
+	values = calloc(count + 1, sizeof(struct value));
+	if( values == NULL ) {
+		oom(parser);
+		return NULL;
 	}
-	if( v->type == vt_constants ) {
-		v->finalized = finalize_data(v->c.constants,
-				v->c.size, __alignof__(struct constant));
-		if( v->finalized == NULL )
-			parser->error = true;
-		return v->finalized;
+	for( uv = v->values; uv != NULL ; uv = uv->next ) {
+		assert( i < count);
+		values[i].flag = uv->flag;
+		values[i].name = uv->name;
+		assert( C(uv->type.base_type, ELEMENTARY) );
+		values[i].type = uv->type.base_type->type;
+		values[i].constants = constants_finalize(
+				parser, uv->type.data);
+		i++;
 	}
-	if( v->type == vt_struct || v->type == vt_response ||
+	v->finalized.values = finalize_data(values,
+			(count+1)*sizeof(struct value),
+			__alignof__(struct value));
+	free(values);
+	if( v->finalized.values == NULL )
+		parser->error = true;
+	return v->finalized.values;
+}
+
+static void variable_finalize(struct parser *parser, struct variable *v, union parameter_option *o) {
+	if( v == NULL ) {
+		memset(o, 0, sizeof(union parameter_option));
+	} else if( v->type == vt_values ) {
+		o->values = values_finalize(parser, v);
+	} else if( v->type == vt_constants ) {
+		o->constants = constants_finalize(parser, v);
+	} else if( v->type == vt_struct || v->type == vt_response ||
 			v->type == vt_setup ||
 			v->type == vt_request || v->type == vt_event ) {
-		struct unfinished_parameter *p, *todo, *startat;
-		do {
-
-			todo = NULL;
-			startat = v->parameter;
-			p = startat;
-
-			while( p != NULL ) {
-				if( !p->isspecial ) {
-					p = p->next;
-					continue;
-				}
-				if( p->special.finalized != NULL ) {
-					p = p->next;
-					continue;
-				}
-				if( !p->special.isjunction ) {
-					p = p->next;
-					continue;
-				}
-				if( p->special.iftrue == NULL ) {
-					/* empty branch still needs
-					   an end command, but no recursion
-					   for that */
-					p->special.finalized =
-							parameter_finalize(
-								parser,
-								NULL);
-					p = p->next;
-					continue;
-				}
-				todo = p;
-				startat = p->special.iftrue;
-				p = startat;
-			}
-			if( todo != NULL ) {
-				todo->special.finalized =
-					parameter_finalize(parser, startat);
-			} else {
-				v->finalized =
-					parameter_finalize(parser, startat);
-			}
-		} while( todo != NULL );
-		return v->finalized;
+		o->parameters = parameters_finalize(parser, v);
+	} else {
+		memset(o, 0, sizeof(union parameter_option));
+		assert( v->type != v->type );
 	}
-	assert( v->type != v->type );
 }
 
 static const struct request *finalize_requests(struct parser *parser, struct namespace *ns, const struct parameter *unknownrequest, const struct parameter *unknownresponse) {
@@ -2430,7 +2458,7 @@ static const struct request *finalize_requests(struct parser *parser, struct nam
 			rs[i].parameters = unknownrequest;
 		} else {
 			assert( ns->requests[i].request != NULL);
-			rs[i].parameters = variable_finalize(parser,
+			rs[i].parameters = parameters_finalize(parser,
 					ns->requests[i].request);
 		}
 		if( ns->requests[i].has_response ) {
@@ -2439,7 +2467,7 @@ static const struct request *finalize_requests(struct parser *parser, struct nam
 				rs[i].answers = unknownresponse;
 			} else {
 				assert( ns->requests[i].response != NULL);
-				rs[i].answers = variable_finalize(parser,
+				rs[i].answers = parameters_finalize(parser,
 						ns->requests[i].response);
 			}
 		} else
@@ -2489,7 +2517,7 @@ static const struct event *finalize_events(struct parser *parser, struct namespa
 	}
 	for( i = 0 ; i < ns->num_events[et] ; i++ ) {
 		es[i].name = ns->events[et][i].name;
-		es[i].parameters = variable_finalize(parser,
+		es[i].parameters = parameters_finalize(parser,
 				ns->events[et][i].event);
 		if( !ns->events[et][i].special )
 			continue;
@@ -2563,9 +2591,9 @@ void finalize_everything(struct parser *parser) {
 		return;
 	}
 	v = find_variable(parser, vt_request, "core::unknown");
-	unknownrequest = variable_finalize(parser, v);
+	unknownrequest = parameters_finalize(parser, v);
 	v = find_variable(parser, vt_response, "core::unknown");
-	unknownresponse = variable_finalize(parser, v);
+	unknownresponse = parameters_finalize(parser, v);
 	unexpected_reply = unknownresponse;
 	if( parser->error )
 		return;
@@ -2622,7 +2650,7 @@ void finalize_everything(struct parser *parser) {
 	if( errors == NULL )
 		parser->error = true;
 	num_errors = core->num_errors;
-	setup_parameters = variable_finalize(parser, core->setup);
+	setup_parameters = parameters_finalize(parser, core->setup);
 }
 
 /*

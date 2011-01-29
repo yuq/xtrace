@@ -46,6 +46,7 @@ struct parameter {
 	 * applies to. If OFS_LATER it is after the last list item
 	 * in this parameter-list. */
 	size_t offse;
+	/* NULL means end of list */
 	const char *name;
 	enum fieldtype {
 		/* signed endian specific: */
@@ -130,7 +131,14 @@ struct parameter {
 		ft_DECREMENT_STORED,
 		ft_SET
 		} type;
-	const struct constant *constants;
+	union parameter_option {
+		/* for integers and fields of integers */
+		const struct constant *constants;
+		/* for IFs, Structs, ... */
+		const struct parameter *parameters;
+		/* for LISTofVALUE */
+		const struct value *values;
+	} o;
 };
 struct value {
 	unsigned long flag;
