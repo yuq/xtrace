@@ -976,78 +976,22 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 			state = s;
 			continue;
 		}
-		if( strcmp(position, "ELSEIF") == 0 ) {
-			struct parameter_state *s;
-			const char *v, *condition;
-			struct unfinished_parameter *i;
-			enum fieldtype ft;
-
-			if( state->parent == NULL )
-				error(parser, "ELSEIF without IF");
-			if( needsnextmarker && !state->nextmarker_set )
-				error(parser, "Missing NEXT (or LISTof...)!");
-			v = get_const_token(parser, false);
-			number = parse_number(parser, v);
-			v = get_const_token(parser, false);
-			if( v == NULL )
-				break;
-			if( strcmp(v, "ATOM") == 0 ) {
-				ft = ft_IFATOM;
-				v = get_const_token(parser, false);
-				condition = string_add(v);
-			} else if( strcmp(v, "CARD8") == 0 ) {
-				unsigned char c;
-
-				ft = ft_IF8;
-				v = get_const_token(parser, false);
-				c = parse_number(parser, v);
-				condition = string_add_l((const char*)&c, 1);
-			} else if( strcmp(v, "CARD16") == 0 ) {
-				unsigned char c[2];
-				unsigned long l;
-
-				ft = ft_IF16;
-				v = get_const_token(parser, false);
-				l = parse_number(parser, v);
-				c[1] = l & 0xFF;
-				c[0] = l >> 8;
-				condition = string_add_l((const char*)c, 2);
-			} else if( strcmp(v, "CARD32") == 0 ) {
-				unsigned char c[4];
-				unsigned long l;
-
-				ft = ft_IF32;
-				v = get_const_token(parser, false);
-				l = parse_number(parser, v);
-				c[3] = l & 0xFF;
-				c[2] = (l >> 8) & 0xFF;
-				c[1] = (l >> 16) & 0xFF;
-				c[0] = l >> 24;
-				condition = string_add_l((const char*)c, 4);
-			} else {
-				error(parser, "unknown IF type '%s'!", v);
-				break;
-			}
-			no_more_arguments(parser);
-			last = &state->junction->next;
-			i = new_parameter_special(parser, &last,
-					ft, number, condition);
-			s = state->parent;
-			*state = *s;
-			state->parent = s;
-			state->junction = i;
-			if( i != NULL ) {
-				last = &i->special.iftrue;
-				i->special.isjunction = true;
-			}
-			continue;
-		}
-		if( strcmp(position, "IF") == 0 ) {
+		if( strcmp(position, "IF") == 0 ||
+				strcmp(position, "ELSEIF") == 0 ) {
 			struct parameter_state *s;
 			struct unfinished_parameter *i;
 			const char *v, *condition;
 			enum fieldtype ft;
 			size_t fieldlen;
+			bool inelseif = strcmp(position, "ELSEIF") == 0;
+
+			if( inelseif ) {
+				/* this is like an END here */
+				if( state->parent == NULL )
+					error(parser, "ELSEIF without IF");
+				if( needsnextmarker && !state->nextmarker_set )
+					error(parser, "Missing NEXT (or LISTof...)!");
+			}
 
 			v = get_const_token(parser, false);
 			if( strcmp(v, "STORED") == 0 )
@@ -1100,17 +1044,23 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 			}
 			no_more_arguments(parser);
 			field_accessed(parser, state, number, fieldlen);
+			if( inelseif )
+				last = &state->junction->next;
 			i = new_parameter_special(parser, &last,
 					ft, number, condition);
-			s = malloc(sizeof(*s));
-			if( s == NULL ) {
-				oom(parser);
-				break;
+			if( inelseif ) {
+				s = state->parent;
+			} else {
+				s = state;
+				state = malloc(sizeof(*state));
+				if( state == NULL ) {
+					oom(parser);
+					break;
+				}
 			}
-			*s = *state;
-			s->parent = state;
-			s->junction = i;
-			state = s;
+			*state = *s;
+			state->parent = s;
+			state->junction = i;
 			if( i != NULL ) {
 				last = &i->special.iftrue;
 				i->special.isjunction = true;
