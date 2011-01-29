@@ -4,6 +4,7 @@
 	   data and otherwise ignored, also all field output or list length
 	   is automatically truncated to that value)
 	* allow 'ELSEIF STORED ...'
+	* use AC_PROG_CC_C99 to be sure to get C99 semantics
 2011-01-28
 	* allow to 'transfer' data from REQUEST to RESPONSE on the stack
 	* allow 'IF STORED ...' to compare stored value
