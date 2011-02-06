@@ -1284,35 +1284,137 @@ REQUEST glXSwapBuffers
 8	drawable	CARD32
 END
 
+TYPE BOOL32 ENUM32 bool
+
+CONSTANTS proptype
+0x20	GLX_VISUAL_CAVEAT_EXT
+0x23	GLX_TRANSPARENT_TYPE
+0x25	GLX_TRANSPARENT_RED_VALUE
+0x26	GLX_TRANSPARENT_GREEN_VALUE
+0x27	GLX_TRANSPARENT_BLUE_VALUE
+0x28	GLX_TRANSPARENT_ALPHA_VALUE
+0x24	GLX_TRANSPARENT_INDEX_VALUE
+100001	GLX_SAMPLES_SGIS
+100000	GLX_SAMPLE_BUFFERS_SGIS
+0x800b	GLX_VISUAL_ID
+0x8013	GLX_FBCONFIG_ID
+0x8012	GLX_X_RENDERABLE
+4	GLX_RGBA
+0x8011	GLX_RENDER_TYPE
+5	GLX_DOUBLEBUFFER
+6	GLX_STEREO
+2	GLX_BUFFER_SIZE
+3	GLX_LEVEL
+7	GLX_AUX_BUFFERS
+8	GLX_RED_SIZE
+9	GLX_GREEN_SIZE
+10	GLX_BLUE_SIZE
+11	GLX_ALPHA_SIZE
+14	GLX_ACCUM_RED_SIZE
+15	GLX_ACCUM_GREEN_SIZE
+16	GLX_ACCUM_BLUE_SIZE
+17	GLX_ACCUM_ALPHA_SIZE
+12	GLX_DEPTH_SIZE
+13	GLX_STENCIL_SIZE
+0x22	GLX_X_VISUAL_TYPE
+0x8060	GLX_SWAP_METHOD_OML
+0x8010	GLX_DRAWABLE_TYPE
+0x20d0	GLX_BIND_TO_TEXTURE_RGB_EXT
+0x20d1	GLX_BIND_TO_TEXTURE_RGBA_EXT
+0x20d2	GLX_BIND_TO_MIPMAP_TEXTURE_EXT
+0x20d3	GLX_BIND_TO_TEXTURE_TARGETS_EXT
+END
+
+STRUCT property length 8
+0	type	ENUM32 proptype
+4	value	CARD32
+END
+
+LIST visualconfig variable min-length 72
+0	visualid	CARD32
+4	class		CARD32
+8	rgba		BOOL32
+12	red_size	UINT32
+16	green_size	UINT32
+20	blue_size	UINT32
+24	alpha_size	UINT32
+28	accum_red_size	UINT32
+32	accum_green_size	UINT32
+36	accum_blue_size	UINT32
+40	accum_alpha_size	UINT32
+44	double_buffer	BOOL32
+48	stereo		BOOL32
+52	buffer_size	UINT32
+56	depth_size	UINT32
+60	stencil_size	UINT32
+64	aux_buffers	UINT32
+68	level		UINT32
+GET 0
+DECREMENT_COUNT 18
+DIVIDE_COUNT 2
+72	props	LISTofproperty
+END
+
 # opcode 14
 REQUEST glXGetVisualConfigs
 4	screen	CARD32
 END
 RESPONSE glXGetVisualConfigs
-8	num_visuals	UINT32
 12	num_properties	UINT32
+12	num_properties	PUSH32
+8	num_visuals	COUNT32
+32	visualconfigs	LISTofvisualconfig
+RESET_COUNTER
+END
+
+CONSTANTS vendor_op
+65540	GetFBConfigsSGIX
+END
+
+LIST fbconfigattribs variable min-length 8
+GET 0
+0	props	LISTofproperty
 END
 
 # opcode 17
-REQUEST glXVendorPrivateWithReply
-4	vendor_op	CARD32
+REQUEST glXVendorPrivateWithReply TRANSFER=1
+4	vendor_op	ENUM32 vendor_op
+4	vendor_op	PUSH32
+IF 4 CARD32 $vendor_op:GetFBConfigsSGIX
+12	screen	UINT32
+ELSE
 8	vendor_data	LISTofCARD8
 # FIXME proper size
 END
 RESPONSE glXVendorPrivateWithReply
+GET 0
+IF STORED CARD32 $vendor_op:GetFBConfigsSGIX
+8	num_fbconfigs	COUNT32
+12	num_attribs	UINT32
+12	num_attribs	PUSH32
+32	fbconfigs	LISToffbconfigattribs
+RESET_COUNTER
+ELSE
+RESET_COUNTER
 8	data1	LISTofCARD8
 #32	data2	LISTofCARD8
+END
+
+CONSTANTS server_string
+1	GLX_VENDOR
+2	GLX_VERSION
+3	GLX_EXTENSIONS
 END
 
 # opcode 19
 REQUEST glXQueryServerString
 4	context_tag	CARD32
-8	name	glENUM
+8	name	ENUM32 server_string
 END
 RESPONSE glXQueryServerString
-8	n	UINT32
-12	num_properties	UINT32
-32	string	LISTofCARD8
+12	n	COUNT32
+DECREMENT_COUNT 1
+32	string	STRING8
 #  FIXME proper size
 END
 
@@ -1320,8 +1422,9 @@ END
 REQUEST glXClientInfo
 4	gl_client_major	UINT32
 8	gl_client_minor	UINT32
-12	n	UINT32
-16	extension_string	LISTofCARD8
+12	n	COUNT32
+DECREMENT_COUNT 1
+16	extension_string	STRING8
 # FIXME proper size
 END
 

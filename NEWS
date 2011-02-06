@@ -1,6 +1,7 @@
 new after 1.1.0:
 - support XVideo, Composite
 - bugfixes (GetWindowAttributes on big endian)
+- improved GLX support
 new after 1.0.2:
 - bugfixes
 - support Generic Events (XGE)
