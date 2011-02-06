@@ -1,3 +1,5 @@
+2011-02-06
+	* add a 'DIVIDE_COUNT' directive
 2011-01-29
 	* add a 'SIZE' directive to limit some structure to an explicit size
 	  (in VarStructs everything after that size is printed as unexpected

@@ -1115,6 +1115,20 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 					ft_DECREMENT_STORED, number, NULL);
 			continue;
 		}
+		if( strcmp(position, "DIVIDE_COUNT") == 0) {
+			const char *v;
+
+			if( !state->store_set ) {
+				error(parser, "store variable must be set before it can be changed!");
+			}
+			v = get_const_token(parser, false);
+			number = parse_number(parser, v);
+			no_more_arguments(parser);
+
+			new_parameter_special(parser, &last,
+					ft_DIVIDE_STORED, number, NULL);
+			continue;
+		}
 		if( strcmp(position, "RESET_COUNTER") == 0 ) {
 			no_more_arguments(parser);
 			state->store_set = false;

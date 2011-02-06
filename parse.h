@@ -127,8 +127,10 @@ struct parameter {
 		/* a 64 bit number consisting of first the high 32 bit, then
 		 * the low 32 bti */
 		ft_INT32_32,
-		/* set stored value to specific value */
+		/* decrement stored value by specific value */
 		ft_DECREMENT_STORED,
+		ft_DIVIDE_STORED,
+		/* set stored value to specific value */
 		ft_SET
 		} type;
 	union parameter_option {

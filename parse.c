@@ -1256,6 +1256,12 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 				stored -= p->offse;
 			printspace = false;
 			continue;
+		 case ft_DIVIDE_STORED:
+			if (stored % p->offse)
+				fprintf(stderr, "count (%lu) not divisible by %zu\n", stored, p->offse);
+			stored /= p->offse;
+			printspace = false;
+			continue;
 		 case ft_SET:
 			stored = p->offse;
 			printspace = false;
@@ -1392,6 +1398,7 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 		 case ft_SET_SIZE:
 		 case ft_GET:
 		 case ft_DECREMENT_STORED:
+		 case ft_DIVIDE_STORED:
 		 case ft_SET:
 		 case ft_EVENT:
 		 case ft_FRACTION16_16:
