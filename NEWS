@@ -1,5 +1,5 @@
 new after 1.1.0:
-- support XVideo, Composite
+- support XVideo, Composite, SYNC
 - bugfixes (GetWindowAttributes on big endian)
 - improved GLX support
 new after 1.0.2:
