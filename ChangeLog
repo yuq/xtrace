@@ -1,3 +1,5 @@
+2011-02-12
+	* configure.ac: change monotonic clock cache-id to make autoconf happy
 2011-02-06
 	* add a 'DIVIDE_COUNT' directive
 	* enhance GLX support (GetVisualConfigs, GetFBConfigsSGIX,

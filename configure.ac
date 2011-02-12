@@ -14,7 +14,7 @@ AC_GNU_SOURCE
 AC_PROG_CC_C99
 AC_PROG_INSTALL
 
-AC_CACHE_CHECK([Checking for _POSIX_TIMERS and _POSIX_MONOTONIC_CLOCK],[ac_monotonic_clock],
+AC_CACHE_CHECK([Checking for _POSIX_TIMERS and _POSIX_MONOTONIC_CLOCK],[ac_cv_monotonic_clock],
 [AC_PREPROC_IFELSE(AC_LANG_PROGRAM([[
 #include <unistd.h>
 #include <time.h>
@@ -28,9 +28,9 @@ AC_CACHE_CHECK([Checking for _POSIX_TIMERS and _POSIX_MONOTONIC_CLOCK],[ac_monot
 #else
 #error _POSIX_TIMERS not defined, not using clock_gettime
 #endif
-]]), [ac_monotonic_clock=yes], [ac_monotonic_clock=no])])
+]]), [ac_cv_monotonic_clock=yes], [ac_cv_monotonic_clock=no])])
 
-if test $ac_monotonic_clock = yes ; then
+if test $ac_cv_monotonic_clock = yes ; then
 	AC_DEFINE([HAVE_MONOTONIC_CLOCK], 1, [Define if clock_gettime(CLOCK_MONOTONIC) should work])
 	AC_CHECK_LIB(rt, clock_gettime, [], [AC_MSG_ERROR([_POSIX_TIMERS suggests clock_gettime should work but it seems not to work, though])])
 fi
