@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <X11/X.h>
