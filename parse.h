@@ -124,6 +124,8 @@ struct parameter {
 		ft_FRACTION16_16,
 		/* dito 32 bit */
 		ft_FRACTION32_32,
+		/* nominator is unsigned */
+		ft_UFRACTION32_32,
 		/* a 64 bit number consisting of first the high 32 bit, then
 		 * the low 32 bti */
 		ft_INT32_32,

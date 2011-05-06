@@ -1,3 +1,5 @@
+2011-05-06
+	* add UFRACTION32_32
 2011-02-12
 	* configure.ac: change monotonic clock cache-id to make autoconf happy
 2011-02-06

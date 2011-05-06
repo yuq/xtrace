@@ -970,6 +970,7 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 	for( p = parameters; p->name != NULL; p++ ) {
 		size_t s;
 		int8_t i8; int16_t i16; int32_t i32;
+		uint32_t uu;
 #ifdef STUPIDCC
 		uint8_t u8=0; uint16_t u16=0; uint32_t u32=0;
 		unsigned long l=0;
@@ -1207,6 +1208,16 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 			u32 = getCARD32(ofs + 4);
 			fprintf(out,"%d/%u", i32, u32);
 			continue;
+		 case ft_UFRACTION32_32:
+			if( ofs + 8 > len )
+				continue;
+			if( print_offsets )
+				fprintf(out,"[%d]",(int)ofs);
+			fputs(p->name,out);putc('=',out);
+			uu = getCARD32(ofs);
+			u32 = getCARD32(ofs + 4);
+			fprintf(out,"%u/%u", uu, u32);
+			continue;
 		 case ft_INT32_32:
 			if( ofs + 8 > len )
 				continue;
@@ -1403,6 +1414,7 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 		 case ft_EVENT:
 		 case ft_FRACTION16_16:
 		 case ft_FRACTION32_32:
+		 case ft_UFRACTION32_32:
 		 case ft_INT32_32:
 		 case ft_FIXED:
 		 case ft_LISTofFIXED:
