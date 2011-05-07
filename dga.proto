@@ -1,0 +1,362 @@
+# This file is part of "xtrace"
+# Copyright (C) 2011 Ville Syrjala
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# This file is based on /usr/include/X11/extensions/xf86dga1const.h,
+# /usr/include/X11/extensions/xf86dga1proto.h and
+# /usr/include/X11/extensions/xf86dgaproto.h which state:
+#
+# Copyright (c) 1995  Jon Tombs
+# Copyright (c) 1995  XFree86 Inc
+#
+# This file is based on /usr/include/X11/extensions/xf86dgaconst.h which states:
+#
+# Copyright (c) 1999  XFree86 Inc
+#
+
+EXTENSION "XFree86-DGA" DGA
+USE core
+
+REQUESTS
+DGAQueryVersion RESPONDS
+DGA1GetVideoLL RESPONDS
+DGA1DirectVideo
+DGA1GetViewPortSize RESPONDS
+DGA1SetViewPort
+DGA1GetVidPage RESPONDS
+DGA1SetVidPage
+DGA1InstallColormap
+DGA1QueryDirectVideo RESPONDS
+DGA1ViewPortChanged RESPONDS
+UNKNOWN
+UNKNOWN
+DGA2QueryModes RESPONDS
+DGA2SetMode RESPONDS
+DGA2SetViewport
+DGA2InstallColormap
+DGA2SelectInput
+DGA2FillRectangle
+DGA2CopyArea
+DGA2CopyTransparentArea
+DGA2GetViewportStatus RESPONDS
+DGA2Sync RESPONDS
+DGA2OpenFrameBuffer RESPONDS
+DGA2CloseFrameBuffer
+DGA2SetClientVersion
+DGA2ChangePixmapMode RESPONDS
+DGA2CreateColormap
+END
+
+EVENTS
+UNKNOWN
+UNKNOWN
+KeyPress
+KeyRelease
+ButtonPress
+ButtonRelease
+MotionNotify
+END
+
+ERRORS
+ClientNotLocal
+NoDirectVideoMode
+ScreenNotActive
+DirectNotActivated
+OperationNotSupported
+END
+
+BITMASK directvideoflags
+0x0001 DirectPresent
+0x0002 DirectGraphics
+0x0004 DirectMouse
+0x0008 DirectKeyb
+0x0100 HasColormap
+0x0200 DirectColormap
+END
+TYPE DIRECTVIDEOFLAGS16 BITMASK16 directvideoflags
+TYPE DIRECTVIDEOFLAGS32 BITMASK32 directvideoflags
+
+BITMASK viewportflags
+0x00000001	FlipImmediate
+0x00000002	FlipRetrace
+END
+TYPE VIEWPORTFLAGS BITMASK32 viewportflags
+
+BITMASK modeflags
+0x00000001	ConcurrentAccess
+0x00000002	SolidFillRect
+0x00000004	BlitRect
+0x00000008	BlitTransRect
+0x00000010	Pixmap
+0x00010000	Interlaced
+0x00020000	Doublescan
+END
+TYPE MODEFLAGS BITMASK32 modeflags
+
+CONSTANTS pixmapmodeflags
+0	PixmapModeLarge
+1	PixmapModeSmall
+END
+TYPE PIXMAPMODEFLAGS CARD32 constants pixmapmodeflags
+
+BITMASK fbextraflags
+0x00000001	NeedRoot
+END
+TYPE FBEXTRAFLAGS BITMASK32 fbextraflags
+
+REQUEST DGAQueryVersion
+END
+RESPONSE DGAQueryVersion
+ 8	major-version	UINT16
+10	minor-version	UINT16
+END
+
+REQUEST DGA1GetVideoLL
+ 4	screen	UINT16
+END
+RESPONSE DGA1GetVideoLL
+ 8	offset		UINT32
+12	width		UINT32
+16	bank-size	UINT32
+20	ram-size	UINT32
+END
+
+REQUEST DGA1InstallColormap
+ 4	screen		UINT16
+ 8	id		COLORMAP
+END
+
+REQUEST DGA1DirectVideo
+ 4	screen		UINT16
+ 6	enable		DIRECTVIDEOFLAGS16
+END
+
+REQUEST DGA1GetViewPortSize
+ 4	screen		UINT16
+END
+RESPONSE DGA1GetViewPortSize
+ 8	width		UINT32
+12	height		UINT32
+END
+
+REQUEST DGA1SetViewPort
+ 4	screen		UINT16
+ 8	x		UINT32
+12	y		UINT32
+END
+
+REQUEST DGA1GetVidPage
+ 4	screen		UINT16
+END
+RESPONSE DGA1GetVidPage
+ 8	vpage		UINT32
+END
+
+REQUEST DGA1SetVidPage
+ 4	screen		UINT16
+ 6	vpage		UINT16
+END
+
+REQUEST DGA1QueryDirectVideo
+ 4	screen		UINT16
+END
+RESPONSE DGA1QueryDirectVideo
+ 8	flags		DIRECTVIDEOFLAGS32
+END
+
+REQUEST DGA1ViewPortChanged
+ 4	screen		UINT16
+ 6	num_pages	UINT16
+END
+RESPONSE DGA1ViewPortChanged
+ 8	result		UINT32
+END
+
+LIST MODEINFO variable min-length 72
+ 0	byte-order	UINT8
+ 1	depth		UINT8
+ 2	num		UINT16
+ 4	bpp		UINT16
+ 6	name-size	COUNT16
+ 8	vsync		UFRACTION32_32
+16	flags		MODEFLAGS
+20	image-width	UINT16
+22	image-height	UINT16
+24	pixmap-width	UINT16
+26	pixmap-height	UINT16
+28	bytes-per-scanline	UINT32
+32	red-mask	CARD32
+36	green-mask	CARD32
+40	blue-mask	CARD32
+44	visual-class	UINT16
+48	viewport-width	UINT16
+50	viewport-height	UINT16
+52	viewport-xstep	UINT16
+54	viewport-ystep	UINT16
+56	viewport-xmax	UINT16
+58	viewport-ymax	UINT16
+60	viewport-flags	VIEWPORTFLAGS
+64	reserved1	UINT32
+68	reserved2	UINT32
+72	name		STRING8
+ROUND
+END
+
+REQUEST DGA2QueryModes
+ 4	screen		UINT32
+END
+RESPONSE DGA2QueryModes
+ 8	number		COUNT32
+32	modes		LISTofMODEINFO
+END
+
+REQUEST DGA2SetMode
+ 4	screen		UINT32
+ 8	mode		UINT32
+12	pid		PIXMAP
+END
+RESPONSE DGA2SetMode
+ 8	flags		MODEFLAGS
+32	mode		LISTofMODEINFO
+END
+
+REQUEST DGA2OpenFrameBuffer
+ 4	screen		UINT32
+END
+RESPONSE DGA2OpenFrameBuffer
+ 8	mem1		CARD32
+12	mem2		CARD32
+16	size		CARD32
+20	offset		UINT32
+24	extra		FBEXTRAFLAGS
+32	device-name	STRING8
+END
+
+REQUEST DGA2CloseFrameBuffer
+ 4	screen		UINT32
+END
+
+REQUEST DGA2SetViewport
+ 4	screen		UINT32
+ 8	x		UINT16
+10	y		UINT16
+12	flags		VIEWPORTFLAGS
+END
+
+REQUEST DGA2InstallColormap
+ 4	screen		UINT32
+ 8	cmap		COLORMAP
+END
+
+REQUEST DGA2SelectInput
+ 4	screen		UINT32
+ 8	mask		SETofDEVICEEVENT
+END
+
+REQUEST DGA2FillRectangle
+ 4	screen		UINT32
+ 8	x		UINT16
+10	y		UINT16
+12	width		UINT16
+14	height		UINT16
+16	color		CARD32
+END
+
+REQUEST DGA2CopyArea
+ 4	screen		UINT32
+ 8	src-x		UINT16
+10	src-y		UINT16
+12	width		UINT16
+14	height		UINT16
+16	dst-x		UINT16
+18	dst-y		UINT16
+END
+
+REQUEST DGA2CopyTransparentArea
+ 4	screen		UINT32
+ 8	src-x		UINT16
+10	src-y		UINT16
+12	width		UINT16
+14	height		UINT16
+16	dst-x		UINT16
+18	dst-y		UINT16
+20	key		UINT32
+END
+
+REQUEST DGA2GetViewportStatus
+ 4	screen		UINT32
+END
+RESPONSE DGA2GetViewportStatus
+ 8	status		CARD32
+END
+
+REQUEST DGA2Sync
+ 4	screen		UINT32
+END
+RESPONSE DGA2Sync
+END
+
+REQUEST DGA2SetClientVersion
+ 4	major		UINT16
+ 6	minor		UINT16
+END
+
+REQUEST DGA2ChangePixmapMode
+ 4	screen		UINT32
+ 8	x		UINT16
+10	y		UINT16
+12	flags		PIXMAPMODEFLAGS
+END
+RESPONSE DGA2ChangePixmapMode
+ 8	screen		UINT32
+12	x		UINT16
+14	y		UINT16
+END
+
+REQUEST DGA2CreateColormap
+ 4	screen		UINT32
+ 8	id		COLORMAP
+12	mode		UINT32
+16	alloc		ENUM8 alloc
+END
+
+templateEVENT Key
+ 1	keycode	KEYCODE
+ 8	time	TIMESTAMP
+16	screen	INT16
+18	state	SETofKEYBUTMASK
+END
+
+EVENT KeyPress ALIASES Key
+EVENT KeyRelease ALIASES Key
+
+templateEVENT Button
+ 1	button	BUTTON
+ 8	time	TIMESTAMP
+16	screen	INT16
+18	state	SETofKEYBUTMASK
+END
+
+EVENT ButtonPress ALIASES Button
+EVENT ButtonRelease ALIASES Button
+
+EVENT MotionNotify
+ 8	time	TIMESTAMP
+12	dx	INT16
+14	dy	INT16
+16	screen	INT16
+18	state	SETofKEYBUTMASK
+END
+
+EOF
