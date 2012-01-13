@@ -1,3 +1,6 @@
+new after 1.2.0:
+- support XFree86-DGA
+- fix --timestamp description in manpage
 new after 1.1.0:
 - support XVideo, Composite, SYNC
 - bugfixes (GetWindowAttributes on big endian)
