@@ -15,11 +15,12 @@ if test "${CFLAGS:+set}" != set ; then
 	CFLAGS="-Wall -O2 -g -Wmissing-prototypes -Wstrict-prototypes -Wshadow"
 fi
 
+AC_LANG(C)
 AC_PROG_CC_C99
 AC_PROG_INSTALL
 
 AC_CACHE_CHECK([Checking for _POSIX_TIMERS and _POSIX_MONOTONIC_CLOCK],[ac_cv_monotonic_clock],
-[AC_PREPROC_IFELSE(AC_LANG_PROGRAM([[
+[AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[
 #include <unistd.h>
 #include <time.h>
 ]],[[
@@ -32,7 +33,7 @@ AC_CACHE_CHECK([Checking for _POSIX_TIMERS and _POSIX_MONOTONIC_CLOCK],[ac_cv_mo
 #else
 #error _POSIX_TIMERS not defined, not using clock_gettime
 #endif
-]]), [ac_cv_monotonic_clock=yes], [ac_cv_monotonic_clock=no])])
+]])], [ac_cv_monotonic_clock=yes], [ac_cv_monotonic_clock=no])])
 
 if test $ac_cv_monotonic_clock = yes ; then
 	AC_DEFINE([HAVE_MONOTONIC_CLOCK], 1, [Define if clock_gettime(CLOCK_MONOTONIC) should work])
