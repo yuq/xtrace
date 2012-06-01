@@ -1468,6 +1468,8 @@ static bool requestGrabButton(struct connection *c, bool pre, bool bigrequest,st
 */
 
 bool requestQueryExtension(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply) {
+	size_t len;
+
 	if( pre )
 		return false;
 	if( reply == NULL)
@@ -1475,12 +1477,11 @@ bool requestQueryExtension(struct connection *c, bool pre, bool bigrequest UNUSE
 	if( c->clientignore <= 8 )
 		return false;
 	reply->data_type = dt_EXTENSION;
-	reply->data.extension = find_extension(c->clientbuffer+8,
-			c->clientignore-8);
+	len = c->clientignore-8;
+	if( len > clientCARD16(4) )
+		len = clientCARD16(4);
+	reply->data.extension = find_extension(c->clientbuffer+8, len);
 	if( reply->data.extension == NULL ) {
-		size_t len = c->clientignore-8;
-		if( len > clientCARD16(4) )
-			len = clientCARD16(4);
 		reply->data_type = dt_UNKNOWN_EXTENSION;
 		reply->data.uextension = register_unknown_extension(c,
 				c->clientbuffer+8, len);
