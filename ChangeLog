@@ -1,3 +1,5 @@
+2012-06-01
+	* fix parsing of unusual QueryExtension requests
 2012-01-09
 	* fix --timestamp description in manpage
 2011-05-07
