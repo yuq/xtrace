@@ -2201,9 +2201,13 @@ bool parser_free(struct parser *parser) {
 		enum variable_type vt;
 
 		assert( ns->refcount == 0 );
+#ifdef HAVE_TDESTROY
 		for( vt = 0 ; vt < vt_COUNT ; vt ++ ) {
 			tdestroy(ns->variables[vt], free_varname);
 		}
+#else
+#warning Not freeing some memory as your libc lacks tdestroy
+#endif
 		free(ns->name);
 		free(ns->extension);
 		for( i = 0 ; i < ns->num_requests ; i++ ) {

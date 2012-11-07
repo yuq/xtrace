@@ -37,10 +37,12 @@ AC_CACHE_CHECK([Checking for _POSIX_TIMERS and _POSIX_MONOTONIC_CLOCK],[ac_cv_mo
 
 if test $ac_cv_monotonic_clock = yes ; then
 	AC_DEFINE([HAVE_MONOTONIC_CLOCK], 1, [Define if clock_gettime(CLOCK_MONOTONIC) should work])
+	AC_CHECK_FUNC([clock_gettime],[],[
 	AC_CHECK_LIB(rt, clock_gettime, [], [AC_MSG_ERROR([_POSIX_TIMERS suggests clock_gettime should work but it seems not to work, though])])
+	])
 fi
 
-AC_CHECK_FUNCS([strndup asprintf socket])
+AC_CHECK_FUNCS([strndup asprintf socket tdestroy])
 if test $ac_cv_func_socket = no; then
 	AC_CHECK_LIB(socket, socket, [AC_DEFINE(HAVE_SOCKET)
 LIBS="$LIBS -lsocket -lnsl"; break],[AC_MSG_ERROR([Could not find socket library function])])
