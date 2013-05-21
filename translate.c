@@ -2460,6 +2460,9 @@ static const struct request *finalize_requests(struct parser *parser, struct nam
 		} else if( strcmp(rs[i].name, "ListFontsWithInfo") == 0 ) {
 			/* this should be changed to a general approach */
 			rs[i].reply_func = replyListFontsWithInfo;
+		} else if( strcmp(rs[i].name, "GetAtomName") == 0) {
+			rs[i].request_func = requestGetAtomName;
+			rs[i].reply_func = replyGetAtomName;
 		} else {
 			fprintf(stderr, "No specials available for '%s::%s'!\n",
 					ns->name, rs[i].name);

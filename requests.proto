@@ -111,7 +111,7 @@ CirculateWindow
 GetGeometry RESPONDS
 QueryTree RESPONDS
 InternAtom RESPONDS SPECIAL
-GetAtomName RESPONDS
+GetAtomName RESPONDS SPECIAL
 ChangeProperty
 DeleteProperty
 GetProperty RESPONDS /* 20*/

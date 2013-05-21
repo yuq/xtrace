@@ -174,12 +174,14 @@ struct expectedreply {
 		dt_UNKNOWN_EXTENSION, /* uextension used */
 		dt_EXTENSION, /* extension used */
 		dt_ATOM, /* atom used */
+		dt_CARD32, /* card32 used */
 	} data_type;
 	union {
 		void *data;
 		struct atom *atom;
 		const struct extension *extension;
 		struct unknownextension *uextension;
+		uint32_t card32;
 	} data;
 	unsigned long values[];
 };
@@ -1505,6 +1507,20 @@ bool requestInternAtom(struct connection *c, bool pre, bool bigrequest UNUSED, s
 	return false;
 }
 
+bool requestGetAtomName(struct connection *c, bool pre, bool bigrequest UNUSED, struct expectedreply *reply) {
+	uint32_t atom;
+	if( pre )
+		return false;
+	if( reply == NULL)
+		return false;
+	if( c->clientignore < 8 )
+		return false;
+	atom = clientCARD32(4);
+	reply->data_type = dt_CARD32;
+	reply->data.card32 = atom;
+	return false;
+}
+
 /* Reactions to some replies */
 
 void replyListFontsWithInfo(struct connection *c, bool *ignore, bool *dontremove, struct expectedreply *dummy UNUSED) {
@@ -1560,6 +1576,16 @@ void replyInternAtom(struct connection *c, bool *ignore UNUSED, bool *dontremove
 		return;
 	atom = serverCARD32(8);
 	internAtom(c, atom, d->data.atom);
+}
+
+void replyGetAtomName(struct connection *c, bool *ignore UNUSED, bool *dontremove UNUSED, struct expectedreply *d) {
+	struct atom *atom;
+	uint16_t len;
+	if( d->data_type != dt_CARD32 || d->data.card32 == 0 )
+		return;
+	len = serverCARD16(8);
+	atom = newAtom((const char *)c->serverbuffer+32, len);
+	internAtom(c, d->data.card32, atom);
 }
 
 #define ft_COUNT8 ft_STORE8

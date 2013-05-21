@@ -167,8 +167,10 @@ extern const struct parameter *setup_parameters;
 /* special handlers, for the SPECIAL requests/events */
 extern request_func requestQueryExtension;
 extern request_func requestInternAtom;
+extern request_func requestGetAtomName;
 extern reply_func replyListFontsWithInfo;
 extern reply_func replyQueryExtension;
 extern reply_func replyInternAtom;
+extern reply_func replyGetAtomName;
 
 #endif
