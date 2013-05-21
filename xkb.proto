@@ -11,16 +11,16 @@ GetState RESPONDS UNSUPPORTED /* 4 */
 LatchLockState UNSUPPORTED /* 5 */
 GetControls RESPONDS UNSUPPORTED /* 6 */
 SetControls UNSUPPORTED /* 7 */
-GetMap RESPONDS UNSUPPORTED /* 8 */
+GetMap RESPONDS /* 8 */
 SetMap UNSUPPORTED /* 9 */
 GetCompatMap RESPONDS UNSUPPORTED /* 10 */
 SetCompatMap UNSUPPORTED /* 11 */
 GetIndicatorState RESPONDS UNSUPPORTED /* 12 */
 GetIndicatorMap RESPONDS UNSUPPORTED /* 13 */
 SetIndicatorMap UNSUPPORTED /* 14 */
-GetNamedIndicator RESPONDS UNSUPPORTED /* 15 */
+GetNamedIndicator RESPONDS /* 15 */
 SetNamedIndicator UNSUPPORTED /* 16 */
-GetNames RESPONDS UNSUPPORTED /* 17 */
+GetNames RESPONDS /* 17 */
 SetNames UNSUPPORTED /* 18 */
 GetGeometry RESPONDS UNSUPPORTED /* 19 */
 SetGeometry UNSUPPORTED /* 20 */
@@ -80,6 +80,127 @@ REQUEST Bell
 16 duration INT16
 20 name ATOM
 24 window WINDOW
+END
+
+TYPE KEYCODE UINT8
+
+REQUEST GetMap
+ 4 deviceSpec DEVICESPEC
+ 6 full UINT16
+ 8 partial UINT16
+10 firstType UINT8
+11 nTypes UINT8
+12 firstKeySym KEYCODE
+13 nKeySyms UINT8
+14 firstKeyAct KEYCODE
+15 nKeyActs UINT8
+16 firstKeyBehavior KEYCODE
+17 nKeyBehaviors UINT8
+18 virtualMods UINT16
+END
+
+RESPONSE GetMap
+ 2	deviceID	UINT8
+10	minKeyCode	KEYCODE
+11	maxKeyCode	KEYCODE
+12	present		UINT16
+14	firstType	UINT8
+15	nTypes		UINT8
+16	totalTypes	UINT8
+17	firstKeySym	KEYCODE
+18	totalSyms	UINT16
+20	nKeySyms	UINT8
+21	firstKeyAct	KEYCODE
+22	totalActs	UINT16
+24	nKeyActs	UINT8
+25	firstKeyBehavior	KEYCODE
+26	nKeyBehaviors	UINT8
+27	totalKeyBehaviors	UINT8
+28	firstKeyExplicit	KEYCODE
+29	nKeyExplicit	UINT8
+30	totalKeyExplicit	UINT8
+31	firstModMapKey	KEYCODE
+32	nModMapKeys	UINT8
+33	totalModMapKeys	UINT8
+34	firstVModMapKey	KEYCODE
+35	nVModMapKeys	UINT8
+36	totalVModMapKeys	UINT8
+38	virtualMods	UINT16
+# TODO
+40	not-yet-supported	LISTofCARD8
+END
+
+BITMASK namedetailmask
+   1	keycodes
+   2	geometry
+   4	symbols
+   8	phys_symbols
+  16	type
+  32	compat
+  64	key_type_names
+ 128	key_type_level_names
+ 256	indicators
+ 512	key_names
+1024	key_aliases
+2048	vmods
+4096	groups
+8192	radio_groups
+END
+
+REQUEST GetNames
+ 4	deviceSpec	DEVICESPEC
+ 8	which		BITMASK32 namedetailmask
+END
+
+RESPONSE GetNames
+ 1	deviceID	UINT8
+ 8	which		BITMASK32 namedetailmask
+12	minKeyCode	KEYCODE
+13	maxKeyCode	KEYCODE
+14	nTypes		UINT8
+15	groupNames	UINT8
+16	virtualMods	UINT16
+18	firstKey	KEYCODE
+19	nKeys		UINT8
+20	indicators	CARD32
+24	nRadioGroups	UINT8
+25	nKeyAliases	UINT8
+26	nKTLevels	UINT16
+# TODO
+32	valueList	LISTofCARD8
+END
+
+CONSTANTS LEDCLASSSPEC
+0	KbdFeedbackClass
+4	LedFeedbackClass
+0x0300	DfltXIClass
+0x0500	AllXIClasses
+0xff00	XINone
+END
+
+REQUEST GetNamedIndicator
+ 4	deviceSpec	DEVICESPEC
+ 6	ledClass	ENUM16 LEDCLASSSPEC
+ 8	ledID		IDSPEC
+12	indicator	ATOM
+END
+
+RESPONSE GetNamedIndicator
+ 1	deviceID	UINT8
+ 8	indicator	ATOM
+12	found		BOOL
+13	on		BOOL
+14	realIndicator	BOOL
+15	ndx		UINT8
+16	flags		CARD8
+17	whichGroups	CARD8
+18	groups		CARD8
+19	whichMods	CARD8
+20	mods		CARD8
+21	realMods	CARD8
+22	virtualMods	CARD16
+24	ctrls		CARD32
+28	supported	BOOL
 END
 
 EVENT XkbEvent
