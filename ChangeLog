@@ -1,6 +1,7 @@
 2013-05-26
 	* xinput: improve ValuatorClass (previously AxisClass),
 	          add ScrollClass, TouchClass
+	* mark some font properties as atoms
 2013-05-21
 	* xkb: add partial support for GetMap, GetNames and GetNamedIndicator
 2013-05-21
