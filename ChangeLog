@@ -1,3 +1,7 @@
+2013-05-21
+	* xkb: add partial support for GetMap, GetNames and GetNamedIndicator
+2013-05-21
+	* Add handling of GetAtomName
 2012-06-01
 	* fix parsing of unusual QueryExtension requests
 2012-01-09
