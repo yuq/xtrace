@@ -1015,8 +1015,26 @@ TYPE SETofBUTTONMASK CARD32
 CONSTANTS class
 0	KeyClass
 1	ButtonClass
-2	AxisClass
+2	ValuatorClass
+3	ScrollClass
+8	TouchClass
 END
+
+CONSTANTS scrolltype
+1 vertical
+2 horizontal
+END
+TYPE ScrollType ENUM32 scrolltype
+BITMASK scrollflag
+1<<0	NoEmulation
+1<<1	Preferred
+END
+TYPE ScrollFlag BITMASK32 scrollflag
+CONSTANTS touchmode
+1 DirectTouch
+2 DependentTouch
+END
+TYPE TouchMode ENUM8 touchmode
 
 LIST CLASS variable min-length 8
 0	type	ENUM16	class
@@ -1029,15 +1047,25 @@ ELSEIF 0 CARD16 $class:ButtonClass
 6	num_buttons	COUNT16
 8	state	SETofBUTTONMASK
 12	labels	LISTofATOM
-ELSEIF 0 CARD16 $class:AxisClass
-6	axisnumber	COUNT16
+ELSEIF 0 CARD16 $class:ValuatorClass
+6	number	UINT16
 8	label	ATOM
-12	min	FRACTION32_32
-20	max	FRACTION32_32
-28	value	FRACTION32_32
+12	min	FP3232
+20	max	FP3232
+28	value	FP3232
 36	resolution	UINT32
 40	mode	CARD8
 NEXT	44
+ELSEIF 0 CARD16 $class:ScrollClass
+6	number	UINT16
+8	type	ScrollType
+12	flags	ScrollFlag
+16	increment	FP3232
+NEXT	24
+ELSEIF 0 CARD16 $class:TouchClass
+6	mode	TouchMode
+7	touch_max	UINT8
+NEXT	8
 ELSE
 0	pad	LISTofCARD32
 END
