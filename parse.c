@@ -1820,7 +1820,7 @@ static inline void print_server_event(struct connection *c) {
 
 
 static inline void print_server_reply(struct connection *c) {
-	unsigned int cmd,seq;
+	unsigned int seq;
 	struct expectedreply *replyto,**lastp;
 	size_t len;
 	unsigned long stackvalues[30];
@@ -1834,7 +1834,6 @@ static inline void print_server_reply(struct connection *c) {
 	if( len > c->servercount )
 		len = c->servercount;
 
-	cmd = serverCARD8(1);
 	seq = serverCARD16(2);
 	for( lastp = &c->expectedreplies ;
 			(replyto=*lastp) != NULL ; lastp=&replyto->next){

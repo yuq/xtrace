@@ -2183,11 +2183,13 @@ bool translate(struct parser *parser, const char *name) {
 	return false;
 }
 
+#ifdef HAVE_TDESTROY
 static void free_varname(void *nodep) {
 	struct varname *vn = nodep;
 	variable_unref(vn->variable);
 	free(vn);
 }
+#endif
 
 bool parser_free(struct parser *parser) {
 	bool success = !parser->error;

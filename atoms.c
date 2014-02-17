@@ -87,7 +87,6 @@ const char *getAtom(struct connection *c UNUSED, uint32_t atom) {
 }
 void internAtom(struct connection *c UNUSED, uint32_t atom, struct atom *data) {
 	struct atom **p;
-	uint32_t lastmask;
 
 	if( atom <= CONSTANT_ATOMS ) {
 		free(data);
@@ -98,7 +97,6 @@ void internAtom(struct connection *c UNUSED, uint32_t atom, struct atom *data) {
 	data->atom = atom;
 
 	p = &atom_root;
-	lastmask = 0;
 	while( *p != NULL ) {
 		uint32_t k;
 		k = (*p)->atom;
