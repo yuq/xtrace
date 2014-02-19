@@ -2200,7 +2200,9 @@ bool parser_free(struct parser *parser) {
 		struct namespace *ns = parser->namespaces;
 		parser->namespaces = ns->next;
 		int i;
+#ifdef HAVE_TDESTROY
 		enum variable_type vt;
+#endif
 
 		assert( ns->refcount == 0 );
 #ifdef HAVE_TDESTROY
