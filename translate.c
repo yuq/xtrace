@@ -1141,7 +1141,7 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 		}
 		if( strcmp(position, "SIZE") == 0 ) {
 			const char *v;
-			unsigned long t = 1;
+			//unsigned long t = 1;
 
 			v = get_const_token(parser, false);
 			if( v == NULL )
@@ -1180,8 +1180,8 @@ static bool parse_parameters(struct parser *parser, struct variable *variable, b
 				}
 				error(parser, "'TIMES' not yet supported!");
 				continue;
-				v = get_const_token(parser, false);
-				t = parse_number(parser, v);
+				//v = get_const_token(parser, false);
+				//t = parse_number(parser, v);
 			}
 			no_more_arguments(parser);
 			state->sizemarker_set = true;
