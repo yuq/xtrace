@@ -402,9 +402,9 @@ static const char *get_const_token(struct parser *parser, bool optional) {
 					*q++ = *p++;
 				else {
 					*q = *(p++) - '0';
-					if( *p >= '0' || *p <= '7' )
+					if( *p >= '0' && *p <= '7' )
 						*q = *q * 8 +  *(p++) - '0';
-					if( *p >= '0' || *p <= '7' )
+					if( *p >= '0' && *p <= '7' )
 						*q = *q * 8 +  *(p++) - '0';
 					q++;
 				}
