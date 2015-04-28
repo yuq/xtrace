@@ -1748,7 +1748,7 @@ static inline void print_generic_event(struct connection *c, const unsigned char
 		return;
 	}
 	fprintf(out, "%s(%hhu) ", extension->name, opcode);
-	if( evtype > extension->numxgevents
+	if( evtype >= extension->numxgevents
 			|| extension->xgevents[evtype].name == NULL ) {
 		fprintf(out, "unknown(%hu) ", evtype);
 		print_parameters(c, buffer, len,
