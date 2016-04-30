@@ -1,0 +1,77 @@
+NEEDS "sync.proto"
+NEEDS "randr.proto"
+
+EXTENSION "DRI3" DRI3
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+Open RESPONDS
+PixmapFromBuffer
+BufferFromPixmap RESPONDS
+FenceFromFD
+FDFromFence RESPONDS
+END
+
+EVENTS
+END
+
+ERRORS
+END
+
+REQUEST QueryVersion
+ 4	major_version	UINT32
+ 8	minor_version	UINT32
+END
+RESPONSE QueryVersion
+ 8	major-version	UINT32
+12	minor-version	UINT32
+END
+
+REQUEST Open
+ 4	drawable	DRAWABLE
+ 8	provider	RandR::PROVIDER
+END
+RESPONSE Open
+ 1	nfd	UINT8
+END
+
+REQUEST PixmapFromBuffer
+ 4	pixmap		PIXMAP
+ 8	drawable	DRAWABLE
+ 12	size		UINT32
+ 16	width		UINT16
+ 18	height		UINT16
+ 20	stride		UINT16
+ 22	depth		UINT8
+ 23	bpp		UINT8
+END
+
+REQUEST BufferFromPixmap
+ 4	pixmap		PIXMAP
+END
+RESPONSE BufferFromPixmap
+ 1	nfd		UINT8
+ 8	size		UINT32
+ 12	width		UINT16
+ 14	height		UINT16
+ 16	stride		UINT16
+ 18	depth		UINT8
+ 19	bpp		UINT8
+END
+
+REQUEST FenceFromFD
+ 4	drawable	DRAWABLE
+ 8	fence		XSync::Fence
+ 9	initially_triggered	BOOL
+END
+
+REQUEST FDFromFence
+ 4	drawable	DRAWABLE
+ 8	fence		XSync::Fence
+END
+RESPONSE FDFromFence
+ 1	nfd		UINT8
+END
+
+EOF

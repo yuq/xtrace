@@ -10,7 +10,7 @@ dist_man_MANS = xtrace.1
 
 MAINTAINERCLEANFILES = $(srcdir)/Makefile.in $(srcdir)/configure $(srcdir)/stamp-h.in $(srcdir)/aclocal.m4 $(srcdir)/config.h.in
 
-dist_pkgdata_DATA = all.proto bigfont.proto bigrequest.proto damage.proto dpms.proto dri2.proto errors.proto events.proto fixes.proto genericevents.proto glx.proto mitshm.proto randr.proto render.proto requests.proto saver.proto setup.proto shape.proto sync.proto vidmode.proto xinerama.proto xinput.proto xkb.proto xvideo.proto composite.proto dga.proto
+dist_pkgdata_DATA = all.proto bigfont.proto bigrequest.proto damage.proto dpms.proto dri2.proto errors.proto events.proto fixes.proto genericevents.proto glx.proto mitshm.proto randr.proto render.proto requests.proto saver.proto setup.proto shape.proto sync.proto vidmode.proto xinerama.proto xinput.proto xkb.proto xvideo.proto composite.proto dga.proto dri3.proto
 
 distclean-local:
 	-rm -rf $(srcdir)/autom4te.cache
