@@ -49,6 +49,12 @@ LIBS="$LIBS -lsocket -lnsl"; break],[AC_MSG_ERROR([Could not find socket library
 fi
 AC_CHECK_FUNC([getaddrinfo],,[AC_MSG_ERROR([Could not find getaddrinfo library function])])
 
+AC_SEARCH_LIBS(sendmsg, socket, [have_sendmsg="yes"], [have_sendmsg="no"])
+AC_CHECK_HEADER(sys/socket.h, [], [have_sendmsg="no"])
+if test $have_sendmsg = yes ; then
+        AC_DEFINE([HAVE_SENDMSG],1,[Define if your platform supports sendmsg])
+fi
+
 dnl AC_CHECK_HEADER(X11/X.h,[],[AC_MSG_ERROR([Could not find X11/X.h])])
 dnl AC_CHECK_HEADER(X11/Xlib.h,[],[AC_MSG_ERROR([Could not find X11/Xlib.h])])
 dnl AC_CHECK_HEADER(X11/extensions/security.h,[],[AC_MSG_ERROR([Could not find X11/extensions/secruity.h])],[#include <X11/Xlib.h>])

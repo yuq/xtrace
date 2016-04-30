@@ -31,6 +31,10 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#if HAVE_SENDMSG
+#include <sys/socket.h>
+#endif
+
 #include "xtrace.h"
 #include "stringlist.h"
 #include "translate.h"
@@ -100,6 +104,92 @@ static void acceptConnection(int listener) {
 	connections = c;
 }
 
+static ssize_t doread(int fd, void *buf, size_t n, struct fdqueue *fdq)
+{
+#if HAVE_SENDMSG
+	struct iovec iov = {
+		.iov_base = buf,
+		.iov_len = n,
+	};
+	union {
+		struct cmsghdr cmsghdr;
+		char buf[CMSG_SPACE(FDQUEUE_MAX_FD * sizeof(int))];
+	} cmsgbuf;
+	struct msghdr msg = {
+		.msg_name = NULL,
+		.msg_namelen = 0,
+		.msg_iov = &iov,
+		.msg_iovlen = 1,
+		.msg_control = cmsgbuf.buf,
+		.msg_controllen = CMSG_SPACE(sizeof(int) * (FDQUEUE_MAX_FD - fdq->nfd)),
+	};
+	int ret = recvmsg(fd, &msg, 0);
+
+	/* Check for truncation errors. Only MSG_CTRUNC is
+	 * probably possible here, which would indicate that
+	 * the sender tried to transmit more than FDQUEUE_MAX_FD
+	 * file descriptors.
+	 */
+	if (msg.msg_flags & (MSG_TRUNC|MSG_CTRUNC))
+		return 0;
+
+	struct cmsghdr *hdr;
+	if (msg.msg_controllen >= sizeof (struct cmsghdr)) {
+		for (hdr = CMSG_FIRSTHDR(&msg); hdr; hdr = CMSG_NXTHDR(&msg, hdr)) {
+			if (hdr->cmsg_level == SOL_SOCKET && hdr->cmsg_type == SCM_RIGHTS) {
+				int nfd = (hdr->cmsg_len - CMSG_LEN(0)) / sizeof (int);
+				memcpy(fdq->fd + fdq->nfd, CMSG_DATA(hdr), nfd * sizeof (int));
+				fdq->nfd += nfd;
+			}
+		}
+	}
+	return ret;
+#else
+	return read(fd, buf, n);
+#endif
+}
+
+static ssize_t dowrite(int fd, const void *buf, size_t n, struct fdqueue *fdq)
+{
+#if HAVE_SENDMSG
+	if (fdq->nfd) {
+		union {
+			struct cmsghdr cmsghdr;
+			char buf[CMSG_SPACE(FDQUEUE_MAX_FD * sizeof(int))];
+		} cmsgbuf;
+		struct iovec iov = {
+			.iov_base = buf,
+			.iov_len = n,
+		};
+		struct msghdr msg = {
+			.msg_name = NULL,
+			.msg_namelen = 0,
+			.msg_iov = &iov,
+			.msg_iovlen = 1,
+			.msg_control = cmsgbuf.buf,
+			.msg_controllen = CMSG_LEN(fdq->nfd * sizeof (int)),
+		};
+		int i, ret;
+		struct cmsghdr *hdr = CMSG_FIRSTHDR(&msg);
+
+		hdr->cmsg_len = msg.msg_controllen;
+		hdr->cmsg_level = SOL_SOCKET;
+		hdr->cmsg_type = SCM_RIGHTS;
+		memcpy(CMSG_DATA(hdr), fdq->fd, fdq->nfd * sizeof (int));
+
+		ret = sendmsg(fd, &msg, 0);
+		if (ret < 0)
+			return ret;
+		for (i = 0; i < fdq->nfd; i++)
+			close(fdq->fd[i]);
+		fdq->nfd = 0;
+		return ret;
+	} else
+#endif
+	{
+		return write(fd, buf, n);
+	}
+}
 
 static int mainqueue(int listener) {
 	int n, r = 0;
@@ -117,39 +207,44 @@ static int mainqueue(int listener) {
 
 		c = connections;
 		while( c != NULL ) {
-			if( c->client_fd != -1 && c->server_fd == -1 && c->servercount == 0 ) {
+			if( c->client_fd != -1 && c->server_fd == -1 && c->servercount == 0 && c->serverfdq.nfd == 0 ) {
 				close(c->client_fd);
 				c->client_fd = -1;
 				if( readwritedebug )
 					fprintf(out,"%03d:>:sent EOF\n",c->id);
 			}
 			if( c->client_fd != -1 ) {
-				if( sizeof(c->clientbuffer) > c->clientcount )
+				if( sizeof(c->clientbuffer) > c->clientcount && FDQUEUE_MAX_FD > c->clientfdq.nfd )
 					FD_SET(c->client_fd,&readfds);
 				FD_SET(c->client_fd,&exceptfds);
 				if( c->client_fd >= n )
 					n = c->client_fd+1;
-				if(c->serverignore > 0 && c->servercount > 0 )
+				if( c->serverignore > 0 && c->servercount > 0 || c->serverfdq.nfd > 0 )
 					FD_SET(c->client_fd,&writefds);
-			} else if( c->server_fd != -1 && c->clientcount == 0 ) {
+			} else if( c->server_fd != -1 && c->clientcount == 0 && c->clientfdq.nfd == 0 ) {
 				close(c->server_fd);
 				c->server_fd = -1;
 				if( readwritedebug )
 					fprintf(out,"%03d:<:sent EOF\n",c->id);
 			}
 			if( c->server_fd != -1 ) {
-				if( sizeof(c->serverbuffer) > c->servercount )
+				if( sizeof(c->serverbuffer) > c->servercount && FDQUEUE_MAX_FD > c->serverfdq.nfd )
 					FD_SET(c->server_fd,&readfds);
 				FD_SET(c->server_fd,&exceptfds);
 				if( c->server_fd >= n )
 					n = c->server_fd+1;
-				if(c->clientignore > 0 && c->clientcount > 0
+				if( (c->clientignore > 0 && c->clientcount > 0 || c->clientfdq.nfd > 0)
 						&& allowsent > 0)
 					FD_SET(c->server_fd,&writefds);
 
 			}
 			if( c->client_fd == -1 && c->server_fd == -1 ) {
 				if( c == connections ) {
+					int i;
+					for ( i = 0; i < c->clientfdq.nfd; i++ )
+						close(c->clientfdq.fd[i]);
+					for ( i = 0; i < c->serverfdq.nfd; i++ )
+						close(c->serverfdq.fd[i]);
 					free_usedextensions(c->usedextensions);
 					free_unknownextensions(c->unknownextensions);
 					free_unknownextensions(c->waiting);
@@ -221,7 +316,7 @@ static int mainqueue(int listener) {
 
 					if( c->serverignore < towrite )
 						towrite = c->serverignore;
-					written = write(c->client_fd,c->serverbuffer,towrite);
+					written = dowrite(c->client_fd,c->serverbuffer,towrite,&c->serverfdq);
 					if( written >= 0 ) {
 						if( readwritedebug )
 							fprintf(stdout,"%03d:>:wrote %u bytes\n",c->id,(unsigned int)written);
@@ -251,7 +346,7 @@ static int mainqueue(int listener) {
 				}
 				if( FD_ISSET(c->client_fd,&readfds) ) {
 					size_t toread = sizeof(c->clientbuffer)-c->clientcount;
-					ssize_t wasread = read(c->client_fd,c->clientbuffer+c->clientcount,toread);
+					ssize_t wasread = doread(c->client_fd,c->clientbuffer+c->clientcount,toread,&c->clientfdq);
 					assert( toread > 0 );
 					if( wasread > 0 ) {
 						if( readwritedebug )
@@ -296,7 +391,7 @@ static int mainqueue(int listener) {
 
 					if( c->clientignore < towrite )
 						towrite = c->clientignore;
-					written = write(c->server_fd,c->clientbuffer,towrite);
+					written = dowrite(c->server_fd,c->clientbuffer,towrite,&c->clientfdq);
 					if( interactive && allowsent > 0 )
 						allowsent--;
 					if( written >= 0 ) {
@@ -321,7 +416,7 @@ static int mainqueue(int listener) {
 				}
 				if( FD_ISSET(c->server_fd,&readfds) ) {
 					size_t toread = sizeof(c->serverbuffer)-c->servercount;
-					ssize_t wasread = read(c->server_fd,c->serverbuffer+c->servercount,toread);
+					ssize_t wasread = doread(c->server_fd,c->serverbuffer+c->servercount,toread,&c->serverfdq);
 					assert( toread > 0 );
 					if( wasread > 0 ) {
 						if( readwritedebug )

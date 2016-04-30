@@ -15,6 +15,12 @@ const char *generateSocketName(struct sockaddr_un *addr,int display);
 uint16_t calculateTCPport(int display);
 int acceptClient(int family,int listener, char **from);
 
+#define FDQUEUE_MAX_FD 16
+struct fdqueue {
+	int fd[FDQUEUE_MAX_FD];
+	int nfd;
+};
+
 extern struct connection {
 	struct connection *next;
 	int id; char *from;
@@ -26,6 +32,8 @@ extern struct connection {
 	unsigned char serverbuffer[16*4096];
 	unsigned int servercount,serverignore;
 	enum server_state { s_start=0, s_normal, s_amlost} serverstate;
+	struct fdqueue clientfdq;
+	struct fdqueue serverfdq;
 	struct expectedreply *expectedreplies;
 	uint64_t seq;
 	struct usedextension *usedextensions;
