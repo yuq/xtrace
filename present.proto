@@ -1,0 +1,174 @@
+NEEDS "randr.proto"
+NEEDS "fixes.proto"
+NEEDS "sync.proto"
+
+EXTENSION "Present" Present
+USE core
+
+REQUESTS
+QueryVersion RESPONDS
+Pixmap
+NotifyMSC
+SelectInput
+QueryCapabilities RESPONDS
+END
+
+EVENTS
+END
+
+ERRORS
+END
+
+XGEVENTS
+ConfigureNotify
+CompleteNotify
+IdleNotify
+RedirectNotify
+END
+
+TYPE PRESENT_EVENT_ID CARD32
+
+BITMASK present_event_mask
+ 1<<0	  ConfigureNotify
+ 1<<1	  CompleteNotify
+ 1<<2	  IdleNotify
+ 1<<3	  RedirectNotify
+END
+TYPE PRESENT_EVENT_MASK BITMASK32 present_event_mask
+
+BITMASK present_option
+ 1<<0	Async
+ 1<<1	Copy
+ 1<<2	UST
+END
+TYPE PRESENT_OPTION BITMASK32 present_option
+
+BITMASK present_capability
+ 1<<0	Async
+ 1<<1	Fence
+ 1<<2	UST
+END
+TYPE PRESENT_CAPABILITY BITMASK32 present_capability
+
+CONSTANTS present_complete_kind
+ 0	  Pixmap
+ 1	  NotifyMSC
+END
+TYPE PRESENT_COMPLETE_KIND ENUM8 present_complete_kind
+
+CONSTANTS present_complete_mode
+ 0	  Copy
+ 1	  Flip
+ 2	  Skip
+END
+TYPE PRESENT_COMPLETE_MODE ENUM8 present_complete_mode
+
+LIST PRESENT_NOTIFY length 8
+ 0     window	      WINDOW
+ 4     serial	      UINT32
+END
+
+REQUEST QueryVersion
+ 4	majorVersion	UINT32
+ 8	minorVersion	UINT32
+END
+RESPONSE QueryVersion
+ 8	majorVersion	UINT32
+ 12	minorVersion	UINT32
+END
+
+REQUEST Pixmap
+ 4	window		WINDOW
+ 8	pixmap		PIXMAP
+ 12	serial		UINT32
+ 16	valid		Fixes::REGION
+ 20	update		Fixes::REGION
+ 24	x_off		INT16
+ 26	y_off		INT16
+ 28	target_crtc	RandR::CRTC
+ 32	wait_fence	XSync::Fence
+ 36	idle_fence	XSync::Fence
+ 40	options		PRESENT_OPTION
+ 48	target_msc	XSync::Value
+ 56	divisor		XSync::Value
+ 64	remainder	XSync::Value
+ 72	notifies	LISTofPRESENT_NOTIFY
+END
+
+REQUEST NotifyMSC
+ 4	window		WINDOW
+ 8	serial		UINT32
+ 16	target_msc	XSync::Value
+ 24	divisor		XSync::Value
+ 32	remainder	XSync::Value
+END
+
+REQUEST SelectInput
+ 4	eid		PRESENT_EVENT_ID
+ 8	window		WINDOW
+ 12	event_mask	PRESENT_EVENT_MASK
+END
+
+REQUEST QueryCapabilities
+ 4	target		UINT32
+END
+RESPONSE QueryCapabilities
+ 8	 capabilities	PRESENT_CAPABILITY
+END
+
+XGEVENT ConfigureNotify
+ 12	 event		PRESENT_EVENT_ID
+ 16	 window		WINDOW
+ 20	 x		INT16
+ 22	 y		INT16
+ 24	 width		UINT16
+ 26	 height		UINT16
+ 28	 off_x		INT16
+ 30	 off_y		INT16
+ 32	 pixmap_width	UINT16
+ 34	 pixmap_height	UINT16
+ 36	 pixmap_flags	CARD32
+END
+
+XGEVENT CompleteNotify
+ 10	 kind		PRESENT_COMPLETE_KIND
+ 11	 mode		PRESENT_COMPLETE_MODE
+ 12	 event		PRESENT_EVENT_ID
+ 16	 window		WINDOW
+ 20	 serial		UINT32
+ 24	 ust		XSync::Value
+ 32	 msc		XSync::Value
+END
+
+XGEVENT IdleNotify
+ 12	 event		PRESENT_EVENT_ID
+ 16	 window		WINDOW
+ 20	 serial		UINT32
+ 24	 pixmap		PIXMAP
+ 28	 idle_fence	XSync::Fence
+END
+
+XGEVENT RedirectNotify
+ 10	 update_window	BOOL
+ 12	 event		PRESENT_EVENT_ID
+ 16	 event_window	WINDOW
+ 20	 window		WINDOW
+ 24	 pixmap		PIXMAP
+ 28	 serial		UINT32
+ 32	 valid_region	Fixes::REGION
+ 36	 update_region	Fixes::REGION
+ 40	 valid_rect	RECTANGLE
+ 48	 update_rect	RECTANGLE
+ 56	 x_off		INT16
+ 58	 y_off		INT16
+ 60	 target_crtc	RandR::CRTC
+ 64	 wait_fence	XSync::Fence
+ 68	 idle_fence	XSync::Fence
+ 72	 options	PRESENT_OPTION
+ 80	 target_msc	XSync::Value
+ 88	 divisor	XSync::Value
+ 96	 remainder	XSync::Value
+ 104	 notifies	LISTofPRESENT_NOTIFY
+END
+
+EOF
