@@ -116,6 +116,17 @@ GetPanning RESPONDS
 SetPanning RESPONDS
 SetOutputPrimary
 GetOutputPrimary RESPONDS
+# RandR 1.4:
+GetProviders RESPONDS
+GetProviderInfo RESPONDS
+SetProviderOffloadSink
+SetProviderOutputSource
+ListProviderProperties RESPONDS
+QueryProviderProperty RESPONDS
+ConfigureProviderProperty
+ChangeProviderProperty
+DeleteProviderProperty
+GetProviderProperty RESPONDS
 END
 
 EVENTS
@@ -127,6 +138,7 @@ ERRORS
 BadOutput
 BadCrtc
 BadMode
+BadProvider
 END
 
 CONSTANTS randr_notify
@@ -136,8 +148,14 @@ TYPE RANDR_NOTIFY	ENUM8	randr_notify
 
 BITMASK randr_notify_mask
 1<<0	ScreenChangeNotifyMask
+# RandR 1.2
+1<<1	CrtcChange
 1<<2	OutputChangeNotifyMask
 1<<3	OutputPropertyNotifyMask
+# RandR 1.4
+1<<4	ProviderChange
+1<<5	ProviderProperty
+1<<6	ResourceChange
 END
 TYPE RANDR_NOTIFY_MASK	BITMASK8	randr_notify_mask
 
@@ -215,6 +233,8 @@ TYPE CRTC CARD32
 TYPE LISTofCRTC LISTofCARD32
 TYPE MODE CARD32
 TYPE LISTofMODE LISTofCARD32
+TYPE PROVIDER CARD32
+TYPE LISTofPROVIDER LISTofCARD32
 
 STRUCT MODEINFO length 32
  0	id	CARD32
@@ -580,6 +600,112 @@ RESPONSE GetOutputPrimary
  8	output	OUTPUT
 END
 
+REQUEST GetProviders
+ 4	window	WINDOW
+END
+RESPONSE GetProviders
+ 8	timestamp	TIMESTAMP
+ 12	num_providers	COUNT16
+ 32	providers	LISTofPROVIDER
+END
+
+BITMASK randr_provider_capablility
+ 1<<0	SourceOutput
+ 1<<1	SinkOutput
+ 1<<2	SourceOffload
+ 1<<3	SinkOffload
+END
+TYPE RANDR_PROVIDER_CAPABILITY BITMASK32 randr_provider_capablility
+
+REQUEST GetProviderInfo
+ 4	provider		PROVIDER
+ 8	config_timestamp	TIMESTAMP
+END
+RESPONSE GetProviderInfo
+ 1	status				RRCONFIGSTATUS
+ 8	timestamp			TIMESTAMP
+ 12	capabilities			RANDR_PROVIDER_CAPABILITY
+ 16	num_crtcs			COUNT16
+ 32	crtcs				LISTofCRTC
+ 18	num_outputs			COUNT16
+ LATER	outputs				LISTofOUTPUT
+ 20	num_associated_providers	COUNT16
+ LATER	associated_providers		LISTofPROVIDER
+ 22	name_len			COUNT16
+ LATER	name				STRING8
+END
+
+REQUEST SetProviderOffloadSink
+ 4	provider		PROVIDER
+ 8	sink_provider		PROVIDER
+ 12	config_timestamp	TIMESTAMP
+END
+
+REQUEST SetProviderOutputSource
+ 4	provider		PROVIDER
+ 8	source_provider		PROVIDER
+ 12	config_timestamp	TIMESTAMP
+END
+
+REQUEST ListProviderProperties
+ 4	provider	PROVIDER
+END
+RESPONSE ListProviderProperties
+ 8	num_atoms	COUNT16
+ 32	atoms		LISTofATOM
+END
+
+REQUEST QueryProviderProperty
+ 4	provider	PROVIDER
+ 8	property	ATOM
+END
+RESPONSE QueryProviderProperty
+ 8	pending		BOOL
+ 9	range		BOOL
+ 10	immutable	BOOL
+ 32	valid_values	LISTofINT32
+END
+
+REQUEST ConfigureProviderProperty
+ 4	provider	PROVIDER
+ 8	property	ATOM
+ 12	pending		BOOL
+ 13	range		BOOL
+ 16	values		INT32
+END
+
+REQUEST ChangeProviderProperty
+ 4	provider	PROVIDER
+ 8	property	ATOM
+ 12	type		ATOM
+ 16	format		FORMAT8
+ 17	mode		ENUM8 randr_changemode
+ 20	num_items	COUNT32
+ 24	data		LISTofFORMAT
+END
+
+REQUEST DeleteProviderProperty
+ 4	provider	PROVIDER
+ 8	property	ATOM
+END
+
+REQUEST GetProviderProperty
+ 4	provider	PROVIDER
+ 8	property	ATOM
+ 12	type		ATOM
+ 16	long_offset	UINT32
+ 20	long_length	UINT32
+ 24	delete		BOOL
+ 25	pending		BOOL
+END
+RESPONSE GetProviderProperty
+ 1	format		FORMAT8
+ 8	type		ATOM
+ 12	bytes_after	CARD32
+ 16	num_items	COUNT32
+ 32	data		LISTofFORMAT
+END
+
 EVENT RRScreenChangeNotify
  1	rotation	RANDR_RR
  4	timestamp	TIMESTAMP
@@ -598,6 +724,9 @@ CONSTANTS RRNotify_kind
 0	CrtcChange
 1	OutputChange
 2	OutputProperty
+3	ProviderChange
+4	ProviderProperty
+5	ResourceChange
 END
 
 EVENT RRNotify
@@ -628,6 +757,19 @@ ELSEIF 1 CARD8 2
 12	atom	ATOM
 16	time	TIMESTAMP
 20	state	ENUM8 randr_changenotifystate
+ELSEIF 1 CARD8 3
+ 4	timestamp	TIMESTAMP
+ 8	window		WINDOW
+12	provider	PROVIDER
+ELSEIF 1 CARD8 4
+ 4	window		WINDOW
+ 8	provider	PROVIDER
+12	atom		ATOM
+16	timestamp	TIMESTAMP
+20	state		ENUM8 randr_changenotifystate
+ELSEIF 1 CARD8 5
+ 4	timestamp	TIMESTAMP
+ 8	window		WINDOW
 ELSE
 4	unknown	LISTofCARD8
 END
