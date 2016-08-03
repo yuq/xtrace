@@ -247,14 +247,22 @@ REQUEST SwapInterval
  8	interval	UINT32
 END
 
+CONSTANTS event_type
+ 1	  ExchangeComplete
+ 2	  BlitComplete
+ 3	  FlipComplete
+END
+TYPE EVENT_TYPE ENUM16 event_type
+
 EVENT BufferSwapComplete
- 4	drawable	DRAWABLE
- 8	ust_hi	UINT32
-12	ust_lo	UINT32
-16	msc_hi	UINT32
-20	msc_lo	UINT32
-24	sbc_hi	UINT32
-28	sbc_lo	UINT32
+ 4	event_type	EVENT_TYPE
+ 8	drawable	DRAWABLE
+12	ust_hi	UINT32
+16	ust_lo	UINT32
+20	msc_hi	UINT32
+24	msc_lo	UINT32
+28	sbc_hi	UINT32
+32	sbc_lo	UINT32
 END
 
 EVENT InvalidateBuffers
