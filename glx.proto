@@ -39,7 +39,7 @@ glXVendorPrivateWithReply RESPONDS
 glXQueryExtensionsString RESPONDS UNSUPPORTED
 glXQueryServerString RESPONDS
 glXClientInfo /* 20 */
-glXGetFBConfigs RESPONDS UNSUPPORTED
+glXGetFBConfigs RESPONDS
 glXCreatePixmap UNSUPPORTED
 glXDestroyPixmap UNSUPPORTED
 glXCreateNewContext UNSUPPORTED
@@ -1426,6 +1426,18 @@ REQUEST glXClientInfo
 DECREMENT_COUNT 1
 16	extension_string	STRING8
 # FIXME proper size
+END
+
+# opcode 21
+REQUEST glXGetFBConfigs
+4	screen	CARD32
+END
+RESPONSE glXGetFBConfigs
+8	num_fb_configs	COUNT32
+12	num_attribs	UINT32
+12	num_attribs	PUSH32
+32	fbconfigs	LISToffbconfigattribs
+RESET_COUNTER
 END
 
 # opcode 117
