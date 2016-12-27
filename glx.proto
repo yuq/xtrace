@@ -1239,7 +1239,7 @@ END
 # opcode 3
 REQUEST glXCreateContext
 4	context	CARD32
-8	visual_id	UINT32
+8	visual_id	CARD32
 12	screen	CARD32
 16	share_list	CARD32
 20	is_direct	UINT8
