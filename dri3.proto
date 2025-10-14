@@ -11,6 +11,12 @@ PixmapFromBuffer
 BufferFromPixmap RESPONDS
 FenceFromFD
 FDFromFence RESPONDS
+GetSupportedModifiers RESPONDS
+PixmapFromBuffers
+BuffersFromPixmap RESPONDS
+SetDRMDeviceInUse
+ImportSyncobj
+FreeSyncobj
 END
 
 EVENTS
@@ -72,6 +78,70 @@ REQUEST FDFromFence
 END
 RESPONSE FDFromFence
  1	nfd		UINT8
+END
+
+REQUEST GetSupportedModifiers
+4	window		WINDOW
+8	depth		CARD8
+9	bpp		CARD8
+10	unused		CARD16
+END
+RESPONSE GetSupportedModifiers
+8	num_window_modifiers	COUNT32
+32	window_modifiers	LISTofCARD64
+12	num_screen_modifiers	COUNT32
+LATER	screen_modifiers	LISTofCARD64
+END
+
+REQUEST PixmapFromBuffers
+4	pixmap		PIXMAP
+8	window		WINDOW
+12	num_buffers	CARD8
+16	width		CARD16
+18	height		CARD16
+20	stride0		CARD32
+24	offset0		CARD32
+28	stride1		CARD32
+32	offset1		CARD32
+36	stride2		CARD32
+40	offset2		CARD32
+44	stride3		CARD32
+48	offset3		CARD32
+52	depth		CARD8
+53	bpp		CARD8
+56	modifier	CARD64
+END
+
+REQUEST BuffersFromPixmap
+4	pixmap		PIXMAP
+END
+RESPONSE BuffersFromPixmap
+1	nfd		COUNT8
+8	width		CARD16
+10	height		CARD16
+16	modifier	CARD64
+24	depth		CARD8
+25	bpp		CARD8
+32	strides		LISTofCARD32
+1	nfd		COUNT8
+36	offsets		LISTofCARD32
+END
+
+REQUEST SetDRMDeviceInUse
+4	window		WINDOW
+8	drmMajor	CARD32
+12	drmMinor	CARD32
+END
+
+TYPE SYNCOBJ CARD32
+
+REQUEST ImportSyncobj
+4	syncobj		SYNCOBJ
+8	drawable	DRAWABLE
+END
+
+REQUEST FreeSyncobj
+4	syncobj		SYNCOBJ
 END
 
 EOF
