@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include "xtrace.h"
 #include "parse.h"
@@ -90,16 +91,30 @@ static void startline(struct connection *c, enum package_direction d, const char
 #define UL256 ((unsigned long)256)
 #define CARD16(bigendian,buffer,ofs) ((bigendian)?(buffer[ofs]*U256+buffer[ofs+1]):(buffer[ofs+1]*U256+buffer[ofs]))
 #define CARD32(bigendian,buffer,ofs) ((bigendian)?(((buffer[ofs]*U256+buffer[ofs+1])*UL256+buffer[ofs+2])*UL256+buffer[ofs+3]):(buffer[ofs]+UL256*(buffer[ofs+1]+UL256*(buffer[ofs+2]+U256*buffer[ofs+3]))))
+
+static inline uint64_t CARD64(bool bigendian, const unsigned char *buffer,
+                              int ofs)
+{
+    uint64_t ret = 0;
+    for (int i = 0; i < 8; i++) {
+      int shift = (bigendian ? (7 - i) : i) * 8;
+      ret |= (uint64_t)buffer[ofs + i] << shift;
+    }
+    return ret;
+}
+
+#define clientCARD64(ofs) CARD64(c->bigendian,c->clientbuffer,ofs)
 #define clientCARD32(ofs) CARD32(c->bigendian,c->clientbuffer,ofs)
 #define clientCARD16(ofs) CARD16(c->bigendian,c->clientbuffer,ofs)
 #define clientCARD8(ofs) c->clientbuffer[ofs]
+#define serverCARD64(ofs) CARD64(c->bigendian,c->serverbuffer,ofs)
 #define serverCARD32(ofs) CARD32(c->bigendian,c->serverbuffer,ofs)
 #define serverCARD16(ofs) CARD16(c->bigendian,c->serverbuffer,ofs)
 #define serverCARD8(ofs) c->serverbuffer[ofs]
+#define getCARD64(ofs) CARD64(c->bigendian,buffer,ofs)
 #define getCARD32(ofs) CARD32(c->bigendian,buffer,ofs)
 #define getCARD16(ofs) CARD16(c->bigendian,buffer,ofs)
 #define getCARD8(ofs) buffer[ofs]
-#define getCARD32(ofs) CARD32(c->bigendian,buffer,ofs)
 
 #define getBE32(ofs) (((buffer[ofs]*UL256+buffer[ofs+1])*UL256+buffer[ofs+2])*UL256+buffer[ofs+3])
 
@@ -361,6 +376,36 @@ static size_t printLISTofCARD32(struct connection *c,const uint8_t *buffer,size_
 				fprintf(out,"0x%08x",(unsigned int)u32);
 		}
 		len--;ofs+=4;nr++;
+	}
+	putc(';',out);
+	return ofs;
+}
+
+static size_t printLISTofCARD64(struct connection *c,const uint8_t *buffer,size_t buflen,const struct parameter *p,size_t len, size_t ofs){
+	bool notfirst = false;
+	size_t nr = 0;
+
+	if( buflen < ofs )
+		return ofs;
+	if( (buflen - ofs)/8 <= len )
+		len = (buflen - ofs)/8;
+
+	if( print_offsets )
+		fprintf(out,"[%d]",(int)ofs);
+	fprintf(out,"%s=",p->name);
+	while( len > 0 ) {
+		uint64_t u64;
+
+		if( nr == maxshownlistlen ) {
+			fputs(",...",out);
+		} else if( nr < maxshownlistlen ) {
+			if( notfirst )
+				putc(',',out);
+			notfirst = true;
+			u64 = getCARD64(ofs);
+			fprintf(out,"0x%016"PRIx64, u64);
+		}
+		len--;ofs+=8;nr++;
 	}
 	putc(';',out);
 	return ofs;
@@ -1097,6 +1142,9 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 		 case ft_LISTofCARD32:
 			lastofs = printLISTofCARD32(c,buffer,len,p,stored,ofs);
 			continue;
+		 case ft_LISTofCARD64:
+			lastofs = printLISTofCARD64(c,buffer,len,p,stored,ofs);
+			continue;
 		 case ft_LISTofATOM:
 			lastofs = printLISTofATOM(c,buffer,len,p,stored,ofs);
 			continue;
@@ -1279,6 +1327,15 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 			stored = p->offse;
 			printspace = false;
 			continue;
+		 case ft_CARD64: {
+			uint64_t u64 = getCARD64(ofs);
+			if( print_offsets )
+				fprintf(out,"[%d]",(int)ofs);
+			fputs(p->name, out);
+			putc('=', out);
+			fprintf(out, "0x%016" PRIx64, u64);
+			continue;
+                 }
 		 default:
 			break;
 		}
@@ -1389,6 +1446,7 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 		 case ft_LISTofCARD8:
 		 case ft_LISTofCARD16:
 		 case ft_LISTofCARD32:
+		 case ft_LISTofCARD64:
 		 case ft_LISTofATOM:
 		 case ft_LISTofUINT8:
 		 case ft_LISTofUINT16:
@@ -1424,6 +1482,7 @@ static size_t print_parameters(struct connection *c, const unsigned char *buffer
 		 case ft_LISTofFIXED3232:
 		 case ft_FLOAT32:
 		 case ft_LISTofFLOAT32:
+		 case ft_CARD64:
 			 assert(0);
 		}
 		if( value != NULL ) {

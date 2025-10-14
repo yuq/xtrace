@@ -64,10 +64,12 @@ struct parameter {
 		ft_PUSH8, ft_PUSH16, ft_PUSH32,
 		/* bitfields: multiple values are possible */
 		ft_BITMASK8, ft_BITMASK16, ft_BITMASK32,
+		/* must be after above 3-grouped data types for parser */
+		ft_CARD64,
 		/* Different forms of lists: */
 		/*	- boring ones */
 		ft_STRING8, ft_LISTofCARD32, ft_LISTofATOM,
-		ft_LISTofCARD8, ft_LISTofCARD16,
+		ft_LISTofCARD8, ft_LISTofCARD16, ft_LISTofCARD64,
 		ft_LISTofUINT8, ft_LISTofUINT16,
 		ft_LISTofUINT32,
 		ft_LISTofINT8, ft_LISTofINT16,
