@@ -89,18 +89,18 @@ REQUEST Pixmap
  32	wait_fence	XSync::Fence
  36	idle_fence	XSync::Fence
  40	options		PRESENT_OPTION
- 48	target_msc	XSync::Value
- 56	divisor		XSync::Value
- 64	remainder	XSync::Value
+ 48	target_msc	CARD64
+ 56	divisor		CARD64
+ 64	remainder	CARD64
  72	notifies	LISTofPRESENT_NOTIFY
 END
 
 REQUEST NotifyMSC
  4	window		WINDOW
  8	serial		UINT32
- 16	target_msc	XSync::Value
- 24	divisor		XSync::Value
- 32	remainder	XSync::Value
+ 16	target_msc	CARD64
+ 24	divisor		CARD64
+ 32	remainder	CARD64
 END
 
 REQUEST SelectInput
@@ -136,8 +136,8 @@ XGEVENT CompleteNotify
  12	 event		PRESENT_EVENT_ID
  16	 window		WINDOW
  20	 serial		UINT32
- 24	 ust		XSync::Value
- 32	 msc		XSync::Value
+ 24	 ust		CARD64
+ 32	 msc		CARD64
 END
 
 XGEVENT IdleNotify
@@ -165,9 +165,9 @@ XGEVENT RedirectNotify
  64	 wait_fence	XSync::Fence
  68	 idle_fence	XSync::Fence
  72	 options	PRESENT_OPTION
- 80	 target_msc	XSync::Value
- 88	 divisor	XSync::Value
- 96	 remainder	XSync::Value
+ 80	 target_msc	CARD64
+ 88	 divisor	CARD64
+ 96	 remainder	CARD64
  104	 notifies	LISTofPRESENT_NOTIFY
 END
 
