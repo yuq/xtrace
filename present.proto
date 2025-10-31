@@ -1,6 +1,7 @@
 NEEDS "randr.proto"
 NEEDS "fixes.proto"
 NEEDS "sync.proto"
+NEEDS "dri3.proto"
 
 EXTENSION "Present" Present
 USE core
@@ -11,6 +12,7 @@ Pixmap
 NotifyMSC
 SelectInput
 QueryCapabilities RESPONDS
+PixmapSynced
 END
 
 EVENTS
@@ -40,6 +42,8 @@ BITMASK present_option
  1<<0	Async
  1<<1	Copy
  1<<2	UST
+ 1<<3	Subopt
+ 1<<4	Tear
 END
 TYPE PRESENT_OPTION BITMASK32 present_option
 
@@ -47,6 +51,8 @@ BITMASK present_capability
  1<<0	Async
  1<<1	Fence
  1<<2	UST
+ 1<<3	Tear
+ 1<<4	Syncobj
 END
 TYPE PRESENT_CAPABILITY BITMASK32 present_capability
 
@@ -60,6 +66,7 @@ CONSTANTS present_complete_mode
  0	  Copy
  1	  Flip
  2	  Skip
+ 3	  Subopt
 END
 TYPE PRESENT_COMPLETE_MODE ENUM8 present_complete_mode
 
@@ -114,6 +121,26 @@ REQUEST QueryCapabilities
 END
 RESPONSE QueryCapabilities
  8	 capabilities	PRESENT_CAPABILITY
+END
+
+REQUEST PixmapSynced
+ 4	window		WINDOW
+ 8	pixmap		PIXMAP
+ 12	serial		UINT32
+ 16	valid		Fixes::REGION
+ 20	update		Fixes::REGION
+ 24	x_off		INT16
+ 26	y_off		INT16
+ 28	target_crtc	RandR::CRTC
+ 32	acquire_syncobj	DRI3::SYNCOBJ
+ 36	release_syncobj	DRI3::SYNCOBJ
+ 40	acquire-point	CARD64
+ 48	release-point	CARD64
+ 56	options		PRESENT_OPTION
+ 64	target_msc	CARD64
+ 72	divisor		CARD64
+ 80	remainder	CARD64
+ 88	notifies	LISTofPRESENT_NOTIFY
 END
 
 XGEVENT ConfigureNotify
